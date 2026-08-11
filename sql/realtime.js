@@ -186,3 +186,20 @@ var io = {
         return socket;
     }
 };
+
+/**
+ * data.js calls socket2.emit("ducnghia", userID) immediately after login, in
+ * both the register and the sign-in path. Nothing in the release ever defines
+ * socket2 - it belonged to a second socket.io connection that was not
+ * published either - so the call threw
+ *
+ *     ReferenceError: socket2 is not defined
+ *
+ * which aborted the rest of the login handler before it could draw the map.
+ *
+ * Aliasing it onto the shim keeps the call harmless: `ducnghia` is not a known
+ * event, so the server drops it. The presence announce it was presumably meant
+ * to duplicate is already sent by the socket.emit("ducnghialogin", ...) on the
+ * line above every one of these calls.
+ */
+var socket2 = socket;

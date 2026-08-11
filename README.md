@@ -44,6 +44,16 @@ php tests/run.php
 `index.php` starts with a maintenance notice that stops the game before it
 loads. Delete those first two lines to open the server.
 
+### Running it locally
+
+```bash
+php -S 127.0.0.1:8000 -t . scripts/dev-router.php
+```
+
+The router is required: `php -S` does not read `.htaccess`, and the game boots
+by pointing an iframe at `/game.json`, which only resolves through a rewrite.
+Without it you get the background art and nothing else.
+
 ## How multiplayer works
 
 The game used to open a WebSocket to a Node/socket.io process. That process
