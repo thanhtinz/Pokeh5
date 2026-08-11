@@ -1,10 +1,11 @@
 import Phaser from 'phaser';
 
-import { COLORS, GAME_HEIGHT, GAME_WIDTH, HUD_HEIGHT, RARITY_COLORS } from '../config';
+import { COLORS, GAME_WIDTH, HUD_HEIGHT, RARITY_COLORS } from '../config';
 import { dexEntry } from '../game/data/pokedex';
 import { claimableCount } from '../game/data/quests';
 import { abbreviate, clock, rate } from '../game/format';
 import { expPerHour, goldPerHour } from '../game/idle';
+import { NODES_PER_BOARD } from '../game/signs';
 import { stageInfo, stageLeaderDexId } from '../game/stages';
 import { trainerExpToNext } from '../game/stats';
 import { activeTeam } from '../game/state';
@@ -18,43 +19,142 @@ import {
   openSummon,
   openTrials,
 } from '../ui/modals';
+import { openSigns } from '../ui/systems';
 import { TX } from '../ui/textures';
 import { TEXT, colorText } from '../ui/theme';
+import { COLUMNS, ROWS, drawTown } from '../ui/townmap';
 import { Bar, Button, Label, label, panel } from '../ui/widgets';
 import { ATLAS } from './PreloadScene';
 import type { UiScene } from './UiScene';
 
-/** Decorative icons; the reference art uses Pokemon for its shortcut buttons. */
-const ICON = {
-  task: '63',
-  daily: '39',
-  events: '25',
-  friends: '35',
-  trainer: '133',
-  privilege: '137',
-  recharge: '151',
-  pack: '143',
-  unify: '150',
-  invite: '12',
-  champion: '146',
-  waiting: '131',
-  revenge: '68',
-  chat: '52',
-  guild: '113',
-  formation: '6',
-} as const;
-
 /** How often the idle ticker advances the visible counters. */
 const TICK_MS = 250;
 
-/** Side rail geometry; the centre column is whatever these leave free. */
-const RAIL_TOP = 372;
-const RAIL_STEP = 104;
+/** The action strip and navigation live below the map. */
+const STRIP_Y = 1048;
+const NAV_Y = 1205;
 
-/** Vertical anchors for the lower half, kept together so nothing overlaps. */
-const ACTION_ROW_Y = 995;
-const SHORTCUT_ROW_Y = 1096;
-const NAV_ROW_Y = 1232;
+interface BuildingDef {
+  key: string;
+  name: string;
+  x: number;
+  y: number;
+  /** Dex id whose sprite stands in for the building. */
+  icon: string;
+  color: number;
+  onPress: (scene: CityScene) => void;
+  /** Badge count, recomputed on every refresh. */
+  badge?: () => number;
+}
+
+/**
+ * The town's landmarks. Positions are hand-placed against the routes drawn in
+ * `townmap.ts`, so each node sits on a path junction rather than floating.
+ */
+const BUILDINGS: BuildingDef[] = [
+  {
+    key: 'quests',
+    name: 'Nhiệm Vụ',
+    x: COLUMNS[0],
+    y: ROWS[0],
+    icon: '63',
+    color: 0x4fc3f7,
+    onPress: (scene) => openQuests(scene.ui()),
+    badge: () => claimableCount(store.state),
+  },
+  {
+    key: 'ranking',
+    name: 'Xếp Hạng',
+    x: COLUMNS[1],
+    y: ROWS[0],
+    icon: '146',
+    color: 0xffd44d,
+    onPress: (scene) => scene.notReady('Bảng xếp hạng'),
+  },
+  {
+    key: 'safari',
+    name: 'Safari',
+    x: COLUMNS[2],
+    y: ROWS[0],
+    icon: '128',
+    color: 0x4ade80,
+    onPress: (scene) => scene.notReady('Safari'),
+  },
+  {
+    key: 'guild',
+    name: 'Bang Hội',
+    x: COLUMNS[0],
+    y: ROWS[1],
+    icon: '113',
+    color: 0xef4444,
+    onPress: (scene) => scene.notReady('Bang hội'),
+  },
+  {
+    key: 'tourney',
+    name: 'Giải Đấu',
+    x: COLUMNS[1],
+    y: ROWS[1],
+    icon: '25',
+    color: 0xfbbf24,
+    onPress: (scene) => scene.notReady('Giải đấu'),
+  },
+  {
+    key: 'signs',
+    name: 'Chòm Sao',
+    x: COLUMNS[2],
+    y: ROWS[1],
+    icon: '151',
+    color: 0xc084fc,
+    onPress: (scene) => openSigns(scene.ui()),
+    // Nudges the player toward the boards while any star is still unlit.
+    badge: () => (store.signTotal() < NODES_PER_BOARD ? 1 : 0),
+  },
+  {
+    key: 'maze',
+    name: 'Mê Cung',
+    x: COLUMNS[2],
+    y: ROWS[2],
+    icon: '94',
+    color: 0xa855f7,
+    onPress: (scene) => scene.notReady('Mê cung'),
+  },
+  {
+    key: 'instances',
+    name: 'Phó Bản',
+    x: COLUMNS[0],
+    y: ROWS[2],
+    icon: '68',
+    color: 0x60a5fa,
+    onPress: (scene) => openTrials(scene.ui()),
+  },
+  {
+    key: 'center',
+    name: 'Trung Tâm',
+    x: COLUMNS[0],
+    y: ROWS[3],
+    icon: '36',
+    color: 0xf472b6,
+    onPress: (scene) => openBox(scene.ui()),
+  },
+  {
+    key: 'champion',
+    name: 'Đường Vô Địch',
+    x: COLUMNS[2],
+    y: ROWS[3],
+    icon: '150',
+    color: 0xffd44d,
+    onPress: (scene) => scene.notReady('Đường vô địch'),
+  },
+  {
+    key: 'gym',
+    name: 'Thử Thách Gym',
+    x: COLUMNS[1],
+    y: ROWS[3],
+    icon: '6',
+    color: 0xff8a5c,
+    onPress: (scene) => scene.notReady('Thử thách Gym'),
+  },
+];
 
 export class CityScene extends Phaser.Scene {
   private bpValue!: Label;
@@ -72,8 +172,7 @@ export class CityScene extends Phaser.Scene {
 
   private leadSprite!: Phaser.GameObjects.Image;
   private foeSprite!: Phaser.GameObjects.Image;
-  private taskButton!: Button;
-  private dailyButton!: Button;
+  private badges = new Map<string, Button>();
 
   private sessionStart = 0;
   private accumulator = 0;
@@ -85,19 +184,17 @@ export class CityScene extends Phaser.Scene {
 
   create(): void {
     this.sessionStart = this.time.now;
+    this.badges.clear();
+    this.lastRenderedStage = -1;
 
-    this.buildBackground();
+    drawTown(this);
+    this.buildBuildings();
     this.buildHud();
-    this.buildLeftRail();
-    this.buildRightRail();
-    this.buildStageScene();
-    this.buildIdlePanel();
-    this.buildBottomBar();
+    this.buildActionStrip();
+    this.buildNav();
 
     const unsubscribe = store.events.on('change', () => this.refresh());
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, unsubscribe);
-
-    // Coming back from a battle should show the new stage immediately.
     this.events.on(Phaser.Scenes.Events.RESUME, () => this.refresh());
 
     this.refresh();
@@ -112,61 +209,75 @@ export class CityScene extends Phaser.Scene {
     this.sessionClock.set(clock((this.time.now - this.sessionStart) / 1000));
   }
 
-  private ui(): UiScene {
+  ui(): UiScene {
     return this.scene.get('Ui') as UiScene;
   }
 
-  private notReady(name: string): void {
+  notReady(name: string): void {
     store.events.emit('toast', { text: `${name} sẽ mở trong bản sau`, tone: 'info' });
   }
 
-  // ---------------------------------------------------------------- background
+  // ----------------------------------------------------------------- map nodes
 
-  private buildBackground(): void {
-    const g = this.add.graphics();
-    g.fillGradientStyle(0x1d2a4d, 0x1d2a4d, 0x0b101c, 0x121a30, 1);
-    g.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+  private buildBuildings(): void {
+    for (const def of BUILDINGS) {
+      const button = new Button(this, def.x, def.y, {
+        width: 104,
+        height: 92,
+        texture: TX.btnDark,
+        onPress: () => def.onPress(this),
+      });
+      button.setDepth(def.y);
 
-    // A faint grid reads as a tiled plaza without needing a background image.
-    g.lineStyle(1, 0x2b3c66, 0.12);
-    for (let x = 0; x <= GAME_WIDTH; x += 60) {
-      g.lineBetween(x, HUD_HEIGHT, x, GAME_HEIGHT - 150);
+      // A tinted plate behind the icon is what makes each landmark distinct
+      // without needing eleven pieces of bespoke art.
+      const plate = this.add.image(0, -4, TX.glow).setDisplaySize(96, 96).setTint(def.color).setAlpha(0.5);
+      button.addAt(plate, 1);
+      button.add(this.add.image(0, -6, ATLAS.mons, def.icon).setDisplaySize(66, 66));
+
+      const caption = panel(this, def.x, def.y + 62, Math.max(96, def.name.length * 13 + 22), 34, TX.pill);
+      caption.setTint(def.color).setDepth(def.y);
+      this.add
+        .text(def.x, def.y + 61, def.name, TEXT.badge)
+        .setOrigin(0.5)
+        .setDepth(def.y + 1);
+
+      if (def.badge) this.badges.set(def.key, button);
     }
-    for (let y = HUD_HEIGHT; y <= GAME_HEIGHT - 150; y += 60) {
-      g.lineBetween(0, y, GAME_WIDTH, y);
-    }
-
-    this.add
-      .image(GAME_WIDTH / 2, GAME_HEIGHT / 2, TX.vignette)
-      .setDisplaySize(GAME_WIDTH, GAME_HEIGHT)
-      .setAlpha(0.85);
   }
 
   // ----------------------------------------------------------------------- hud
 
   private buildHud(): void {
-    panel(this, GAME_WIDTH / 2, HUD_HEIGHT / 2 - 8, GAME_WIDTH + 40, HUD_HEIGHT, TX.panel);
+    panel(this, GAME_WIDTH / 2, HUD_HEIGHT / 2 - 8, GAME_WIDTH + 40, HUD_HEIGHT, TX.panel).setDepth(900);
+
+    const hud = this.add.container(0, 0).setDepth(901);
 
     // Avatar: the lead Pokemon stands in for a trainer portrait.
-    this.add.circle(62, 52, 40, COLORS.bgSlot).setStrokeStyle(4, COLORS.textGold);
+    hud.add(this.add.circle(62, 52, 40, COLORS.bgSlot).setStrokeStyle(4, COLORS.textGold));
     this.leadSprite = this.add.image(62, 52, ATLAS.portraits, '1').setDisplaySize(70, 70);
+    hud.add(this.leadSprite);
 
-    this.add.circle(62, 88, 18, COLORS.bgDeep).setStrokeStyle(3, COLORS.accent);
+    hud.add(this.add.circle(62, 88, 18, COLORS.bgDeep).setStrokeStyle(3, COLORS.accent));
     this.levelValue = label(this, 62, 88, '1', TEXT.badge).setOrigin(0.5);
+    hud.add(this.levelValue);
 
-    this.add.text(122, 30, 'BP', colorText(TEXT.small, COLORS.textGold)).setOrigin(0, 0.5);
+    hud.add(this.add.text(122, 30, 'BP', colorText(TEXT.small, COLORS.textGold)).setOrigin(0, 0.5));
     this.bpValue = label(this, 164, 30, '0', {
       ...TEXT.title,
       fontSize: '34px',
       color: '#ffd44d',
     }).setOrigin(0, 0.5);
+    hud.add(this.bpValue);
 
-    this.buildResource(452, 30, 'gold');
-    this.buildResource(620, 30, 'gem');
+    hud.add(this.buildResource(452, 30, 'gold'));
+    hud.add(this.buildResource(620, 30, 'gem'));
 
     this.expBar = new Bar(this, 400, 74, { width: 540, height: 26, color: COLORS.expBar });
-    this.add.text(122, 74, 'EXP', colorText(TEXT.tiny, COLORS.textDim)).setOrigin(0, 0.5);
+    hud.add(this.expBar);
+    hud.add(this.add.text(122, 74, 'EXP', colorText(TEXT.tiny, COLORS.textDim)).setOrigin(0, 0.5));
     this.expValue = label(this, 400, 74, '', TEXT.badge).setOrigin(0.5);
+    hud.add(this.expValue);
 
     const shortcuts: [string, string, () => void][] = [
       ['VIP', TX.btnGold, () => this.notReady('VIP')],
@@ -174,212 +285,136 @@ export class CityScene extends Phaser.Scene {
       ['Thư', TX.btnBlue, () => this.notReady('Hòm thư')],
     ];
     shortcuts.forEach(([text, texture, onPress], index) => {
-      new Button(this, 190 + index * 178, 136, {
-        width: 164,
-        height: 58,
-        texture,
-        label: text,
-        labelStyle: TEXT.buttonSmall,
-        onPress,
-      });
+      hud.add(
+        new Button(this, 190 + index * 178, 136, {
+          width: 164,
+          height: 58,
+          texture,
+          label: text,
+          labelStyle: TEXT.buttonSmall,
+          onPress,
+        }),
+      );
     });
   }
 
-  private buildResource(x: number, y: number, kind: 'gold' | 'gem'): void {
-    const plate = panel(this, x, y, 156, 44, TX.pill);
+  private buildResource(x: number, y: number, kind: 'gold' | 'gem'): Phaser.GameObjects.Container {
+    const plate = panel(this, 0, 0, 156, 44, TX.pill);
     plate.setTint(kind === 'gold' ? 0xffd77a : 0x7fd8ff);
 
-    this.add
-      .circle(x - 58, y, 15, kind === 'gold' ? COLORS.textGold : COLORS.accent)
+    const coin = this.add
+      .circle(-58, 0, 15, kind === 'gold' ? COLORS.textGold : COLORS.accent)
       .setStrokeStyle(2, 0x0b1020);
 
-    const value = label(this, x + 62, y, '0', TEXT.small).setOrigin(1, 0.5);
+    const value = label(this, 62, 0, '0', TEXT.small).setOrigin(1, 0.5);
     if (kind === 'gold') this.goldValue = value;
     else this.gemValue = value;
+
+    return this.add.container(x, y, [plate, coin, value]);
   }
 
-  // --------------------------------------------------------------------- rails
+  // -------------------------------------------------------------- action strip
 
-  /**
-   * Square icon shortcut with a caption under it, matching the rails of the
-   * reference layout.
-   */
-  private iconButton(
-    x: number,
-    y: number,
-    caption: string,
-    icon: string,
-    texture: string,
-    onPress: () => void,
-    atlas: string = ATLAS.mons,
-  ): Button {
-    const button = new Button(this, x, y, { width: 92, height: 82, texture, onPress });
-    button.add(this.add.image(0, -6, atlas, icon).setDisplaySize(56, 56));
-    this.add
-      .text(x, y + 52, caption, colorText(TEXT.tiny, COLORS.text))
-      .setOrigin(0.5)
-      .setStroke('#08101f', 4);
-    return button;
-  }
+  private buildActionStrip(): void {
+    const strip = this.add.container(0, 0).setDepth(880);
+    strip.add(panel(this, GAME_WIDTH / 2, STRIP_Y, GAME_WIDTH + 40, 168, TX.panel));
 
-  private buildLeftRail(): void {
-    const row = 246;
-    this.taskButton = this.iconButton(74, row, 'Nhiệm vụ', ICON.task, TX.btnBlue, () =>
-      openQuests(this.ui()),
-    );
-    this.dailyButton = this.iconButton(184, row, 'Hằng ngày', ICON.daily, TX.btnPurple, () =>
-      openQuests(this.ui()),
-    );
-    this.iconButton(294, row, 'Sự kiện', ICON.events, TX.btnGold, () => this.notReady('Sự kiện'));
-    this.iconButton(404, row, 'Bạn bè', ICON.friends, TX.btnGreen, () => this.notReady('Bạn bè'));
+    // Current stage, with the boss it is named after.
+    this.foeSprite = this.add.image(58, STRIP_Y - 36, ATLAS.mons, '1').setDisplaySize(84, 84);
+    strip.add(this.foeSprite);
 
-    const rail: [string, string, string, () => void][] = [
-      ['Huấn luyện', ICON.trainer, TX.btnBlue, () => this.notReady('Huấn luyện')],
-      ['Đặc quyền', ICON.privilege, TX.btnPurple, () => this.notReady('Đặc quyền')],
-      ['Nạp lần đầu', ICON.recharge, TX.btnGold, () => this.notReady('Nạp lần đầu')],
-      ['Gói ưu đãi', ICON.pack, TX.btnRed, () => this.notReady('Gói ưu đãi')],
-      ['Thống nhất', ICON.unify, TX.btnDark, () => this.notReady('Thống nhất')],
-      ['Mời bạn', ICON.invite, TX.btnGreen, () => this.notReady('Mời bạn')],
-    ];
-    rail.forEach(([caption, icon, texture, onPress], index) => {
-      this.iconButton(74, RAIL_TOP + index * RAIL_STEP, caption, icon, texture, onPress);
-    });
-  }
-
-  private buildRightRail(): void {
-    const rail: [string, string, string, () => void][] = [
-      ['Đấu Trường', ICON.champion, TX.btnGold, () => this.notReady('Đấu Trường')],
-      ['Chờ trận', ICON.waiting, TX.btnBlue, () => this.notReady('Chờ trận')],
-      ['Phục thù', ICON.revenge, TX.btnRed, () => this.notReady('Phục thù')],
-      ['Trò chuyện', ICON.chat, TX.btnPurple, () => this.notReady('Trò chuyện')],
-    ];
-    rail.forEach(([caption, icon, texture, onPress], index) => {
-      this.iconButton(646, RAIL_TOP + index * RAIL_STEP, caption, icon, texture, onPress);
-    });
-  }
-
-  // ------------------------------------------------------------- centre + idle
-
-  private buildStageScene(): void {
-    const groundY = 660;
-
-    this.stageValue = label(this, GAME_WIDTH / 2, 412, '', {
-      ...TEXT.heading,
+    this.stageValue = label(this, 108, STRIP_Y - 52, '', {
+      ...TEXT.body,
       color: '#ffd44d',
-    }).setOrigin(0.5);
-    this.regionValue = label(this, GAME_WIDTH / 2, 450, '', colorText(TEXT.small, COLORS.textDim)).setOrigin(0.5);
-    this.sessionClock = label(this, GAME_WIDTH / 2, 484, '00:00', colorText(TEXT.tiny, COLORS.textDim)).setOrigin(0.5);
+    }).setOrigin(0, 0.5);
+    this.regionValue = label(this, 108, STRIP_Y - 20, '', TEXT.tiny).setOrigin(0, 0.5);
+    strip.add(this.stageValue);
+    strip.add(this.regionValue);
 
-    this.add.image(288, groundY + 32, TX.ground).setDisplaySize(210, 66);
-    this.add.image(456, groundY + 32, TX.ground).setDisplaySize(210, 66);
+    strip.add(
+      this.add.text(560, STRIP_Y - 52, 'Vàng', colorText(TEXT.tiny, COLORS.textGold)).setOrigin(0, 0.5),
+    );
+    strip.add(
+      this.add.text(560, STRIP_Y - 20, 'EXP', colorText(TEXT.tiny, COLORS.success)).setOrigin(0, 0.5),
+    );
+    this.goldRate = label(this, 690, STRIP_Y - 52, '', TEXT.small).setOrigin(1, 0.5);
+    this.expRate = label(this, 690, STRIP_Y - 20, '', TEXT.small).setOrigin(1, 0.5);
+    strip.add(this.goldRate);
+    strip.add(this.expRate);
 
-    const ally = this.add.image(288, groundY, ATLAS.mons, '1').setDisplaySize(196, 196);
-    const foe = this.add.image(456, groundY, ATLAS.mons, '1').setDisplaySize(196, 196).setFlipX(true);
-    this.foeSprite = foe;
-    this.allySprite = ally;
-
-    // A slow bob is enough to stop the hub reading as a still image.
-    this.tweens.add({
-      targets: [ally, foe],
-      y: groundY - 10,
-      duration: 1400,
-      yoyo: true,
-      repeat: -1,
-      ease: 'Sine.easeInOut',
-    });
-  }
-
-  private allySprite!: Phaser.GameObjects.Image;
-
-  private buildIdlePanel(): void {
-    const x = 574;
-    const y = 862;
-    panel(this, x, y, 268, 150, TX.panelSlot);
-
-    const rows: [string, number][] = [
-      ['Boss', COLORS.danger],
-      ['Vàng', COLORS.textGold],
-      ['EXP', COLORS.success],
-    ];
-    rows.forEach(([name, color], index) => {
-      this.add
-        .text(x - 116, y - 46 + index * 46, name, colorText(TEXT.small, color))
-        .setOrigin(0, 0.5);
-    });
-
-    this.stageValueRight = label(this, x + 116, y - 46, '', TEXT.small).setOrigin(1, 0.5);
-    this.goldRate = label(this, x + 116, y, '', TEXT.small).setOrigin(1, 0.5);
-    this.expRate = label(this, x + 116, y + 46, '', TEXT.small).setOrigin(1, 0.5);
-
-    new Button(this, x, ACTION_ROW_Y, {
-      width: 240,
-      height: 88,
-      texture: TX.btnRed,
-      label: 'Chiến Đấu',
-      onPress: () => this.startBattle(),
-    });
-
-    new Button(this, 352, ACTION_ROW_Y, {
-      width: 186,
-      height: 74,
-      texture: TX.btnDark,
-      label: 'Đánh Nhanh',
-      labelStyle: TEXT.buttonSmall,
-      onPress: () => this.quickBattle(),
-    });
+    this.sessionClock = label(this, 460, STRIP_Y - 36, '00:00', TEXT.tiny).setOrigin(0.5);
+    strip.add(this.sessionClock);
 
     // Stage stepper, so a wall can be farmed instead of repeatedly failed.
-    new Button(this, 128, ACTION_ROW_Y, {
-      width: 70,
-      height: 70,
-      texture: TX.btnDark,
-      label: '◀',
-      onPress: () => store.stepStage(-1),
-    });
-    new Button(this, 210, ACTION_ROW_Y, {
-      width: 70,
-      height: 70,
-      texture: TX.btnDark,
-      label: '▶',
-      onPress: () => store.stepStage(1),
-    });
+    strip.add(
+      new Button(this, 52, STRIP_Y + 46, {
+        width: 64,
+        height: 62,
+        texture: TX.btnDark,
+        label: '◀',
+        labelStyle: TEXT.buttonSmall,
+        onPress: () => store.stepStage(-1),
+      }),
+    );
+    strip.add(
+      new Button(this, 124, STRIP_Y + 46, {
+        width: 64,
+        height: 62,
+        texture: TX.btnDark,
+        label: '▶',
+        labelStyle: TEXT.buttonSmall,
+        onPress: () => store.stepStage(1),
+      }),
+    );
+    strip.add(
+      new Button(this, 288, STRIP_Y + 46, {
+        width: 210,
+        height: 66,
+        texture: TX.btnDark,
+        label: 'Đánh Nhanh',
+        labelStyle: TEXT.buttonSmall,
+        onPress: () => this.quickBattle(),
+      }),
+    );
+    strip.add(
+      new Button(this, 546, STRIP_Y + 46, {
+        width: 268,
+        height: 74,
+        texture: TX.btnRed,
+        label: 'Chiến Đấu',
+        onPress: () => this.startBattle(),
+      }),
+    );
   }
 
-  private stageValueRight!: Label;
+  private buildNav(): void {
+    const nav = this.add.container(0, 0).setDepth(890);
+    nav.add(panel(this, GAME_WIDTH / 2, NAV_Y + 40, GAME_WIDTH + 40, 150, TX.panelAlt));
 
-  // -------------------------------------------------------------- bottom bars
-
-  private buildBottomBar(): void {
-    const shortcuts: [string, string, string, () => void, string][] = [
-      ['Cửa hàng', 'nugget', TX.btnBlue, () => openShop(this.ui()), ATLAS.items],
-      ['Túi đồ', 'poke-ball', TX.btnGreen, () => openBag(this.ui()), ATLAS.items],
-      ['Bang hội', ICON.guild, TX.btnRed, () => this.notReady('Bang hội'), ATLAS.mons],
-      ['Đội hình', ICON.formation, TX.btnPurple, () => openFormation(this.ui()), ATLAS.mons],
-      ['Triệu hồi', 'master-ball', TX.btnGold, () => openSummon(this.ui()), ATLAS.items],
+    const entries: [string, string, string, string, () => void][] = [
+      ['Cửa hàng', 'nugget', ATLAS.items, TX.btnBlue, () => openShop(this.ui())],
+      ['Túi đồ', 'poke-ball', ATLAS.items, TX.btnGreen, () => openBag(this.ui())],
+      ['Pokémon', '133', ATLAS.mons, TX.btnGold, () => openBox(this.ui())],
+      ['Đội hình', '9', ATLAS.mons, TX.btnPurple, () => openFormation(this.ui())],
+      ['Triệu hồi', 'master-ball', ATLAS.items, TX.btnRed, () => openSummon(this.ui())],
     ];
-    shortcuts.forEach(([caption, icon, texture, onPress, atlas], index) => {
-      this.iconButton(88 + index * 136, SHORTCUT_ROW_Y, caption, icon, texture, onPress, atlas);
-    });
 
-    const navY = NAV_ROW_Y;
-    panel(this, GAME_WIDTH / 2, navY + 12, GAME_WIDTH + 40, 108, TX.panelAlt);
-
-    const nav: [string, string, () => void][] = [
-      ['Thành', TX.btnGreen, () => undefined],
-      ['Pokémon', TX.btnDark, () => openBox(this.ui())],
-      ['Đội', TX.btnDark, () => openFormation(this.ui())],
-      ['Thử thách', TX.btnDark, () => openTrials(this.ui())],
-      ['Shop', TX.btnDark, () => openShop(this.ui())],
-    ];
-    nav.forEach(([caption, texture, onPress], index) => {
-      new Button(this, 76 + index * 142, navY, {
-        width: 132,
-        height: 74,
+    entries.forEach(([caption, icon, atlas, texture, onPress], index) => {
+      const x = 88 + index * 136;
+      const button = new Button(this, x, NAV_Y, {
+        width: 104,
+        height: 88,
         texture,
-        label: caption,
-        labelStyle: TEXT.buttonSmall,
         onPress,
       });
+      button.add(this.add.image(0, -4, atlas, icon).setDisplaySize(58, 58));
+      nav.add(button);
+      nav.add(
+        this.add
+          .text(x, NAV_Y + 56, caption, colorText(TEXT.tiny, COLORS.text))
+          .setOrigin(0.5)
+          .setStroke('#08101f', 4),
+      );
     });
   }
 
@@ -429,29 +464,25 @@ export class CityScene extends Phaser.Scene {
     const info = stageInfo(state.stage);
     this.stageValue.set(`Ải ${info.stage}${info.isBoss ? '  ★ BOSS' : ''}`);
     this.regionValue.set(info.region);
-    this.stageValueRight.set(`No. ${info.stage}`);
     this.goldRate.set(rate(goldPerHour(state)));
     this.expRate.set(rate(expPerHour(state)));
 
-    const claimable = claimableCount(state);
-    this.taskButton.setBadge(claimable);
-    this.dailyButton.setBadge(claimable);
+    for (const def of BUILDINGS) {
+      const button = this.badges.get(def.key);
+      if (button && def.badge) button.setBadge(def.badge());
+    }
 
     const lead = activeTeam(state)[0];
     if (lead) {
-      const entry = dexEntry(lead.dexId);
-      this.leadSprite.setTexture(ATLAS.portraits, String(entry.id));
-      this.allySprite.setTexture(ATLAS.mons, String(entry.id));
-      this.allySprite.setDisplaySize(176, 176);
+      this.leadSprite.setTexture(ATLAS.portraits, String(dexEntry(lead.dexId).id));
+      this.leadSprite.setDisplaySize(70, 70);
     }
 
-    // The enemy art only changes when the stage does; re-tinting every tick
-    // would fight the bob tween for no reason.
+    // The boss art only changes when the stage does.
     if (this.lastRenderedStage !== info.stage) {
       this.lastRenderedStage = info.stage;
-      const foeId = stageLeaderDexId(info.stage);
-      this.foeSprite.setTexture(ATLAS.mons, String(foeId));
-      this.foeSprite.setDisplaySize(176, 176);
+      this.foeSprite.setTexture(ATLAS.mons, String(stageLeaderDexId(info.stage)));
+      this.foeSprite.setDisplaySize(84, 84);
       this.foeSprite.setTint(info.isBoss ? RARITY_COLORS[5]! : 0xffffff);
     }
   }

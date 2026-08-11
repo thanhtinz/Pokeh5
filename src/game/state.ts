@@ -1,8 +1,10 @@
 import { TEAM_SIZE } from '../config';
+import type { ArtifactLevels } from './artifacts';
 import { BASE_FORMS } from './data/pokedex';
 import { Rng, randomSeed } from './rng';
+import { emptySignLevels, type SignLevels } from './signs';
 
-export const SAVE_VERSION = 1;
+export const SAVE_VERSION = 2;
 
 export interface Ivs {
   hp: number;
@@ -56,6 +58,13 @@ export interface PlayerState {
   team: (string | null)[];
   box: OwnedMon[];
   items: Record<string, number>;
+
+  /** Ascension shards, keyed by dex id as a string so the save stays JSON. */
+  shards: Record<string, number>;
+  /** Artifact levels per owned Pokemon, keyed by its uid. */
+  artifacts: Record<string, ArtifactLevels>;
+  /** Lit stars on each Signs board. */
+  signs: SignLevels;
 
   quests: QuestProgress;
   /** Pity counter for the summon pool. */
@@ -135,9 +144,17 @@ export function createNewSave(): PlayerState {
     box,
     items: { 'poke-ball': 10, potion: 5, 'rare-candy': 3 },
 
+    shards: {},
+    artifacts: {},
+    signs: emptySignLevels(),
+
     quests: { day: dayStamp(now), battlesWon: 0, summons: 0, stagesCleared: 0, claimed: [] },
     summonsSinceEpic: 0,
   };
+}
+
+export function artifactsOf(state: PlayerState, uid: string): ArtifactLevels {
+  return state.artifacts[uid] ?? {};
 }
 
 export function findMon(state: PlayerState, uid: string | null): OwnedMon | null {

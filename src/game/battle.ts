@@ -1,4 +1,6 @@
+import type { ArtifactLevels } from './artifacts';
 import { dexEntry, typeMultiplier } from './data/pokedex';
+import { elementMultiplier, elementOf, restrainedBy, type ElementId } from './elements';
 import { Rng } from './rng';
 import { combatStats } from './stats';
 import type { OwnedMon } from './state';
@@ -11,6 +13,7 @@ export interface Combatant {
   name: string;
   level: number;
   types: string[];
+  element: ElementId;
   maxHp: number;
   hp: number;
   atk: number;
@@ -32,6 +35,8 @@ export type BattleEvent =
       effectiveness: number;
       crit: boolean;
       moveType: string;
+      /** True when the attacker's element restrains the defender's. */
+      restrained: boolean;
       targetHp: number;
     }
   | { type: 'faint'; side: Side; index: number }
@@ -51,9 +56,9 @@ const MOVE_POWER = 80;
 const MAX_ROUNDS = 60;
 const CRIT_CHANCE = 0.0625;
 
-export function toCombatant(mon: OwnedMon, scale = 1): Combatant {
+export function toCombatant(mon: OwnedMon, scale = 1, artifacts: ArtifactLevels = {}): Combatant {
   const entry = dexEntry(mon.dexId);
-  const stats = combatStats(mon);
+  const stats = combatStats(mon, artifacts);
   const maxHp = Math.max(1, Math.floor(stats.hp * scale));
 
   return {
@@ -62,6 +67,7 @@ export function toCombatant(mon: OwnedMon, scale = 1): Combatant {
     name: entry.name,
     level: mon.level,
     types: entry.types,
+    element: elementOf(mon.dexId),
     maxHp,
     hp: maxHp,
     atk: stats.atk,
@@ -96,8 +102,9 @@ function damageOf(
   attacker: Combatant,
   defender: Combatant,
   moveType: string,
+  signMultiplier: number,
   rng: Rng,
-): { damage: number; effectiveness: number; crit: boolean } {
+): { damage: number; effectiveness: number; crit: boolean; restrained: boolean } {
   const physical = attacker.atk >= attacker.spa;
   const offence = physical ? attacker.atk : attacker.spa;
   const defence = Math.max(1, physical ? defender.def : defender.spd);
@@ -107,13 +114,18 @@ function damageOf(
   const crit = rng.chance(CRIT_CHANCE);
   const spread = rng.float(0.85, 1);
 
+  // Element restraint is a mild multiplier on its own; the Signs boards are
+  // what turn it into a reason to build a team around one element.
+  const restrained = restrainedBy(attacker.element) === defender.element;
+  const element = elementMultiplier(attacker.element, defender.element) * (restrained ? signMultiplier : 1);
+
   const raw =
     (((2 * attacker.level) / 5 + 2) * MOVE_POWER * (offence / defence)) / 50 + 2;
   const damage = Math.floor(
-    raw * stab * effectiveness * (crit ? 1.5 : 1) * spread * attacker.scale,
+    raw * stab * effectiveness * element * (crit ? 1.5 : 1) * spread * attacker.scale,
   );
 
-  return { damage: Math.max(1, damage), effectiveness, crit };
+  return { damage: Math.max(1, damage), effectiveness, crit, restrained };
 }
 
 function firstAlive(team: readonly Combatant[]): number {
@@ -125,13 +137,22 @@ function firstAlive(team: readonly Combatant[]): number {
  * replays it, so what the player watches always matches what was scored — and
  * the same seed always produces the same fight.
  */
+export interface SimulateOptions {
+  /** Artifact loadout lookup for the player's Pokemon. */
+  artifactsOf?: (uid: string) => ArtifactLevels;
+  /** Per-element Signs multiplier, applied only to the player's attacks. */
+  signMultipliers?: Record<ElementId, number>;
+}
+
 export function simulate(
   allies: readonly OwnedMon[],
   foes: readonly Combatant[],
   seed: number,
+  options: SimulateOptions = {},
 ): BattleResult {
   const rng = new Rng(seed);
-  const allyTeam = allies.map((mon) => toCombatant(mon));
+  const artifactsOf = options.artifactsOf ?? (() => ({}));
+  const allyTeam = allies.map((mon) => toCombatant(mon, 1, artifactsOf(mon.uid)));
   const foeTeam = foes.map((foe) => ({ ...foe }));
   const events: BattleEvent[] = [];
 
@@ -165,7 +186,16 @@ export function simulate(
 
       const target = defenders[targetIndex]!;
       const moveType = chooseMoveType(actor.mon, target);
-      const { damage, effectiveness, crit } = damageOf(actor.mon, target, moveType, rng);
+      // Signs are the player's investment, so they never help the enemy.
+      const signMultiplier =
+        actor.side === 'ally' ? (options.signMultipliers?.[actor.mon.element] ?? 1) : 1;
+      const { damage, effectiveness, crit, restrained } = damageOf(
+        actor.mon,
+        target,
+        moveType,
+        signMultiplier,
+        rng,
+      );
 
       target.hp = Math.max(0, target.hp - damage);
       events.push({
@@ -177,6 +207,7 @@ export function simulate(
         effectiveness,
         crit,
         moveType,
+        restrained,
         targetHp: target.hp,
       });
 

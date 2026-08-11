@@ -1,4 +1,6 @@
+import { artifactBonus, type ArtifactLevels } from './artifacts';
 import { dexEntry, type BaseStats } from './data/pokedex';
+import { talentAttack } from './data/talents';
 import type { OwnedMon } from './state';
 
 export const MAX_LEVEL = 100;
@@ -25,7 +27,7 @@ export function starMultiplier(star: number): number {
  * The mainline stat formula, with IVs kept and EVs dropped — the extra knob
  * would not survive an idle game's pace, but IVs give duplicates some spread.
  */
-export function combatStats(mon: OwnedMon): CombatStats {
+export function combatStats(mon: OwnedMon, artifacts: ArtifactLevels = {}): CombatStats {
   const { base } = dexEntry(mon.dexId);
   const level = Math.min(mon.level, MAX_LEVEL);
   const mult = starMultiplier(mon.star);
@@ -33,13 +35,17 @@ export function combatStats(mon: OwnedMon): CombatStats {
   const other = (baseValue: number, iv: number) =>
     Math.floor((Math.floor(((2 * baseValue + iv) * level) / 100) + 5) * mult);
 
+  // Artifacts and talents are flat additions applied after the star multiplier,
+  // so investing in them is never devalued by a later ascension.
+  const gear = artifactBonus(artifacts);
+
   return {
-    hp: Math.floor((Math.floor(((2 * base.hp + mon.ivs.hp) * level) / 100) + level + 10) * mult),
-    atk: other(base.atk, mon.ivs.atk),
-    def: other(base.def, mon.ivs.def),
-    spa: other(base.spa, mon.ivs.spa),
-    spd: other(base.spd, mon.ivs.spd),
-    spe: other(base.spe, mon.ivs.spe),
+    hp: Math.floor((Math.floor(((2 * base.hp + mon.ivs.hp) * level) / 100) + level + 10) * mult) + gear.hp,
+    atk: other(base.atk, mon.ivs.atk) + gear.atk + talentAttack(mon.star),
+    def: other(base.def, mon.ivs.def) + gear.def,
+    spa: other(base.spa, mon.ivs.spa) + gear.spa,
+    spd: other(base.spd, mon.ivs.spd) + gear.spd,
+    spe: other(base.spe, mon.ivs.spe) + gear.spe,
   };
 }
 
@@ -47,16 +53,19 @@ export function combatStats(mon: OwnedMon): CombatStats {
  * Battle Power — the single number the HUD shows. Offence and bulk are weighted
  * so that a glass cannon and a wall of the same level land close together.
  */
-export function battlePower(mon: OwnedMon): number {
-  const s = combatStats(mon);
+export function battlePower(mon: OwnedMon, artifacts: ArtifactLevels = {}): number {
+  const s = combatStats(mon, artifacts);
   const offence = Math.max(s.atk, s.spa) + 0.35 * Math.min(s.atk, s.spa);
   const bulk = s.hp * 0.55 + (s.def + s.spd) * 1.1;
   const tempo = s.spe * 0.8;
   return Math.floor((offence * 2.4 + bulk + tempo) * 1.6);
 }
 
-export function teamPower(team: readonly OwnedMon[]): number {
-  return team.reduce((total, mon) => total + battlePower(mon), 0);
+export function teamPower(
+  team: readonly OwnedMon[],
+  artifactsOf: (uid: string) => ArtifactLevels = () => ({}),
+): number {
+  return team.reduce((total, mon) => total + battlePower(mon, artifactsOf(mon.uid)), 0);
 }
 
 /** EXP needed to go from `level` to `level + 1`. */

@@ -6,12 +6,13 @@ import { ITEMS, itemDef } from '../game/data/items';
 import { dexEntry } from '../game/data/pokedex';
 import { abbreviate } from '../game/format';
 import { BANNERS, type SummonOutcome } from '../game/gacha';
-import { battlePower, combatStats, expToNext } from '../game/stats';
+import { combatStats, expToNext } from '../game/stats';
 import { activeTeam, findMon, itemCount, type OwnedMon } from '../game/state';
 import { store } from '../game/store';
 import type { UiScene } from '../scenes/UiScene';
 import { ATLAS } from '../scenes/PreloadScene';
 import { ScrollView } from './scroll';
+import { openArtifacts, openAscend } from './systems';
 import { TX } from './textures';
 import { TEXT, colorText } from './theme';
 import { Bar, Button, chip, label, panel, stars } from './widgets';
@@ -50,7 +51,7 @@ function monCard(
     scene,
     width / 2 - 20,
     -28,
-    abbreviate(battlePower(mon)),
+    abbreviate(store.monPower(mon)),
     colorText(TEXT.stat, COLORS.textGold),
   ).setOrigin(1, 0.5);
   const powerTag = label(
@@ -171,7 +172,7 @@ export function openBox(scene: UiScene): void {
     });
     body.add(list);
 
-    const roster = [...store.state.box].sort((a, b) => battlePower(b) - battlePower(a));
+    const roster = [...store.state.box].sort((a, b) => store.monPower(b) - store.monPower(a));
     const cardH = 118;
     roster.forEach((mon, index) => {
       const card = monCard(ui, mon, DIALOG_W - 90, cardH - 10, () => {
@@ -196,8 +197,8 @@ export function openMonDetail(scene: UiScene, uid: string): void {
     if (!mon) return [];
 
     const entry = dexEntry(mon.dexId);
-    const stats = combatStats(mon);
-    const { container, body } = ui.dialogFrame(entry.name, DIALOG_W, 780, close);
+    const stats = combatStats(mon, store.artifacts(uid));
+    const { container, body } = ui.dialogFrame(entry.name, DIALOG_W, 820, close);
 
     body.add(ui.add.image(0, -230, ATLAS.portraits, String(entry.id)).setDisplaySize(190, 190));
     body.add(stars(ui, 0, -120, mon.star, 26));
@@ -249,13 +250,40 @@ export function openMonDetail(scene: UiScene, uid: string): void {
 
     body.add(
       ui.add
-        .text(0, 262, `Lực chiến ${abbreviate(battlePower(mon))}`, colorText(TEXT.heading, COLORS.textGold))
+        .text(0, 262, `Lực chiến ${abbreviate(store.monPower(mon))}`, colorText(TEXT.heading, COLORS.textGold))
         .setOrigin(0.5),
+    );
+
+    body.add(
+      new Button(ui, -160, 316, {
+        width: 300,
+        height: 76,
+        texture: TX.btnRed,
+        label: 'Nâng sao',
+        labelStyle: TEXT.buttonSmall,
+        onPress: () => {
+          close();
+          openAscend(ui, uid);
+        },
+      }),
+    );
+    body.add(
+      new Button(ui, 160, 316, {
+        width: 300,
+        height: 76,
+        texture: TX.btnPurple,
+        label: 'Thần khí',
+        labelStyle: TEXT.buttonSmall,
+        onPress: () => {
+          close();
+          openArtifacts(ui, uid);
+        },
+      }),
     );
 
     const fielded = store.state.team.includes(uid);
     body.add(
-      new Button(ui, 0, 322, {
+      new Button(ui, 0, 398, {
         width: 320,
         height: 76,
         texture: fielded ? TX.btnDark : TX.btnGreen,
@@ -362,7 +390,7 @@ function openSlotPicker(scene: UiScene, slot: number): void {
     const current = store.state.team[slot] ?? null;
     const roster = [...store.state.box]
       .filter((mon) => mon.uid === current || !store.state.team.includes(mon.uid))
-      .sort((a, b) => battlePower(b) - battlePower(a));
+      .sort((a, b) => store.monPower(b) - store.monPower(a));
 
     const cardH = 118;
     roster.forEach((mon, index) => {
@@ -465,11 +493,7 @@ function showSummonResults(scene: UiScene, results: readonly SummonOutcome[]): v
       body.add(ui.add.text(x, y + 34, outcome.entry.name, TEXT.small).setOrigin(0.5));
       body.add(stars(ui, x, y + 62, outcome.entry.rarity, 14, rarity));
 
-      const tag = outcome.isNew
-        ? 'MỚI!'
-        : outcome.ascendedTo !== null
-          ? `★ ${outcome.ascendedTo}`
-          : 'Đổi vàng';
+      const tag = outcome.isNew ? 'MỚI!' : `+${outcome.shards} mảnh`;
       body.add(
         ui.add
           .text(x, y + 86, tag, colorText(TEXT.tiny, outcome.isNew ? COLORS.success : COLORS.textGold))

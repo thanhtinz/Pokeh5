@@ -1,13 +1,31 @@
 import { TEAM_SIZE } from '../config';
+import { ascend, checkAscend } from './ascension';
+import {
+  ARTIFACT_SLOTS,
+  MAX_ARTIFACT_LEVEL,
+  enhanceCost,
+  type ArtifactLevels,
+  type ArtifactSlotId,
+} from './artifacts';
 import { simulate, type BattleResult } from './battle';
 import { DAILY_QUESTS, isQuestClaimed, isQuestComplete, type QuestDef } from './data/quests';
+import { ELEMENTS, type ElementId } from './elements';
 import { bannerById, summon, type SummonOutcome } from './gacha';
+import { NODES_PER_BOARD, nodeCost, signMultipliers } from './signs';
 import { expPerHour, goldPerHour, offlineReport, OFFLINE_MIN_SECONDS, type OfflineReport } from './idle';
 import { randomSeed } from './rng';
 import { loadSave, saveNow } from './save';
 import { buildStageTeam, stageInfo } from './stages';
-import { applyExp, expToNext, MAX_LEVEL, teamPower, trainerExpToNext } from './stats';
-import { activeTeam, createNewSave, dayStamp, findMon, type PlayerState } from './state';
+import { applyExp, battlePower, expToNext, MAX_LEVEL, teamPower, trainerExpToNext } from './stats';
+import {
+  activeTeam,
+  artifactsOf,
+  createNewSave,
+  dayStamp,
+  findMon,
+  type OwnedMon,
+  type PlayerState,
+} from './state';
 import { Emitter } from './emitter';
 
 export type StoreEvents = {
@@ -127,11 +145,19 @@ class Store {
     }
   }
 
+  /** Artifact loadout for one owned Pokemon. */
+  artifacts(uid: string): ArtifactLevels {
+    return artifactsOf(this.state, uid);
+  }
+
   /** Fights the current stage and applies the outcome. */
   fight(): BattleResult {
     const party = activeTeam(this.state);
     const info = stageInfo(this.state.stage);
-    const result = simulate(party, buildStageTeam(this.state.stage), randomSeed());
+    const result = simulate(party, buildStageTeam(this.state.stage), randomSeed(), {
+      artifactsOf: (uid) => this.artifacts(uid),
+      signMultipliers: signMultipliers(this.state.signs),
+    });
 
     if (result.winner === 'ally') {
       this.state.gold += info.goldReward;
@@ -170,15 +196,149 @@ class Store {
       return results;
     }
 
-    // Star-capped duplicates convert to gold rather than vanishing.
-    for (const outcome of results) {
-      if (!outcome.isNew && outcome.ascendedTo === null) {
-        this.state.gold += 2500 * outcome.entry.rarity;
-      }
-    }
-
     this.commit();
     return results;
+  }
+
+  /** Spends shards and gold to raise one Pokemon's star rating. */
+  ascendMon(uid: string): boolean {
+    const mon = findMon(this.state, uid);
+    if (!mon) return false;
+
+    const check = checkAscend(this.state, mon);
+    if (!check.canAscend) {
+      this.events.emit('toast', {
+        text: check.atMaxStar ? 'Đã đạt sao tối đa' : 'Thiếu mảnh hoặc vàng',
+        tone: 'bad',
+      });
+      return false;
+    }
+
+    ascend(this.state, mon);
+    const unlocked = check.unlocks;
+    this.events.emit('toast', {
+      text: unlocked ? `Mở talent: ${unlocked.name}` : `Lên ${mon.star} sao!`,
+      tone: 'good',
+    });
+    this.commit();
+    return true;
+  }
+
+  /** Raises one artifact slot by a level. */
+  enhanceArtifact(uid: string, slot: ArtifactSlotId): boolean {
+    const mon = findMon(this.state, uid);
+    if (!mon) return false;
+
+    const levels = { ...this.artifacts(uid) };
+    const level = levels[slot] ?? 0;
+    if (level >= MAX_ARTIFACT_LEVEL) {
+      this.events.emit('toast', { text: 'Thần khí đã đạt cấp tối đa', tone: 'bad' });
+      return false;
+    }
+
+    const cost = enhanceCost(level);
+    if (this.state.gold < cost) {
+      this.events.emit('toast', { text: 'Không đủ vàng', tone: 'bad' });
+      return false;
+    }
+
+    this.state.gold -= cost;
+    levels[slot] = level + 1;
+    this.state.artifacts[uid] = levels;
+    this.commit();
+    return true;
+  }
+
+  /**
+   * Levels every slot that is still affordable, cheapest first — so a click
+   * spends the gold where it buys the most levels rather than stalling on the
+   * one expensive slot.
+   */
+  enhanceAllArtifacts(uid: string): number {
+    const mon = findMon(this.state, uid);
+    if (!mon) return 0;
+
+    const levels = { ...this.artifacts(uid) };
+    let raised = 0;
+
+    for (;;) {
+      const affordable = ARTIFACT_SLOTS.filter(
+        (slot) => (levels[slot] ?? 0) < MAX_ARTIFACT_LEVEL,
+      ).sort((a, b) => enhanceCost(levels[a] ?? 0) - enhanceCost(levels[b] ?? 0));
+
+      const next = affordable[0];
+      if (!next) break;
+
+      const cost = enhanceCost(levels[next] ?? 0);
+      if (this.state.gold < cost) break;
+
+      this.state.gold -= cost;
+      levels[next] = (levels[next] ?? 0) + 1;
+      raised += 1;
+    }
+
+    if (raised === 0) {
+      this.events.emit('toast', { text: 'Không đủ vàng', tone: 'bad' });
+      return 0;
+    }
+
+    this.state.artifacts[uid] = levels;
+    this.events.emit('toast', { text: `Cường hoá ${raised} cấp`, tone: 'good' });
+    this.commit();
+    return raised;
+  }
+
+  /** Puts a level-1 artifact in every empty slot, if the gold covers it. */
+  equipAllArtifacts(uid: string): number {
+    const mon = findMon(this.state, uid);
+    if (!mon) return 0;
+
+    const levels = { ...this.artifacts(uid) };
+    let equipped = 0;
+
+    for (const slot of ARTIFACT_SLOTS) {
+      if ((levels[slot] ?? 0) > 0) continue;
+      const cost = enhanceCost(0);
+      if (this.state.gold < cost) break;
+
+      this.state.gold -= cost;
+      levels[slot] = 1;
+      equipped += 1;
+    }
+
+    if (equipped === 0) {
+      this.events.emit('toast', { text: 'Đã trang bị đủ hoặc thiếu vàng', tone: 'bad' });
+      return 0;
+    }
+
+    this.state.artifacts[uid] = levels;
+    this.commit();
+    return equipped;
+  }
+
+  /** Lights the next star on one Signs board. */
+  upgradeSign(element: ElementId): boolean {
+    const level = this.state.signs[element] ?? 0;
+    if (level >= NODES_PER_BOARD) {
+      this.events.emit('toast', { text: 'Chòm sao đã hoàn thành', tone: 'bad' });
+      return false;
+    }
+
+    const cost = nodeCost(level);
+    if (this.state.gold < cost) {
+      this.events.emit('toast', { text: 'Không đủ vàng', tone: 'bad' });
+      return false;
+    }
+
+    this.state.gold -= cost;
+    this.state.signs[element] = level + 1;
+    this.commit();
+    return true;
+  }
+
+  /** Total Signs progress, used for the hub badge. */
+  signTotal(): number {
+    return ELEMENTS.reduce((sum, element) => sum + (this.state.signs[element] ?? 0), 0);
   }
 
   setTeamSlot(slot: number, uid: string | null): void {
@@ -219,7 +379,12 @@ class Store {
   }
 
   power(): number {
-    return teamPower(activeTeam(this.state));
+    return teamPower(activeTeam(this.state), (uid) => this.artifacts(uid));
+  }
+
+  /** Battle power of one Pokemon, artifacts included. */
+  monPower(mon: OwnedMon): number {
+    return battlePower(mon, this.artifacts(mon.uid));
   }
 
   /** Wipes yesterday's daily counters the first time the app opens on a new day. */

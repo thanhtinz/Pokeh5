@@ -23,6 +23,9 @@ export class ScrollView extends Phaser.GameObjects.Container {
   private readonly viewHeight: number;
   private readonly padding: number;
 
+  private readonly maskShape: Phaser.GameObjects.Graphics;
+  private maskAt = { x: Number.NaN, y: Number.NaN };
+
   private contentHeight = 0;
   private velocity = 0;
   private dragging = false;
@@ -44,15 +47,12 @@ export class ScrollView extends Phaser.GameObjects.Container {
     this.content = scene.add.container(0, 0);
     this.add(this.content);
 
-    const shape = scene.make.graphics({});
-    shape.fillStyle(0xffffff);
-    shape.fillRect(
-      options.x - options.width / 2,
-      options.y - options.height / 2,
-      options.width,
-      options.height,
-    );
-    this.content.setMask(shape.createGeometryMask());
+    // A geometry mask is positioned in world space, but a ScrollView is
+    // normally nested inside a dialog container and only parented *after*
+    // construction. Rather than snapshot a transform that is still wrong, the
+    // mask rectangle is re-derived from the world transform each frame.
+    this.maskShape = scene.make.graphics({});
+    this.content.setMask(this.maskShape.createGeometryMask());
 
     this.setSize(options.width, options.height);
     this.setInteractive(
@@ -69,7 +69,7 @@ export class ScrollView extends Phaser.GameObjects.Container {
       scene.input.off(Phaser.Input.Events.POINTER_MOVE, this.onMove, this);
       scene.input.off(Phaser.Input.Events.POINTER_UP, this.onUp, this);
       scene.events.off(Phaser.Scenes.Events.UPDATE, this.step, this);
-      shape.destroy();
+      this.maskShape.destroy();
     });
 
     scene.add.existing(this);
@@ -131,7 +131,21 @@ export class ScrollView extends Phaser.GameObjects.Container {
     this.dragging = false;
   }
 
+  /** Keeps the clip rectangle sitting exactly over the viewport in world space. */
+  private syncMask(): void {
+    const world = this.getWorldTransformMatrix();
+    const x = world.tx - (this.viewWidth * world.scaleX) / 2;
+    const y = world.ty - (this.viewHeight * world.scaleY) / 2;
+    if (x === this.maskAt.x && y === this.maskAt.y) return;
+
+    this.maskAt = { x, y };
+    this.maskShape.clear();
+    this.maskShape.fillStyle(0xffffff);
+    this.maskShape.fillRect(x, y, this.viewWidth * world.scaleX, this.viewHeight * world.scaleY);
+  }
+
   private step(): void {
+    this.syncMask();
     if (this.dragging) return;
 
     const min = this.minOffset();

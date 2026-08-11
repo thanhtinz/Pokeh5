@@ -27,6 +27,11 @@ export class UiScene extends Phaser.Scene {
     if (store.pendingOffline) this.showOfflineReward();
   }
 
+  /** How many dialogs are stacked; the smoke test asserts against this. */
+  get modalCount(): number {
+    return this.modalStack.length;
+  }
+
   /** Transient message that stacks upward and expires on its own. */
   toast(text: string, tone: 'info' | 'good' | 'bad' = 'info'): void {
     const color =
@@ -84,6 +89,8 @@ export class UiScene extends Phaser.Scene {
     for (const child of build(this, close)) host.add(child);
 
     this.modalStack.push(host);
+    if (this.modalStack.length === 1) this.setSceneInput(false);
+
     host.setAlpha(0);
     this.tweens.add({ targets: host, alpha: 1, duration: 140 });
   }
@@ -94,8 +101,25 @@ export class UiScene extends Phaser.Scene {
       targets: host,
       alpha: 0,
       duration: 120,
-      onComplete: () => host.destroy(true),
+      onComplete: () => {
+        host.destroy(true);
+        // Re-enabled only once the dialog is really gone, so the pointer event
+        // that dismissed it cannot also reach whatever was behind it.
+        if (this.modalStack.length === 0) this.setSceneInput(true);
+      },
     });
+  }
+
+  /**
+   * Phaser delivers pointer events to every active scene, not just the topmost
+   * one, so a modal's scrim does not stop the hub underneath from reacting.
+   * Gating input on those scenes is what actually makes a dialog modal.
+   */
+  private setSceneInput(enabled: boolean): void {
+    for (const key of ['City', 'Battle']) {
+      const scene = this.scene.get(key);
+      if (scene?.input) scene.input.enabled = enabled;
+    }
   }
 
   /** Standard framed dialog: title bar, body area, close button. */

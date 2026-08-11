@@ -48,4 +48,10 @@ document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'hidden') flush();
 });
 
+// Exposed in development so the smoke test can assert on real scene state
+// instead of eyeballing screenshots. Stripped from production builds.
+if (import.meta.env.DEV) {
+  (window as unknown as { __game: Phaser.Game }).__game = game;
+}
+
 export default game;

@@ -1,5 +1,8 @@
 import { TEAM_SIZE } from '../config';
+import { ARTIFACT_SLOTS, MAX_ARTIFACT_LEVEL, type ArtifactLevels } from './artifacts';
 import { dexEntryOrNull } from './data/pokedex';
+import { ELEMENTS } from './elements';
+import { NODES_PER_BOARD, emptySignLevels, type SignLevels } from './signs';
 import { MAX_LEVEL, MAX_STAR } from './stats';
 import {
   SAVE_VERSION,
@@ -57,10 +60,59 @@ function clampNumber(value: unknown, min: number, max: number, fallback: number)
   return Math.min(max, Math.max(min, n));
 }
 
+function sanitiseShards(raw: unknown): Record<string, number> {
+  const shards: Record<string, number> = {};
+  if (typeof raw !== 'object' || raw === null) return shards;
+
+  for (const [dexId, count] of Object.entries(raw)) {
+    // Drop entries for species that no longer exist in the pokedex.
+    if (!dexEntryOrNull(Number(dexId))) continue;
+    const amount = clampInt(count, 0, 9_999_999, 0);
+    if (amount > 0) shards[String(Number(dexId))] = amount;
+  }
+  return shards;
+}
+
+function sanitiseArtifacts(raw: unknown, owned: ReadonlySet<string>): Record<string, ArtifactLevels> {
+  const artifacts: Record<string, ArtifactLevels> = {};
+  if (typeof raw !== 'object' || raw === null) return artifacts;
+
+  for (const [uid, levels] of Object.entries(raw)) {
+    // A loadout whose Pokemon was released is dead weight in the save.
+    if (!owned.has(uid) || typeof levels !== 'object' || levels === null) continue;
+
+    const slots: ArtifactLevels = {};
+    let any = false;
+    for (const slot of ARTIFACT_SLOTS) {
+      const level = clampInt((levels as Record<string, unknown>)[slot], 0, MAX_ARTIFACT_LEVEL, 0);
+      if (level > 0) {
+        slots[slot] = level;
+        any = true;
+      }
+    }
+    if (any) artifacts[uid] = slots;
+  }
+  return artifacts;
+}
+
+function sanitiseSigns(raw: unknown): SignLevels {
+  const signs = emptySignLevels();
+  if (typeof raw !== 'object' || raw === null) return signs;
+
+  for (const element of ELEMENTS) {
+    signs[element] = clampInt((raw as Record<string, unknown>)[element], 0, NODES_PER_BOARD, 0);
+  }
+  return signs;
+}
+
 export function sanitise(raw: unknown): PlayerState | null {
   if (typeof raw !== 'object' || raw === null) return null;
   const data = raw as Partial<PlayerState>;
-  if (Number(data.version) !== SAVE_VERSION) return null;
+
+  const version = Number(data.version);
+  // Version 1 predates shards, artifacts and Signs. Those fields simply default
+  // to empty, so an old save carries forward instead of being thrown away.
+  if (version !== SAVE_VERSION && version !== 1) return null;
 
   const box = Array.isArray(data.box)
     ? data.box.map(sanitiseMon).filter((mon): mon is OwnedMon => mon !== null)
@@ -117,6 +169,10 @@ export function sanitise(raw: unknown): PlayerState | null {
     team,
     box,
     items,
+
+    shards: sanitiseShards(data.shards),
+    artifacts: sanitiseArtifacts(data.artifacts, owned),
+    signs: sanitiseSigns(data.signs),
 
     quests: {
       day: clampInt(quests.day, 0, Number.MAX_SAFE_INTEGER, dayStamp()),

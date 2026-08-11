@@ -16,26 +16,57 @@ const GAME = { width: 720, height: 1280 };
 
 /**
  * Phaser's FIT mode letterboxes the canvas, so a tap has to be mapped from the
- * design resolution the layout is written in back to page pixels.
+ * design resolution the layout is written in back to page pixels. The canvas
+ * rect is measured rather than recomputed: guessing how the browser laid it out
+ * is exactly how taps end up silently landing on the wrong thing.
  */
-const SCALE = Math.min(VIEWPORT.width / GAME.width, VIEWPORT.height / GAME.height);
-const OFFSET_X = (VIEWPORT.width - GAME.width * SCALE) / 2;
-const OFFSET_Y = (VIEWPORT.height - GAME.height * SCALE) / 2;
+async function canvasRect(page) {
+  const rect = await page.evaluate(() => {
+    const canvas = document.querySelector('#app canvas');
+    if (!canvas) return null;
+    const { left, top, width, height } = canvas.getBoundingClientRect();
+    return { left, top, width, height };
+  });
+  if (!rect || rect.width === 0) throw new Error('the game canvas was never laid out');
+  return rect;
+}
 
-const toPage = (gx, gy) => [OFFSET_X + gx * SCALE, OFFSET_Y + gy * SCALE];
+function mapper(rect) {
+  return (gx, gy) => [
+    rect.left + (gx / GAME.width) * rect.width,
+    rect.top + (gy / GAME.height) * rect.height,
+  ];
+}
 
 /** Any point on the scrim outside the dialog dismisses the top modal. */
 const DISMISS = [40, 1240];
 
+/**
+ * Each step is a sequence of taps in design-resolution coordinates, then a
+ * screenshot. Reaching the ascension and artifact screens takes three taps
+ * (box, first card, action), which is exactly the path a player walks.
+ */
+const NAV = (index) => [88 + index * 136, 1205];
+const FIRST_CARD = [360, 345];
+
+/**
+ * `expect` is what turns this from a screenshot dump into a test: `modal` means
+ * a dialog must be open by the end of the step, `battle` that the Battle scene
+ * must be running. A tap that silently misses now fails the run.
+ */
 const STEPS = [
-  { name: '01-city', tap: null, wait: 2600, dismiss: false },
-  { name: '02-formation', tap: [496, 1096], wait: 900, dismiss: true },
-  { name: '03-box', tap: [218, 1232], wait: 900, dismiss: true },
-  { name: '04-summon', tap: [632, 1096], wait: 900, dismiss: true },
-  { name: '05-quests', tap: [74, 246], wait: 900, dismiss: true },
-  { name: '06-trials', tap: [502, 1232], wait: 900, dismiss: true },
+  { name: '01-city', taps: [], wait: 2600, dismiss: false, expect: 'hub' },
+  { name: '02-formation', taps: [NAV(3)], wait: 900, dismiss: true, expect: 'modal' },
+  { name: '03-box', taps: [NAV(2)], wait: 900, dismiss: true, expect: 'modal' },
+  { name: '04-summon', taps: [NAV(4)], wait: 900, dismiss: true, expect: 'modal' },
+  { name: '05-quests', taps: [[110, 268]], wait: 900, dismiss: true, expect: 'modal' },
+  { name: '06-signs', taps: [[610, 440]], wait: 1200, dismiss: true, expect: 'modal' },
+  { name: '07-trials', taps: [[110, 612]], wait: 900, dismiss: true, expect: 'modal' },
+  { name: '08-mon-detail', taps: [NAV(2), FIRST_CARD], wait: 900, dismiss: true, expect: 'modal' },
+  { name: '09-ascend', taps: [NAV(2), FIRST_CARD, [200, 982]], wait: 900, dismiss: true, expect: 'modal' },
+  { name: '10-artifacts', taps: [NAV(2), FIRST_CARD, [520, 982]], wait: 900, dismiss: true, expect: 'modal' },
   // The battle scene replaces the hub rather than opening a modal.
-  { name: '07-battle', tap: [574, 995], wait: 2400, dismiss: false },
+  { name: '11-battle', taps: [[546, 1094]], wait: 2400, dismiss: false, expect: 'battle' },
 ];
 
 async function main() {
@@ -76,16 +107,40 @@ async function main() {
   page.on('requestfailed', (req) => problems.push(`request: ${req.url()}`));
 
   await page.goto('http://localhost:5199/', { waitUntil: 'load' });
+  await page.waitForFunction(() => Boolean(document.querySelector('#app canvas')), { timeout: 20_000 });
+
+  const toPage = mapper(await canvasRect(page));
 
   for (const step of STEPS) {
-    if (step.tap) await page.mouse.click(...toPage(...step.tap));
+    for (const tap of step.taps) {
+      await page.mouse.click(...toPage(...tap));
+      await page.waitForTimeout(650);
+    }
     await page.waitForTimeout(step.wait);
     await page.screenshot({ path: path.join(OUT_DIR, `${step.name}.png`) });
-    console.log(`[shot] ${step.name}.png`);
+
+    const state = await page.evaluate(() => {
+      const game = window.__game;
+      const ui = game?.scene.getScene('Ui');
+      return {
+        modals: ui?.modalCount ?? -1,
+        battleRunning: Boolean(game?.scene.isActive('Battle')),
+      };
+    });
+
+    const ok =
+      step.expect === 'modal'
+        ? state.modals > 0
+        : step.expect === 'battle'
+          ? state.battleRunning
+          : state.modals === 0;
+
+    console.log(`[shot] ${step.name}.png  modals=${state.modals} battle=${state.battleRunning}`);
+    if (!ok) problems.push(`step ${step.name}: expected ${step.expect}, got ${JSON.stringify(state)}`);
 
     if (step.dismiss) {
       await page.mouse.click(...toPage(...DISMISS));
-      await page.waitForTimeout(400);
+      await page.waitForTimeout(500);
     }
   }
 

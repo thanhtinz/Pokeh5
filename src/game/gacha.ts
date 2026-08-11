@@ -1,6 +1,6 @@
+import { addShards, shardsPerDuplicate } from './ascension';
 import { DEX, DEX_BY_RARITY, type DexEntry } from './data/pokedex';
 import { Rng } from './rng';
-import { MAX_STAR } from './stats';
 import { createMon, type OwnedMon, type PlayerState } from './state';
 
 export interface BannerDef {
@@ -41,8 +41,8 @@ export function bannerById(id: string): BannerDef {
 export interface SummonOutcome {
   entry: DexEntry;
   mon: OwnedMon | null;
-  /** Set when the species was already owned and got converted into a star. */
-  ascendedTo: number | null;
+  /** Shards awarded when the species was already owned. */
+  shards: number;
   isNew: boolean;
 }
 
@@ -54,25 +54,23 @@ function rollRarity(banner: BannerDef, pityCount: number, rng: Rng): number {
 }
 
 /**
- * A duplicate is never dead weight: it either raises the species' star rating
- * or, once that is capped, converts to gold on the caller's side.
+ * A duplicate is never dead weight: it becomes ascension shards for that exact
+ * species, so every pull feeds the star track of something the player owns.
  */
 function grant(state: PlayerState, entry: DexEntry, rng: Rng): SummonOutcome {
   const existing = state.box.find((mon) => mon.dexId === entry.id);
 
   if (existing) {
-    if (existing.star < MAX_STAR) {
-      existing.star += 1;
-      return { entry, mon: existing, ascendedTo: existing.star, isNew: false };
-    }
-    return { entry, mon: existing, ascendedTo: null, isNew: false };
+    const shards = shardsPerDuplicate(entry.id);
+    addShards(state, entry.id, shards);
+    return { entry, mon: existing, shards, isNew: false };
   }
 
   // New recruits arrive near the player's own power so they are usable at once.
   const level = Math.max(5, Math.floor(averageTeamLevel(state) * 0.85));
   const mon = createMon(entry.id, level, rng);
   state.box.push(mon);
-  return { entry, mon, ascendedTo: null, isNew: true };
+  return { entry, mon, shards: 0, isNew: true };
 }
 
 function averageTeamLevel(state: PlayerState): number {

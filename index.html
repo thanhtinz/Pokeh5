@@ -41,8 +41,10 @@
       #app {
         position: fixed;
         inset: 0;
-        display: grid;
-        place-items: center;
+        /* Deliberately not centred here: Phaser's `autoCenter` already sets a
+           top margin on the canvas, and centring it again in CSS stacks the two
+           and pushes the game off-centre. */
+        overflow: hidden;
       }
       #app canvas {
         display: block;
