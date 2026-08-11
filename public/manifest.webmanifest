@@ -1,0 +1,19 @@
+{
+  "name": "Pokeh5",
+  "short_name": "Pokeh5",
+  "description": "Idle Pokemon RPG",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "portrait",
+  "background_color": "#0b101c",
+  "theme_color": "#101828",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
