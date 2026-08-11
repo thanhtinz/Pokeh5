@@ -5,7 +5,7 @@
 	$user->map->x = (int) $_POST['x'];
 	$user->map->y = (int) $_POST['y'];
 
-if(isset($_POST[auto])) {
+if(isset($_POST['auto'])) {
     			mysql_query("UPDATE `users` SET `map` = '" . json_encode($user->map) . "',`data` = '1' WHERE `id` = '" . $user->id . "'");
 
 
@@ -118,7 +118,7 @@ $info1 = '<i class="fa fa-globe" aria-hidden="true"></i>'.$now.' <br> <i class="
 
     
     
-    		$json = array('name'=>''.$hot.''.$pokemon[naam].'', 'id'=>$id_p, 'level'=>$opponent_monster_level, 'move'=>$h,'info'=>$info1);
+    		$json = array('name'=>''.$hot.''.$pokemon['naam'].'', 'id'=>$id_p, 'level'=>$opponent_monster_level, 'move'=>$h,'info'=>$info1);
 
   		
 		echo json_encode($json);

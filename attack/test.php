@@ -328,7 +328,7 @@ $ducnghia_ten[] = '<font color="33CCCC">'.$ducnghiaa['username'].'</font>,';
  
   
 <div>Người trên bản đồ: 
-<font color="red"> <?=$ducnghia_it?></font>(<?if ($ducnghia_it > 0){
+<font color="red"> <?=$ducnghia_it?></font>(<?php if ($ducnghia_it > 0){
 echo implode(' ',$ducnghia_ten).'';
 }?>) 
 </center>

@@ -89,7 +89,7 @@ include("attack/attack.inc.php");
 
 $aanval_log = aanval_log($_SESSION['trainer']['aanval_log_id']);
 $trainer = mysql_fetch_array(mysql_query("SELECT * FROM `trainer` WHERE `naam`='".$aanval_log['trainer']."'"));
-echo'<center><h2>Cuộc Tranh Tài Với '.$aanval_log[trainer].'  </h2></center>';
+echo'<center><h2>Cuộc Tranh Tài Với '.$aanval_log['trainer'].'  </h2></center>';
 
 if(empty($trainer['badge']) and $trainer['id'] != '138' ){
   $return_link = "trainer";
@@ -173,56 +173,56 @@ else
   //If div is ready
   $("#message").ready(function() {
     //Show Starting Screen
-    if((("<? echo $aanval_log['laatste_aanval']; ?>" == "spelereersteaanval") || ("<? echo $aanval_log['laatste_aanval']; ?>" == "computereersteaanval")) && ("<? echo $_SESSION['trainer']['begin_zien']; ?>" == 1)) {
+    if((("<?php  echo $aanval_log['laatste_aanval']; ?>" == "spelereersteaanval") || ("<?php  echo $aanval_log['laatste_aanval']; ?>" == "computereersteaanval")) && ("<?php  echo $_SESSION['trainer']['begin_zien']; ?>" == 1)) {
       //Set Images
-      $("#img_pokemon").attr("src","images/you/back/<? echo $gebruiker['character']; ?>.png")
-      $("#img_trainer").attr("src","images/trainers/<? echo $aanval_log['trainer']; ?>.png")
+      $("#img_pokemon").attr("src","images/you/back/<?php  echo $gebruiker['character']; ?>.png")
+      $("#img_trainer").attr("src","images/trainers/<?php  echo $aanval_log['trainer']; ?>.png")
       setTimeout("show_start_text();", 1000)
-      $("#message").html("<? echo $txt['start_0'].$aanval_log['trainer'].$txt['start_1']; ?>")
+      $("#message").html("<?php  echo $txt['start_0'].$aanval_log['trainer'].$txt['start_1']; ?>")
       $("#pokemon_text").hide()
-      $("#trainer_naam").html("<? echo $aanval_log['trainer']." ".$txt['appears']; ?>.")
+      $("#trainer_naam").html("<?php  echo $aanval_log['trainer']." ".$txt['appears']; ?>.")
       $.ajax({
         type: "GET",
         url: "attack/trainer/trainer-stop-start.php"
       });     
     }
     //Write Start Text
-    else if("<? echo $aanval_log['laatste_aanval']; ?>" == "spelereersteaanval"){
+    else if("<?php  echo $aanval_log['laatste_aanval']; ?>" == "spelereersteaanval"){
       speler_attack = 1
       $("#message").html("<?php echo $txt['you_first_attack']; ?>")
     }
-    else if("<? echo $aanval_log['laatste_aanval']; ?>" == "computereersteaanval"){
+    else if("<?php  echo $aanval_log['laatste_aanval']; ?>" == "computereersteaanval"){
       speler_attack = 0
       speler_wissel = 0;
-      $("#message").html("<? echo $computer_info['naam_goed'].' '.$txt['opponent_first_attack']; ?>")
+      $("#message").html("<?php  echo $computer_info['naam_goed'].' '.$txt['opponent_first_attack']; ?>")
       next_turn()
     }
-    else if("<? echo $aanval_log['laatste_aanval']; ?>" == "pokemon"){
+    else if("<?php  echo $aanval_log['laatste_aanval']; ?>" == "pokemon"){
       speler_attack = 0
       next_turn()
-      $("#message").html("<? echo $computer_info['naam_goed'].' '.$txt['opponents_turn']; ?>")
+      $("#message").html("<?php  echo $computer_info['naam_goed'].' '.$txt['opponents_turn']; ?>")
     }
-    else if("<? echo $aanval_log['laatste_aanval']; ?>" == "computer"){
+    else if("<?php  echo $aanval_log['laatste_aanval']; ?>" == "computer"){
       speler_attack = 1
       $("#message").html("<?php echo $txt['your_turn']; ?>")
     }
-    else if("<? echo $aanval_log['laatste_aanval']; ?>" == "speler_wissel"){
+    else if("<?php  echo $aanval_log['laatste_aanval']; ?>" == "speler_wissel"){
       speler_attack = 0
       speler_wissel = 1
-      $("#message").html("<? echo $pokemon_info['naam_goed'].' '.$txt['have_to_change']; ?>")
+      $("#message").html("<?php  echo $pokemon_info['naam_goed'].' '.$txt['have_to_change']; ?>")
     }
-    else if("<? echo $aanval_log['laatste_aanval']; ?>" == "trainer_wissel"){
+    else if("<?php  echo $aanval_log['laatste_aanval']; ?>" == "trainer_wissel"){
       speler_attack = 0
       speler_wissel = 0
-      $("#message").html("<? echo $computer_info['naam_goed'].' '.$txt['opponent_have_to_change_1'].' '.$aanval_log['trainer'].' '.$txt['opponent_have_to_change_2']; ?>")
+      $("#message").html("<?php  echo $computer_info['naam_goed'].' '.$txt['opponent_have_to_change_1'].' '.$aanval_log['trainer'].' '.$txt['opponent_have_to_change_2']; ?>")
       trainer_change()
     }
-    else if("<? echo $aanval_log['laatste_aanval']; ?>" == "klaar"){
+    else if("<?php  echo $aanval_log['laatste_aanval']; ?>" == "klaar"){
       speler_attack = 1
       $("#message").html("<?php echo $txt['fight_finished']; ?>")
-      setTimeout("location.href='index.php?page=<? echo $return_link; ?>'", 3000)
+      setTimeout("location.href='index.php?page=<?php  echo $return_link; ?>'", 3000)
     }
-    else if("<? echo $aanval_log['laatste_aanval']; ?>" == "end_screen")
+    else if("<?php  echo $aanval_log['laatste_aanval']; ?>" == "end_screen")
 	{
       speler_attack = 0
       speler_wissel = 0
@@ -230,11 +230,11 @@ else
     }
     else
 	{
-      $("#message").html("Foutcode: 0001\nInfo:<? echo $aanval_log['laatste_aanval']; ?>")  
+      $("#message").html("Foutcode: 0001\nInfo:<?php  echo $aanval_log['laatste_aanval']; ?>")  
     } 
   });     
   </script>
-  <?
+  <?php 
 
   //Player Pokemon In Hand
   for($inhand = 1; $player_hand = mysql_fetch_assoc($pokemon_sql); $inhand++){
@@ -253,38 +253,38 @@ else
       $("div[id='change_pokemon']").ready(function() 
 	  {
         //Is pokemon in fight, so yes, don't show
-        if(<? echo $infight; ?> == 1){
-          if(<? echo $player_hand['shiny']; ?> == 1){
-            $("div[id='change_pokemon'][name='<? echo $inhand; ?>']").css({ backgroundImage : "url(images/shiny/icon/<? echo strtolower($player_hand['wild_id']); ?>.gif)" });
-            $("div[id='change_pokemon'][name='<? echo $inhand; ?>']").attr("title", "<? echo $player_hand['naam']; ?> \nLife: <? echo $player_hand['leven']; ?>/<? echo $player_hand['levenmax']; ?>");
+        if(<?php  echo $infight; ?> == 1){
+          if(<?php  echo $player_hand['shiny']; ?> == 1){
+            $("div[id='change_pokemon'][name='<?php  echo $inhand; ?>']").css({ backgroundImage : "url(images/shiny/icon/<?php  echo strtolower($player_hand['wild_id']); ?>.gif)" });
+            $("div[id='change_pokemon'][name='<?php  echo $inhand; ?>']").attr("title", "<?php  echo $player_hand['naam']; ?> \nLife: <?php  echo $player_hand['leven']; ?>/<?php  echo $player_hand['levenmax']; ?>");
           }
           else{
-       	    $("div[id='change_pokemon'][name='<? echo $inhand; ?>']").css({ backgroundImage : "url(images/pokemon/icon/<? echo strtolower($player_hand['wild_id']); ?>.gif)" });
-            $("div[id='change_pokemon'][name='<? echo $inhand; ?>']").attr("title", "<? echo $player_hand['naam']; ?> \nLife: <? echo $player_hand['leven']; ?>/<? echo $player_hand['levenmax']; ?>");
+       	    $("div[id='change_pokemon'][name='<?php  echo $inhand; ?>']").css({ backgroundImage : "url(images/pokemon/icon/<?php  echo strtolower($player_hand['wild_id']); ?>.gif)" });
+            $("div[id='change_pokemon'][name='<?php  echo $inhand; ?>']").attr("title", "<?php  echo $player_hand['naam']; ?> \nLife: <?php  echo $player_hand['leven']; ?>/<?php  echo $player_hand['levenmax']; ?>");
           }      
         }
-        else if("Ja" == "<? echo $player_hand['baby']; ?>"){
-          $("div[id='change_pokemon'][name='<? echo $inhand; ?>']").css({ backgroundImage : "url(images/icons/egg.gif)" });
-          $("div[id='change_pokemon'][name='<? echo $inhand; ?>']").attr("title", "Egg");
-          $("div[id='change_pokemon'][name='<? echo $inhand; ?>']").show()
+        else if("Ja" == "<?php  echo $player_hand['baby']; ?>"){
+          $("div[id='change_pokemon'][name='<?php  echo $inhand; ?>']").css({ backgroundImage : "url(images/icons/egg.gif)" });
+          $("div[id='change_pokemon'][name='<?php  echo $inhand; ?>']").attr("title", "Egg");
+          $("div[id='change_pokemon'][name='<?php  echo $inhand; ?>']").show()
         }
         //Pokemon is not in fight, show.
         else{
-          if(<? echo $player_hand['id']; ?> != ""){
-            if(<? echo $player_hand['shiny']; ?> == 1){
-              $("div[id='change_pokemon'][name='<? echo $inhand; ?>']").css({ backgroundImage : "url(images/shiny/icon/<? echo strtolower($player_hand['wild_id']); ?>.gif)" });
-              $("div[id='change_pokemon'][name='<? echo $inhand; ?>']").attr("title", "<? echo $player_hand['naam']; ?> \nLife: <? echo $player_hand['leven']; ?>/<? echo $player_hand['levenmax']; ?>");
+          if(<?php  echo $player_hand['id']; ?> != ""){
+            if(<?php  echo $player_hand['shiny']; ?> == 1){
+              $("div[id='change_pokemon'][name='<?php  echo $inhand; ?>']").css({ backgroundImage : "url(images/shiny/icon/<?php  echo strtolower($player_hand['wild_id']); ?>.gif)" });
+              $("div[id='change_pokemon'][name='<?php  echo $inhand; ?>']").attr("title", "<?php  echo $player_hand['naam']; ?> \nLife: <?php  echo $player_hand['leven']; ?>/<?php  echo $player_hand['levenmax']; ?>");
             }
             else{
-         	    $("div[id='change_pokemon'][name='<? echo $inhand; ?>']").css({ backgroundImage : "url(images/pokemon/icon/<? echo strtolower($player_hand['wild_id']); ?>.gif)" });
-              $("div[id='change_pokemon'][name='<? echo $inhand; ?>']").attr("title", "<? echo $player_hand['naam']; ?> \nLife: <? echo $player_hand['leven']; ?>/<? echo $player_hand['levenmax']; ?>");
+         	    $("div[id='change_pokemon'][name='<?php  echo $inhand; ?>']").css({ backgroundImage : "url(images/pokemon/icon/<?php  echo strtolower($player_hand['wild_id']); ?>.gif)" });
+              $("div[id='change_pokemon'][name='<?php  echo $inhand; ?>']").attr("title", "<?php  echo $player_hand['naam']; ?> \nLife: <?php  echo $player_hand['leven']; ?>/<?php  echo $player_hand['levenmax']; ?>");
             }
-            $("div[id='change_pokemon'][name='<? echo $inhand; ?>']").show()
+            $("div[id='change_pokemon'][name='<?php  echo $inhand; ?>']").show()
           }
         }
       });
     </script>
-    <?
+    <?php 
   } 
   //Set Player hand query counter on 0
   mysql_data_seek($pokemon_sql, 0);
@@ -293,51 +293,51 @@ else
   <script language="javascript">
    
   function show_start_text(){
-    $("#img_pokemon").attr("src","images/<? echo $pokemon_info['map']; ?>/back/<? echo $pokemon_info['wild_id']; ?>.gif");
-    $("#img_trainer").attr("src","images/<? echo $computer_info['map']; ?>/<? echo $computer_info['wild_id']; ?>.gif");
-    $("#pokemon_naam").html("<? echo $pokemon_info['naam_goed']; ?>")
-    $("#pokemon_level").html("<? echo $pokemon_info['level']; ?>")
-    $("#trainer_naam").html("<? echo $computer_info['naam_goed']; ?>")
+    $("#img_pokemon").attr("src","images/<?php  echo $pokemon_info['map']; ?>/back/<?php  echo $pokemon_info['wild_id']; ?>.gif");
+    $("#img_trainer").attr("src","images/<?php  echo $computer_info['map']; ?>/<?php  echo $computer_info['wild_id']; ?>.gif");
+    $("#pokemon_naam").html("<?php  echo $pokemon_info['naam_goed']; ?>")
+    $("#pokemon_level").html("<?php  echo $pokemon_info['level']; ?>")
+    $("#trainer_naam").html("<?php  echo $computer_info['naam_goed']; ?>")
     $("#pokemon_text").show()
-    if("<? echo $aanval_log['laatste_aanval']; ?>" == "spelereersteaanval"){
+    if("<?php  echo $aanval_log['laatste_aanval']; ?>" == "spelereersteaanval"){
       speler_attack = 1
       speler_wissel = 1
       $("#message").html("<?php echo $txt['you_first_attack']; ?>")
     }
-    else if("<? echo $aanval_log['laatste_aanval']; ?>" == "computereersteaanval")
+    else if("<?php  echo $aanval_log['laatste_aanval']; ?>" == "computereersteaanval")
 	{
       speler_attack = 0
       speler_wissel = 0;
-      $("#message").html("<? echo $computer_info['naam_goed'].' '.$txt['opponent_first_attack']; ?>")
+      $("#message").html("<?php  echo $computer_info['naam_goed'].' '.$txt['opponent_first_attack']; ?>")
       next_turn()
     }
   }
   
   function show_end_screen(id){
-    $.get("attack/trainer/trainer-finish.php?aanval_log_id="+<? echo $aanval_log['id']; ?>+"&sid="+Math.random(), function(data) {
+    $.get("attack/trainer/trainer-finish.php?aanval_log_id="+<?php  echo $aanval_log['id']; ?>+"&sid="+Math.random(), function(data) {
       request = data.split(" | ")
        document.getElementById('hit').style.display = "none";
 		document.getElementById('hit2').style.display = "none";
       if(request[4] == 1){
-        if(request[0] == "") $("#message").html("<? echo $txt['defeated_1'].' '.$aanval_log['trainer'].' '.$txt['defeated_2']; ?>"+request[1]+" Silver.")
-        else if(request[2] == "1") $("#message").html("<? echo $txt['defeated_1'].' '.$aanval_log['trainer'].' '.$txt['defeated_masterball']; ?>"+request[1]+" Ruby.")
-        else $("#message").html("<? echo $txt['defeated_1'].' '.$aanval_log['trainer'].' '.$txt['get_badge_1']; ?> "+request[0]+" <?php echo $txt['get_badge_2']; ?> "+request[1]+" Ruby.")
-        if((<? echo $gebruiker['Badge case']; ?> == 0) && (<? echo $gym; ?> == 0)) $('#message').append("<?php echo $txt['no_badgecase']; ?>")
+        if(request[0] == "") $("#message").html("<?php  echo $txt['defeated_1'].' '.$aanval_log['trainer'].' '.$txt['defeated_2']; ?>"+request[1]+" Silver.")
+        else if(request[2] == "1") $("#message").html("<?php  echo $txt['defeated_1'].' '.$aanval_log['trainer'].' '.$txt['defeated_masterball']; ?>"+request[1]+" Ruby.")
+        else $("#message").html("<?php  echo $txt['defeated_1'].' '.$aanval_log['trainer'].' '.$txt['get_badge_1']; ?> "+request[0]+" <?php echo $txt['get_badge_2']; ?> "+request[1]+" Ruby.")
+        if((<?php  echo $gebruiker['Badge case']; ?> == 0) && (<?php  echo $gym; ?> == 0)) $('#message').append("<?php echo $txt['no_badgecase']; ?>")
         $("#message").append(request[3])
         $("#trainer_"+id).attr("src","images/icons/pokeball_black.gif")
       }
       else{
-        $("#message").html("<? echo $aanval_log['trainer'].' '.$txt['has_defeated_you_1']; ?>")
+        $("#message").html("<?php  echo $aanval_log['trainer'].' '.$txt['has_defeated_you_1']; ?>")
         if(request[1] > 0) $("#message").append("<?php echo $txt['has_defeated_you_2']; ?> "+request[1]+" Silver. ")
         $("#message").append("<?php echo $txt['has_defeated_you_3']; ?>")
       }
       $("#pokemon_text").hide()
-      $("#trainer_naam").html("<? echo $aanval_log['trainer']; ?>.")
+      $("#trainer_naam").html("<?php  echo $aanval_log['trainer']; ?>.")
       //Set Images
-      $("#img_pokemon").attr("src","images/you/back/<? echo $gebruiker['character']; ?>.png")
-      $("#img_trainer").attr("src","images/trainers/<? echo $aanval_log['trainer']; ?>.png")
+      $("#img_pokemon").attr("src","images/you/back/<?php  echo $gebruiker['character']; ?>.png")
+      $("#img_trainer").attr("src","images/trainers/<?php  echo $aanval_log['trainer']; ?>.png")
       
-      setTimeout("location.href='index.php?page=<? echo $return_link; ?>'", 7500)
+      setTimeout("location.href='index.php?page=<?php  echo $return_link; ?>'", 7500)
     });
   }
   
@@ -398,7 +398,7 @@ else
       $("#"+request[8]+"_life").width(life_procent + '%')
       $("#"+request[8]+"_leven").html(request[2])
       $("#"+request[8]+"_leven_max").html(request[3])
-      $("div[id='change_pokemon'][name='"+request[9]+"']").attr("title", "<? echo $pokemon_info['naam']; ?> \nLife:"+request[2]+"/"+request[3]+"");
+      $("div[id='change_pokemon'][name='"+request[9]+"']").attr("title", "<?php  echo $pokemon_info['naam']; ?> \nLife:"+request[2]+"/"+request[3]+"");
     }
     
     if(request[4] == "pokemon"){
@@ -532,7 +532,7 @@ else
       //Computer make next turn
       if(request[1] == 1) next_turn()
       //Attack finished
-      else setTimeout("location.href='?page=<? echo $return_link; ?>'", 3000)
+      else setTimeout("location.href='?page=<?php  echo $return_link; ?>'", 3000)
     }
   }
   
@@ -542,7 +542,7 @@ else
     request = msg.split(" | ")
     //Send message
     $("#message").html(request[0])
-    if(request[1] == 1) setTimeout("location.href='?page=<? echo $return_link; ?>'", 3000)
+    if(request[1] == 1) setTimeout("location.href='?page=<?php  echo $return_link; ?>'", 3000)
     //Computer make next turn
     if(request[1] == 0){
       speler_attack = 0
@@ -594,7 +594,7 @@ else
 
     			$.ajax({
     			  type: "GET",
-    			  url: "attack/trainer/trainer-do_attack.php?attack_name="+$(this).html()+"&wie=pokemon&aanval_log_id="+<? echo $aanval_log['id']; ?>+"&sid="+Math.random(),
+    			  url: "attack/trainer/trainer-do_attack.php?attack_name="+$(this).html()+"&wie=pokemon&aanval_log_id="+<?php  echo $aanval_log['id']; ?>+"&sid="+Math.random(),
     			  success: attack_status
     			}); 
   			}
@@ -610,7 +610,7 @@ else
           $("#potion_screen").hide()
           $.ajax({
             type: "GET",
-            url: "attack/attack_change_pokemon.php?opzak_nummer="+$(this).attr("name")+"&computer_info_name=<? echo $computer_info['naam']; ?>&aanval_log_id="+<? echo $aanval_log['id']; ?>+"&sid="+Math.random(),
+            url: "attack/attack_change_pokemon.php?opzak_nummer="+$(this).attr("name")+"&computer_info_name=<?php  echo $computer_info['naam']; ?>&aanval_log_id="+<?php  echo $aanval_log['id']; ?>+"&sid="+Math.random(),
             success: change_pokemon_status
           }); 
         }
@@ -634,7 +634,7 @@ else
         else{   
           $.ajax({
             type: "GET",
-            url: "attack/attack_use_potion.php?item="+$("#item_name").html()+"&computer_info_name=<? echo $computer_info['naam']; ?>&option_id="+$('#item :selected').attr("name")+"&potion_pokemon_id="+$("input[name='potion_pokemon_id']:checked").val()+"&aanval_log_id="+<? echo $aanval_log['id']; ?>+"&sid="+Math.random(),
+            url: "attack/attack_use_potion.php?item="+$("#item_name").html()+"&computer_info_name=<?php  echo $computer_info['naam']; ?>&option_id="+$('#item :selected').attr("name")+"&potion_pokemon_id="+$("input[name='potion_pokemon_id']:checked").val()+"&aanval_log_id="+<?php  echo $aanval_log['id']; ?>+"&sid="+Math.random(),
             success: use_item_status
           });
           $("#potion_screen").hide()
@@ -657,7 +657,7 @@ else
 
         $.ajax({
           type: "GET",
-          url: "attack/trainer/trainer-do_attack.php?attack_name=undifined&wie=computer&aanval_log_id="+<? echo $aanval_log['id']; ?>+"&sid="+Math.random(),
+          url: "attack/trainer/trainer-do_attack.php?attack_name=undifined&wie=computer&aanval_log_id="+<?php  echo $aanval_log['id']; ?>+"&sid="+Math.random(),
           success: attack_status
         }); 
       }
@@ -671,7 +671,7 @@ else
         $("#potion_screen").hide()
         $.ajax({
           type: "GET",
-          url: "attack/trainer/trainer-change-pokemon.php?pokemon_info_name=<? echo $pokemon_info['naam']; ?>&computer_info_name=<? echo $computer_info['naam']; ?>&aanval_log_id="+<? echo $aanval_log['id']; ?>+"&sid="+Math.random(),
+          url: "attack/trainer/trainer-change-pokemon.php?pokemon_info_name=<?php  echo $pokemon_info['naam']; ?>&computer_info_name=<?php  echo $computer_info['naam']; ?>&aanval_log_id="+<?php  echo $aanval_log['id']; ?>+"&sid="+Math.random(),
           success: trainer_change_pokemon
         }); 
       }
@@ -756,7 +756,7 @@ object-fit: fill;
         			<div class="statbar lstatbar animated fadeInRight" style="display: block;left: 130px;top: 120px;opacity: 1;">
 
 			
-				<small><strong><font style='text-shadow:1px 1px 1px #fff;'><span id="trainer_naam"><? echo $computer_info['naam_goed']; ?></span><span id='computer_star' style='display:none;'></font></strong></small>
+				<small><strong><font style='text-shadow:1px 1px 1px #fff;'><span id="trainer_naam"><?php  echo $computer_info['naam_goed']; ?></span><span id='computer_star' style='display:none;'></font></strong></small>
 				
 				<div class="hpbar">
 					<div class="prevhp" style="width: <?=$computer_life_procent?>px;">
@@ -770,7 +770,7 @@ object-fit: fill;
 			<td>
 				<div align="center" id="dame" style="display:none;"></div>
 				<div id="img_computer_f">
-                <img class="animated slideInLeft" id="img_trainer" src="images/<? echo $computer_info['map']."/".$computer_info['wild_id']; ?>.gif" style="padding: 20px 0px 0px 50px;max-width: 50%;height:auto;max-height:100px"/></div> 
+                <img class="animated slideInLeft" id="img_trainer" src="images/<?php  echo $computer_info['map']."/".$computer_info['wild_id']; ?>.gif" style="padding: 20px 0px 0px 50px;max-width: 50%;height:auto;max-height:100px"/></div> 
             </td></tr>
 			<tr>
 			<td> 
@@ -778,11 +778,11 @@ object-fit: fill;
 				<div class="inback" align="center" id="hit2" style="display:none;"></div>
 				<div align="center" id="dame2" style="display:none;"></div>
 
-                <div id="img_pokemon_f"><img class="animated slideInLeft" id="img_pokemon" src="images/<? echo $pokemon_info['map']; ?>/back/<? echo $pokemon_info['wild_id']; ?>.gif" style="padding: 10px 0 0 10px;max-height:100px"/></div>
+                <div id="img_pokemon_f"><img class="animated slideInLeft" id="img_pokemon" src="images/<?php  echo $pokemon_info['map']; ?>/back/<?php  echo $pokemon_info['wild_id']; ?>.gif" style="padding: 10px 0 0 10px;max-height:100px"/></div>
             </td>
 			<td>
 			<div class="statbar rstatbar animated fadeInLeft" style="display: block; left: 350px; top: 24px; opacity: 1;">
-				<small><strong><font style='text-shadow:1px 1px 1px #fff;'><span id="pokemon_naam"><? echo $pokemon_info['naam_goed']; ?></span><span id="pokemon_star" style="display:none;"></span><br/><span id="pokemon_hp" style="padding:0px 0 0px 5px;">LV.<? echo $pokemon_info['level']; ?></span></font></strong></small>
+				<small><strong><font style='text-shadow:1px 1px 1px #fff;'><span id="pokemon_naam"><?php  echo $pokemon_info['naam_goed']; ?></span><span id="pokemon_star" style="display:none;"></span><br/><span id="pokemon_hp" style="padding:0px 0 0px 5px;">LV.<?php  echo $pokemon_info['level']; ?></span></font></strong></small>
 				<div class="hpbar">
 					<div class="prevhp" style="width: <?php echo $pokemon_life_procent; ?>px;">
 						<div class="hp" id="pokemon_life" style="width: <?php echo $pokemon_life_procent; ?>%; border-right-width: 1px;"></div>
@@ -838,13 +838,13 @@ object-fit: fill;
 					 
 						<td>
 							<div id="types1" style="background: url('images/battle/move/<?=$skill1['soort']?>.png');background-repeat: no-repeat;background-size:100%;width: 120px;height: 45px;margin-left: 5px;">
-								<div id="aanval" class="attack-name s1"><? echo $pokemon_info['aanval_1']; ?></div>
+								<div id="aanval" class="attack-name s1"><?php  echo $pokemon_info['aanval_1']; ?></div>
 							<div class="attack-pp pp1"></div>
 							</div>
 						</td>
 						<td>
 							<div id="types2" style="background: url('images/battle/move/<?=$skill2['soort']?>.png');background-repeat: no-repeat;background-size:100%;width: 120px;height: 45px;margin-left: 5px;">
-								<div id="aanval" class="attack-name s2"><? echo $pokemon_info['aanval_2']; ?></div>
+								<div id="aanval" class="attack-name s2"><?php  echo $pokemon_info['aanval_2']; ?></div>
 								<div class="attack-pp pp2">	</div>
 							</div>
 						</td>
@@ -852,13 +852,13 @@ object-fit: fill;
 						<tr>
 						<td>
 							<div id="types3" style="background: url('images/battle/move/<?php echo $skill3['soort']?>.png');background-repeat: no-repeat;background-size:100%;width: 120px;height: 45px;margin-left: 5px;">
-								<div id="aanval" class="attack-name s3"><? echo $pokemon_info['aanval_3']; ?></div>
+								<div id="aanval" class="attack-name s3"><?php  echo $pokemon_info['aanval_3']; ?></div>
 								<div class="attack-pp pp3">	</div>
 							</div>
 						</td>
 						<td>
 							<div id="types4" style="background: url('images/battle/move/<?=$skill4['soort']?>.png');background-repeat: no-repeat;background-size:100%;width: 120px;height: 45px;margin-left: 5px;">
-								<div id="aanval" class="attack-name s4"><? echo $pokemon_info['aanval_4']; ?></div>
+								<div id="aanval" class="attack-name s4"><?php  echo $pokemon_info['aanval_4']; ?></div>
 								<div class="attack-pp pp4">	</div>
 							</div>
 						</td>

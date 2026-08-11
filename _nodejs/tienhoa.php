@@ -28,9 +28,9 @@ if(empty($_SESSION['evolueren'])) {
         <td colspan="3"><center>PokeMon <b class=viptxt><?=$pokemon['naam']?></b> có thể tiến hóa thành <b class=viptxt><?=$update['naam']?></b></center></td>
       </tr>
       <tr>
-        <td width="200" valign="top"><center><img src="images/<?php if($pokemon['shiny'] == 0) echo 'pokemon'; else echo 'shiny'; ?>/<? echo $pokemon['wild_id']; ?>.gif" /></center></td>
+        <td width="200" valign="top"><center><img src="images/<?php if($pokemon['shiny'] == 0) echo 'pokemon'; else echo 'shiny'; ?>/<?php  echo $pokemon['wild_id']; ?>.gif" /></center></td>
         <td width="86" valign="middle"><center><img src="images/icons/pijl_rechts.png" width="16" height="16" /></center></td>
-        <td width="200" valign="top"><center><img src="images/<?php if($pokemon['shiny'] == 0) echo 'pokemon'; else echo 'shiny'; ?>/<? echo $update['wild_id']; ?>.gif" /></center></td>
+        <td width="200" valign="top"><center><img src="images/<?php if($pokemon['shiny'] == 0) echo 'pokemon'; else echo 'shiny'; ?>/<?php  echo $update['wild_id']; ?>.gif" /></center></td>
       </tr>
       <tr>
         <td colspan="3">

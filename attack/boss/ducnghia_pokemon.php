@@ -122,7 +122,7 @@ margin:10px;
   <table style="width:100%;background-color:#eee;padding:10px;margin-top:1px">
 <td class="txtst"><big>
     <font color="green"><i class="fa fa-id-card-o" aria-hidden="true"></i>
- Họ Tên:</font> <?=$p[naam]?> <br>
+ Họ Tên:</font> <?=$p['naam']?> <br>
    <font color="741414"><i class="fa fa-free-code-camp" aria-hidden="true"></i>
  Hệ:</font> <?=$p['type']?> <br>
  
@@ -180,7 +180,7 @@ margin:10px;
 										GROUP BY pokemon_wild.wild_id"));
   ?>
  <font color="009CFC"><i class="fa fa-paw" aria-hidden="true"></i>
- Đã Bị Bắt:</font>  <? echo highamount($info['hoeveelingame'])?> con <br>
+ Đã Bị Bắt:</font>  <?php  echo highamount($info['hoeveelingame'])?> con <br>
     
     
     </big>

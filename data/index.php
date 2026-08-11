@@ -4,20 +4,20 @@ include_once('../templates/ducnghia.php');
 include_once('../templates/includes/Array2XML.php');
 
 
-if(isset($_POST[b])) {
-    $bbbbb= $_POST[b];
+if(isset($_POST['b'])) {
+    $bbbbb= $_POST['b'];
 } else
-if(isset($_GET[b])) {
-    $bbbbb = $_GET[b];
+if(isset($_GET['b'])) {
+    $bbbbb = $_GET['b'];
 } else {
     $bbbbb = 'game';
 }
 
-if(isset($_POST[a])) {
-    $aaaaa= $_POST[a];
+if(isset($_POST['a'])) {
+    $aaaaa= $_POST['a'];
 } else
-if(isset($_GET[a])) {
-    $aaaaa = $_GET[a];
+if(isset($_GET['a'])) {
+    $aaaaa = $_GET['a'];
 } else {
     echo'DucNghia : error';
     exit();

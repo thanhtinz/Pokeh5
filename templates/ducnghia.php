@@ -18,7 +18,7 @@ $_GET[$index]=mysql_real_escape_string($_GET[$index]);
 }
 function ducnghia_vp($_aaaaaaaaaaaaaaaaaaaa){
 
-	$ducnghia_dulieu_nek = mysql_fetch_assoc(mysql_query("SELECT * FROM `vatpham` WHERE `user_id` = '{$_SESSION[id]}' AND `id_shop` = '{$_aaaaaaaaaaaaaaaaaaaa}'"));
+	$ducnghia_dulieu_nek = mysql_fetch_assoc(mysql_query("SELECT * FROM `vatpham` WHERE `user_id` = '{$_SESSION['id']}' AND `id_shop` = '{$_aaaaaaaaaaaaaaaaaaaa}'"));
 	
 	return $ducnghia_dulieu_nek;
 }
@@ -692,31 +692,31 @@ if($dn=="Slow") {
     $tnsp = '30';
 }
 
-if($pokemon[dai]>0) {
-  $tmp = trangbi($pokemon[dai]);
-  $hp_trangbi = $tmp[tang];
+if($pokemon['dai']>0) {
+  $tmp = trangbi($pokemon['dai']);
+  $hp_trangbi = $tmp['tang'];
 }
 
-if($pokemon[non]>0) {
-  $non = trangbi($pokemon[non]);
-  $pt_trangbi = $non[tang];
+if($pokemon['non']>0) {
+  $non = trangbi($pokemon['non']);
+  $pt_trangbi = $non['tang'];
 }
 
-if($pokemon[khan]>0) {
-  $khan = trangbi($pokemon[khan]);
-  $sp_tb = $khan[tang];
+if($pokemon['khan']>0) {
+  $khan = trangbi($pokemon['khan']);
+  $sp_tb = $khan['tang'];
 }
-if($pokemon[kinh]>0) {
-  $kinh = trangbi($pokemon[kinh]);
-  $att_tb = $kinh[tang];
+if($pokemon['kinh']>0) {
+  $kinh = trangbi($pokemon['kinh']);
+  $att_tb = $kinh['tang'];
 }
-if($pokemon[day]>0) {
-  $day = trangbi($pokemon[day]);
-  $scpat_tb = $day[tang];
+if($pokemon['day']>0) {
+  $day = trangbi($pokemon['day']);
+  $scpat_tb = $day['tang'];
 }
-if($pokemon[nhan]>0) {
-  $nhan = trangbi($pokemon[nhan]);
-  $spcpt_tba = $nhan[tang];
+if($pokemon['nhan']>0) {
+  $nhan = trangbi($pokemon['nhan']);
+  $spcpt_tba = $nhan['tang'];
 }
 
 
@@ -743,11 +743,11 @@ $spdnew = round($nspgiap)+ round($nspgiap/100*$buff);
 $spattnew = round($nsptancong)+ round($nsptancong/100*$buff);
 
   //Stats opslaan
-  if($pokemon[leven] > $pokemon[levenmax]) {
-      $pokemon[leven] = $pokemon[levenmax];
+  if($pokemon['leven'] > $pokemon['levenmax']) {
+      $pokemon['leven'] = $pokemon['levenmax'];
   }
   
- $a= mysql_query("UPDATE `pokemon_speler` SET `levenmax`='".$hpnew."',`leven`='".$pokemon[leven]."', `attack`='".$atnew."', `defence`='".$giapnew."', `speed`='".$tdnew."', `spc.attack`='".$spattnew."', `spc.defence`='".$spdnew."' WHERE `id`='".$pokemon['id']."'");
+ $a= mysql_query("UPDATE `pokemon_speler` SET `levenmax`='".$hpnew."',`leven`='".$pokemon['leven']."', `attack`='".$atnew."', `defence`='".$giapnew."', `speed`='".$tdnew."', `spc.attack`='".$spattnew."', `spc.defence`='".$spdnew."' WHERE `id`='".$pokemon['id']."'");
   return $a;
 }
 
@@ -1149,7 +1149,7 @@ $pokemon_sql = mysql_query("SELECT pw.naam, pw.type1, pw.type2, pw.zeldzaamheid,
     $tijd = date('Y-m-d H:i:s');
     $opzak = $check_id['in_hand']+1;
 $data_ducnghia_add = mysql_query("INSERT INTO `pokemon_speler` (`wild_id`, `user_id`, `opzak`, `opzak_nummer`, `karakter`, `level`, `levenmax`, `leven`, `totalexp`, `expnodig`, `attack`, `defence`, `speed`, `spc.attack`, `spc.defence`, `attack_iv`, `defence_iv`, `speed_iv`, `spc.attack_iv`, `spc.defence_iv`, `hp_iv`, `attack_ev`, `defence_ev`, `speed_ev`, `spc.attack_ev`, `spc.defence_ev`, `hp_ev`, `aanval_1`, `aanval_2`, `aanval_3`, `aanval_4`, `effect`, `ei`, `ei_tijd`,`nguoibat`) 
-VALUES ('".$new_computer['id']."', '".$check_id['id']."', 'nee', '', '".$karakter['karakter_naam']."', '$level', '".$new_computer['hpstat'] ."', '".$new_computer['hpstat'] ."', '".$experience['punten']."', '".$experience['punten']."', '".$new_computer['attackstat']."', '".$new_computer['defencestat']."', '".$new_computer['speedstat']."', '".$new_computer['spcattackstat']."', '".$new_computer['spcdefencestat']."', '".$attack_iv."', '".$defence_iv."', '".$speed_iv."', '".$spcattack_iv."', '".$spcdefence_iv."', '".$hp_iv."', '".$new_computer_sql['effort_attack']."', '".$new_computer_sql['effort_defence']."', '".$new_computer_sql['effort_spc.attack']."', '".$new_computer_sql['effort_spc.defence']."', '".$new_computer_sql['effort_speed']."', '".$new_computer_sql['effort_hp']."', '".$new_computer['aanval1']."', '".$new_computer['aanval2']."', '".$new_computer['aanval3']."', '".$new_computer['aanval4']."', '".$new_computer_sql['effect']."', '0', '".$tijd."','".$check_id[id]."')");  
+VALUES ('".$new_computer['id']."', '".$check_id['id']."', 'nee', '', '".$karakter['karakter_naam']."', '$level', '".$new_computer['hpstat'] ."', '".$new_computer['hpstat'] ."', '".$experience['punten']."', '".$experience['punten']."', '".$new_computer['attackstat']."', '".$new_computer['defencestat']."', '".$new_computer['speedstat']."', '".$new_computer['spcattackstat']."', '".$new_computer['spcdefencestat']."', '".$attack_iv."', '".$defence_iv."', '".$speed_iv."', '".$spcattack_iv."', '".$spcdefence_iv."', '".$hp_iv."', '".$new_computer_sql['effort_attack']."', '".$new_computer_sql['effort_defence']."', '".$new_computer_sql['effort_spc.attack']."', '".$new_computer_sql['effort_spc.defence']."', '".$new_computer_sql['effort_speed']."', '".$new_computer_sql['effort_hp']."', '".$new_computer['aanval1']."', '".$new_computer['aanval2']."', '".$new_computer['aanval3']."', '".$new_computer['aanval4']."', '".$new_computer_sql['effect']."', '0', '".$tijd."','".$check_id['id']."')");  
 
 	return  $data_ducnghia_add;
 
@@ -1183,7 +1183,7 @@ $vpt=7*24*3600+time();
 }
 	    	        
 	    	        
-               if($db[id]==0) {
+               if($db['id']==0) {
                    $a =   mysql_query("INSERT INTO `vatpham` SET `user_id`='".$user_id."', `id_shop`='{$id}' ,`soluong` = '".$soluong."',`timesudung` = '".$vpt."'");
    
                } else {
@@ -1204,18 +1204,18 @@ function ducnghia_us($gid){
 	$gunner = mysql_fetch_assoc(mysql_query("SELECT * FROM `users` WHERE `id` = $gid"));
 $tkm = $gunner;
 
-if(empty($tkm[name])) {$tennv =ucfirst($gunner['username']);}else{ $tennv =ucfirst($gunner['name']);}
+if(empty($tkm['name'])) {$tennv =ucfirst($gunner['username']);}else{ $tennv =ucfirst($gunner['name']);}
 
-if($tkm[admin]==1)  {
+if($tkm['admin']==1)  {
     $chuc = 'style="background-image: url(img/2.gif);width:350px;"'; $ma = 'mod'; }
-    if($tkm[admin]==2) {
+    if($tkm['admin']==2) {
     $chuc = '[GM]'; }
-    if($tkm[admin]==3) {
+    if($tkm['admin']==3) {
         $chuc .= 'style="background-image: url(img/backround3.gif);width:350px;"';
         $ma = 'admin';
     }
 
-if($tkm[ducnghia_thoigiankhoa] > time()) {
+if($tkm['ducnghia_thoigiankhoa'] > time()) {
 return '<a href="javascript:ttnv('.$gid.')" style="color:#190B07;"><strike>'.$tennv.'</strike></a>'; 
 } else {
 	return '<b onclick="ttnv('.$gid.')"  class="'.$ma.'" '.$chuc.'>'.$tennv.'</b>'; }
@@ -1361,14 +1361,14 @@ $xbada=mysql_query("SELECT * FROM `ducnghia_boss` WHERE `hp` <= '0' AND `lv` >='
      
      if (time()>$bossn['time']+60*60 AND $bossn['hp']<=0) {
     $ta = time()+5*60;
-            mysql_query("UPDATE `ducnghia_boss` SET `hp`=`hpfull`,`uid`='0',`time` ='".$ta."' WHERE `id`='".$bossn[id]."'");
+            mysql_query("UPDATE `ducnghia_boss` SET `hp`=`hpfull`,`uid`='0',`time` ='".$ta."' WHERE `id`='".$bossn['id']."'");
    	   $mapnl=mysql_fetch_array(mysql_query("SELECT * FROM `maps` WHERE `hieuung` = '1'  ORDER BY RAND() LIMIT 1 "));
-   	$map_npc=mysql_fetch_array(mysql_query("SELECT * FROM `npcs` WHERE `map` = '".$mapnl[id]."' AND `style` !=''  ORDER BY RAND() LIMIT 1 "));
+   	$map_npc=mysql_fetch_array(mysql_query("SELECT * FROM `npcs` WHERE `map` = '".$mapnl['id']."' AND `style` !=''  ORDER BY RAND() LIMIT 1 "));
 
-            mysql_query("UPDATE `npcs` SET `map` = '".$map_npc[map]."',`x` = '".$map_npc[x]."',`y` = '".$map_npc[y]."'   WHERE `id`='".$bossn[map]."'");
+            mysql_query("UPDATE `npcs` SET `map` = '".$map_npc['map']."',`x` = '".$map_npc['x']."',`y` = '".$map_npc['y']."'   WHERE `id`='".$bossn['map']."'");
 
          
-tin($bossn[id]);
+tin($bossn['id']);
 }   
         
     }
@@ -1473,7 +1473,7 @@ $update = mysql_fetch_assoc(mysql_query("SELECT * FROM `pokemon_wild` WHERE `wil
 
 	$check_nv_lv = mysql_fetch_assoc(mysql_query("SELECT * FROM `ducnghia_data_nhiemvu` WHERE `user_id` = '" . $user_id. "' AND `loai` = 'level'  "));
              	
-             	if($check_nv_lv[id] !=0){
+             	if($check_nv_lv['id'] !=0){
              	             mysql_query("UPDATE `ducnghia_data_nhiemvu` SET `song`='".$datauser->level."' WHERE `user_id`='".$_SESSION['id']."' AND `loai` = 'level'"); 
  
              	}	
@@ -1482,7 +1482,11 @@ $update = mysql_fetch_assoc(mysql_query("SELECT * FROM `pokemon_wild` WHERE `wil
 		public $id = 0;
 	
 
-		public function hethong($id) {
+		// PHP 4 style constructor: renamed to __construct().
+		// PHP 8 removed same-name constructors, so `new hethong(...)` was
+		// silently returning an unpopulated object and every read/write
+		// against it was lost.
+		public function __construct($id) {
 			$map = mysql_fetch_array(mysql_query("SELECT * FROM `ducnghia_hethong` WHERE `id` = '" . mysql_real_escape_string($id) . "'"));
 
 			foreach($map as $key => $value) {
@@ -1504,7 +1508,7 @@ $update = mysql_fetch_assoc(mysql_query("SELECT * FROM `pokemon_wild` WHERE `wil
 	    
 	   $ducnghiad_m=mysql_query("SELECT * FROM `maps` WHERE `hieuung` = '1' AND `thoitiet` ='0' ORDER BY RAND() LIMIT 2 ");
     while($mapgame=mysql_fetch_array($ducnghiad_m)) {
-        	mysql_query("UPDATE `maps` SET `thoitiet` = '1' WHERE `id` ='".$mapgame[id]."'  ");
+        	mysql_query("UPDATE `maps` SET `thoitiet` = '1' WHERE `id` ='".$mapgame['id']."'  ");
     }
   $hethong->data->thoigianmua = time() + 300; //5p
   	mysql_query("UPDATE `ducnghia_hethong` SET `data` = '" . json_encode($hethong->data) . "' WHERE `id` = '1'");
@@ -1521,7 +1525,7 @@ $update = mysql_fetch_assoc(mysql_query("SELECT * FROM `pokemon_wild` WHERE `wil
    	                     mysql_query("UPDATE `users` SET `xu`=`xu`+'".$datavqmm['xu']."' WHERE `id`='".$datavqmm['u']."'");
     mysql_query("UPDATE `vxmm` SET `xu`='0',`time`='0',`u`='0' WHERE `id`='1'");
  	                     
-      tin(''.users($datavqmm['u']).' vừa chiến thắng '.tron($datavqmm[xu]).' xu trong vòng quay may mắn. ');
+      tin(''.users($datavqmm['u']).' vừa chiến thắng '.tron($datavqmm['xu']).' xu trong vòng quay may mắn. ');
      }    
 
 if($datauser->khoa>time()) {
@@ -1538,7 +1542,7 @@ function shopvatpham($gid,$sl){
 	$sq = mysql_fetch_assoc(mysql_query("SELECT * FROM `shopvatpham` WHERE `id` = $gid"));
 
 
-	return ''.$sq[tenvatpham].'';
+	return ''.$sq['tenvatpham'].'';
 	
 	}
 	

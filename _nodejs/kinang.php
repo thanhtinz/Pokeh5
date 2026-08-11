@@ -21,11 +21,11 @@ include_once('../templates/ducnghia.php');
 	<br><div class="kengang"></div><center>Move skill PokeMon</center><div class="kengang"></div>	
   <table width="100%" border="0">
         <tr>
-          <td width="130" height="120" rowspan="4"><img src="images/pokemon/<? echo $pokemoninfo['wild_id']; ?>.gif" /></td>
-          <td colspan="2">PokeMon : <? echo $pokemoninfo['naam']; ?> đã có thể học skill <strong><? echo $nieuweaanval['aanvalnaam']; ?>. <br /></strong>
-          bạn có muốn cho PokeMOn bạn học được skill này không ? <strong><? echo $nieuweaanval['aanvalnaam']; ?>?<br /><br /></td>
+          <td width="130" height="120" rowspan="4"><img src="images/pokemon/<?php  echo $pokemoninfo['wild_id']; ?>.gif" /></td>
+          <td colspan="2">PokeMon : <?php  echo $pokemoninfo['naam']; ?> đã có thể học skill <strong><?php  echo $nieuweaanval['aanvalnaam']; ?>. <br /></strong>
+          bạn có muốn cho PokeMOn bạn học được skill này không ? <strong><?php  echo $nieuweaanval['aanvalnaam']; ?>?<br /><br /></td>
         </tr>
-        <?
+        <?php 
         echo '<tr>
           	  
 					<td width="178"><a href="javascript:pokemon_skill(1);" class="btn btn-success" style="-webkit-animation: glowing 15ms infinite;-moz-animation: glowing 15ms infinite;-o-animation: glowing 10ms infinite;animation: glowing 15ms infinite;">'.$pokemoninfo['aanval_1'].'</a></td>

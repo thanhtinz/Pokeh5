@@ -3,7 +3,7 @@
     <script>
     setTimeout(function(){
 
-        	$('#ducnghia_loadmap').load('/_ajax/loadmap.php?map=<?=$datauser[map_num]?>&ducnghia_x=<?=$datauser[map_x]?>&ducnghia_y=<?=$datauser[map_y]?>');
+        	$('#ducnghia_loadmap').load('/_ajax/loadmap.php?map=<?=$datauser['map_num']?>&ducnghia_x=<?=$datauser['map_x']?>&ducnghia_y=<?=$datauser['map_y']?>');
     },50);
     
 

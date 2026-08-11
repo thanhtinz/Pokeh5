@@ -1,4 +1,4 @@
-<?
+<?php 
 function create_new_attack($computer_id,$computer_level,$gebied,$boss){
 
   //Delete last attack logs

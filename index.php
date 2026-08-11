@@ -7,11 +7,11 @@ include_once('templates/config.php');
 include_once('templates/header.php');
 
 if($_SERVER["SERVER_NAME"]=="pkmw.tk"){
-    $_SESSION[ngonngu]='en';
+    $_SESSION['ngonngu']='en';
 }
 
 
-$_SESSION[ducnghia_game] = 'DEV : TRAN DO DUC NGHIA
+$_SESSION['ducnghia_game'] = 'DEV : TRAN DO DUC NGHIA
 birthday : 27/06/2004
 LIVE : VIET NAM
 MY FACEBOOK : fb.com/ducnghiast
@@ -19,7 +19,7 @@ MY EMAIL : trandoducnghia@gmail.com
 Time : '.date("Y-m-d").'
 YOU IP : '.$_SERVER['REMOTE_ADDR'].'
 ID:'.rand(1000000000000000,1999900000000000009).'';
-$decode = base64_encode($_SESSION[ducnghia_game]);
+$decode = base64_encode($_SESSION['ducnghia_game']);
 ?>
 
 

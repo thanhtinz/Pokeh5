@@ -3,13 +3,13 @@ include_once('templates/config.php');
 
 	include_once('templates/header.php');
 
-$kun = base64_decode($_GET[ducnghia]);
+$kun = base64_decode($_GET['ducnghia']);
 
-if(empty($_SESSION[ducnghia_game])) {
+if(empty($_SESSION['ducnghia_game'])) {
     echo'DucNghia : nodata.';
     exit();
 } else {
-    $_SESSION[ducnghia_game] ='';
+    $_SESSION['ducnghia_game'] ='';
 }
 ?>
 

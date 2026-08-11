@@ -260,33 +260,33 @@ for($inhand = 1; $player_hand = mysql_fetch_assoc($pokemon_sql); $inhand++){
 
   $("div[id='change_pokemon']").ready(function() {
         //Is pokemon in fight, so yes, don't show
-        if(<? echo $infight; ?> == 1){
-          if(<? echo $player_hand['shiny']; ?> == 1){
-            $("div[id='change_pokemon'][name='<? echo $inhand; ?>']").css({ backgroundImage : "url(images/shiny/icon/<? echo strtolower($player_hand['wild_id']); ?>.gif)" });
-            $("div[id='change_pokemon'][name='<? echo $inhand; ?>']").attr("title", "<? echo $player_hand['naam']; ?> \nLife: <? echo $player_hand['leven']; ?>/<? echo $player_hand['levenmax']; ?>");
+        if(<?php  echo $infight; ?> == 1){
+          if(<?php  echo $player_hand['shiny']; ?> == 1){
+            $("div[id='change_pokemon'][name='<?php  echo $inhand; ?>']").css({ backgroundImage : "url(images/shiny/icon/<?php  echo strtolower($player_hand['wild_id']); ?>.gif)" });
+            $("div[id='change_pokemon'][name='<?php  echo $inhand; ?>']").attr("title", "<?php  echo $player_hand['naam']; ?> \nLife: <?php  echo $player_hand['leven']; ?>/<?php  echo $player_hand['levenmax']; ?>");
           }
           else{
-       	    $("div[id='change_pokemon'][name='<? echo $inhand; ?>']").css({ backgroundImage : "url(images/pokemon/icon/<? echo strtolower($player_hand['wild_id']); ?>.gif)" });
-            $("div[id='change_pokemon'][name='<? echo $inhand; ?>']").attr("title", "<? echo $player_hand['naam']; ?> \nLife: <? echo $player_hand['leven']; ?>/<? echo $player_hand['levenmax']; ?>");
+       	    $("div[id='change_pokemon'][name='<?php  echo $inhand; ?>']").css({ backgroundImage : "url(images/pokemon/icon/<?php  echo strtolower($player_hand['wild_id']); ?>.gif)" });
+            $("div[id='change_pokemon'][name='<?php  echo $inhand; ?>']").attr("title", "<?php  echo $player_hand['naam']; ?> \nLife: <?php  echo $player_hand['leven']; ?>/<?php  echo $player_hand['levenmax']; ?>");
           }      
         }
-        else if(1 == "<? echo $player_hand['ei']; ?>"){
-          $("div[id='change_pokemon'][name='<? echo $inhand; ?>']").css({ backgroundImage : "url(images/icons/egg.gif)" });
-          $("div[id='change_pokemon'][name='<? echo $inhand; ?>']").attr("title", "Egg");
-          $("div[id='change_pokemon'][name='<? echo $inhand; ?>']").show()
+        else if(1 == "<?php  echo $player_hand['ei']; ?>"){
+          $("div[id='change_pokemon'][name='<?php  echo $inhand; ?>']").css({ backgroundImage : "url(images/icons/egg.gif)" });
+          $("div[id='change_pokemon'][name='<?php  echo $inhand; ?>']").attr("title", "Egg");
+          $("div[id='change_pokemon'][name='<?php  echo $inhand; ?>']").show()
         }
         //Pokemon is not in fight, show.
         else{
-          if(<? echo $player_hand['id']; ?> != ""){
-            if(<? echo $player_hand['shiny']; ?> == 1){
-              $("div[id='change_pokemon'][name='<? echo $inhand; ?>']").css({ backgroundImage : "url(images/shiny/icon/<? echo strtolower($player_hand['wild_id']); ?>.gif)" });
-              $("div[id='change_pokemon'][name='<? echo $inhand; ?>']").attr("title", "<? echo $player_hand['naam']; ?> \nLife: <? echo $player_hand['leven']; ?>/<? echo $player_hand['levenmax']; ?>");
+          if(<?php  echo $player_hand['id']; ?> != ""){
+            if(<?php  echo $player_hand['shiny']; ?> == 1){
+              $("div[id='change_pokemon'][name='<?php  echo $inhand; ?>']").css({ backgroundImage : "url(images/shiny/icon/<?php  echo strtolower($player_hand['wild_id']); ?>.gif)" });
+              $("div[id='change_pokemon'][name='<?php  echo $inhand; ?>']").attr("title", "<?php  echo $player_hand['naam']; ?> \nLife: <?php  echo $player_hand['leven']; ?>/<?php  echo $player_hand['levenmax']; ?>");
             }
             else{
-         	    $("div[id='change_pokemon'][name='<? echo $inhand; ?>']").css({ backgroundImage : "url(images/pokemon/icon/<? echo strtolower($player_hand['wild_id']); ?>.gif)" });
-              $("div[id='change_pokemon'][name='<? echo $inhand; ?>']").attr("title", "<? echo $player_hand['naam']; ?> \nLife: <? echo $player_hand['leven']; ?>/<? echo $player_hand['levenmax']; ?>");
+         	    $("div[id='change_pokemon'][name='<?php  echo $inhand; ?>']").css({ backgroundImage : "url(images/pokemon/icon/<?php  echo strtolower($player_hand['wild_id']); ?>.gif)" });
+              $("div[id='change_pokemon'][name='<?php  echo $inhand; ?>']").attr("title", "<?php  echo $player_hand['naam']; ?> \nLife: <?php  echo $player_hand['leven']; ?>/<?php  echo $player_hand['levenmax']; ?>");
             }
-            $("div[id='change_pokemon'][name='<? echo $inhand; ?>']").show()
+            $("div[id='change_pokemon'][name='<?php  echo $inhand; ?>']").show()
           }
         }
       });
@@ -867,7 +867,7 @@ object-fit: fill;
 			<td>
 				<div align="center" id="dame" style="display:none;"></div>
 				<div id="img_computer_f">
-                <img class="animated slideInLeft" id="img_opponent" src="images/<? echo $opponent_info['map']."/".$opponent_info['wild_id']; ?>.gif" style="padding: 20px 0px 0px 50px;max-width: 50%;height:auto;max-height:100px"/></div> 
+                <img class="animated slideInLeft" id="img_opponent" src="images/<?php  echo $opponent_info['map']."/".$opponent_info['wild_id']; ?>.gif" style="padding: 20px 0px 0px 50px;max-width: 50%;height:auto;max-height:100px"/></div> 
             </td></tr>
 			<tr>
 			<td> 
@@ -875,14 +875,14 @@ object-fit: fill;
 				<div class="inback" align="center" id="hit2" style="display:none;"></div>
 				<div align="center" id="dame2" style="display:none;"></div>
 
-                <div id="img_pokemon_f"><center><img class="animated slideInLeft" id="img_you" src="images/<? echo $pokemon_info['map']; ?>/back/<? echo $pokemon_info['wild_id']; ?>.gif" style="padding: 10px 0 0 10px;max-height:100px"/></center></div>
+                <div id="img_pokemon_f"><center><img class="animated slideInLeft" id="img_you" src="images/<?php  echo $pokemon_info['map']; ?>/back/<?php  echo $pokemon_info['wild_id']; ?>.gif" style="padding: 10px 0 0 10px;max-height:100px"/></center></div>
                 
                
                 
             </td>
 			<td>
 			<div class="statbar rstatbar animated fadeInLeft" style="display: block; left: 350px; top: 24px; opacity: 1;">
-				<small><strong><font style='text-shadow:1px 1px 1px #fff;'><span id="pokemon_naam"><? echo $pokemon_info['naam_goed']; ?></span><span id="pokemon_star" style="display:none;"></span><br/><span id="pokemon_hp" style="padding:0px 0 0px 5px;">HP: <? echo $pokemon_info['leven']; ?>/<? echo $pokemon_info['levenmax']; ?> </span> LV.<? echo $pokemon_info['level']; ?>
+				<small><strong><font style='text-shadow:1px 1px 1px #fff;'><span id="pokemon_naam"><?php  echo $pokemon_info['naam_goed']; ?></span><span id="pokemon_star" style="display:none;"></span><br/><span id="pokemon_hp" style="padding:0px 0 0px 5px;">HP: <?php  echo $pokemon_info['leven']; ?>/<?php  echo $pokemon_info['levenmax']; ?> </span> LV.<?php  echo $pokemon_info['level']; ?>
 				</font></strong></small>
 				<div class="hpbar">
 					<div class="prevhpa" style="width: <?php echo $pokemon_life_procent; ?>px;">
@@ -941,13 +941,13 @@ object-fit: fill;
 					 
 						<td>
 							<div id="types1" style="background: url('images/battle/move/<?=$skill1['soort']?>.png');background-repeat: no-repeat;background-size:100%;width: 120px;height: 45px;margin-left: 5px;">
-								<div id="aanval" class="attack-name s1"><? echo $pokemon_info['aanval_1']; ?></div>
+								<div id="aanval" class="attack-name s1"><?php  echo $pokemon_info['aanval_1']; ?></div>
 							<div class="attack-pp pp1"></div>
 							</div>
 						</td>
 						<td>
 							<div id="types2" style="background: url('images/battle/move/<?=$skill2['soort']?>.png');background-repeat: no-repeat;background-size:100%;width: 120px;height: 45px;margin-left: 5px;">
-								<div id="aanval" class="attack-name s2"><? echo $pokemon_info['aanval_2']; ?></div>
+								<div id="aanval" class="attack-name s2"><?php  echo $pokemon_info['aanval_2']; ?></div>
 								<div class="attack-pp pp2">	</div>
 							</div>
 						</td>
@@ -955,13 +955,13 @@ object-fit: fill;
 						<tr>
 						<td>
 							<div id="types3" style="background: url('images/battle/move/<?php echo $skill3['soort']?>.png');background-repeat: no-repeat;background-size:100%;width: 120px;height: 45px;margin-left: 5px;">
-								<div id="aanval" class="attack-name s3"><? echo $pokemon_info['aanval_3']; ?></div>
+								<div id="aanval" class="attack-name s3"><?php  echo $pokemon_info['aanval_3']; ?></div>
 								<div class="attack-pp pp3">	</div>
 							</div>
 						</td>
 						<td>
 							<div id="types4" style="background: url('images/battle/move/<?=$skill4['soort']?>.png');background-repeat: no-repeat;background-size:100%;width: 120px;height: 45px;margin-left: 5px;">
-								<div id="aanval" class="attack-name s4"><? echo $pokemon_info['aanval_4']; ?></div>
+								<div id="aanval" class="attack-name s4"><?php  echo $pokemon_info['aanval_4']; ?></div>
 								<div class="attack-pp pp4">	</div>
 							</div>
 						</td>

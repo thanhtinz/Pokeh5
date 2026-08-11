@@ -1,4 +1,4 @@
-<?
+<?php 
 #Load Computer Data
 function computer_data($computer_id){
   #Load And Return All Computer Information

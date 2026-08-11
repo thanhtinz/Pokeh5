@@ -1,17 +1,19 @@
 <?php
 
-	session_start();
+	// Autoloader, session, timezone and the ext/mysql compatibility layer.
+	// Credentials live in the environment or config.local.php - see app/Config.php.
+	require_once __DIR__ . '/../app/bootstrap.php';
 
-	
-	$db_host='localhost';
-$db_user='';
-$db_pass='';
-$db_name='';
-$mysql=mysql_connect($db_host,$db_user,$db_pass) OR die("<center><br/>Lỗi:<br/>Máy chủ bảo trì</center>");
-mysql_query('SET NAMES `utf8`',$mysql);
-mysql_select_db($db_name,$mysql) OR die('<center><br/>Lỗi:<br/>hệ Thống Bảo Trì</center>');
+	try {
+		\Pokeh5\Database::pdo();
+	} catch (\PDOException $e) {
+		error_log('[pokeh5] database unavailable: ' . $e->getMessage());
+		die('<center><br/>Lỗi:<br/>Máy chủ bảo trì</center>');
+	}
 
-date_default_timezone_set('Asia/Ho_Chi_Minh');
+	// Kept so legacy files that pass $mysql as the optional link argument
+	// still resolve a variable; the shim ignores it.
+	$mysql = null;
 
 
 ////users////
@@ -26,7 +28,11 @@ date_default_timezone_set('Asia/Ho_Chi_Minh');
 		public $encounters = null;
 		public $grass = null;
 
-		public function map($id) {
+		// PHP 4 style constructor: renamed to __construct().
+		// PHP 8 removed same-name constructors, so `new map(...)` was
+		// silently returning an unpopulated object and every read/write
+		// against it was lost.
+		public function __construct($id) {
 			$map = mysql_fetch_array(mysql_query("SELECT * FROM `maps` WHERE `id` = '" . mysql_real_escape_string($id) . "'"));
 
 			foreach($map as $key => $value) {
@@ -50,10 +56,14 @@ date_default_timezone_set('Asia/Ho_Chi_Minh');
 
 public function ten($id) {
    			$npc = mysql_fetch_array(mysql_query("SELECT * FROM `npcs` WHERE `id` = '" . mysql_real_escape_string($id) . "'"));
- return $npc[name];
+ return $npc['name'];
 }
 
-		public function nhiemvu($id) {
+		// PHP 4 style constructor: renamed to __construct().
+		// PHP 8 removed same-name constructors, so `new nhiemvu(...)` was
+		// silently returning an unpopulated object and every read/write
+		// against it was lost.
+		public function __construct($id) {
 			$map = mysql_fetch_array(mysql_query("SELECT * FROM `ducnghia_nhiemvu` WHERE `nhiemvu` = '" . mysql_real_escape_string($id) . "'"));
 
 			foreach($map as $key => $value) {
@@ -131,7 +141,11 @@ public function check_quest($id) {
 
 			mysql_query("UPDATE `users` SET `npcsPhase` = '" . json_encode($this->npcsPhase) . "' WHERE `id` = '" . $this->id . "'");
 		}
-		public function user($id) {
+		// PHP 4 style constructor: renamed to __construct().
+		// PHP 8 removed same-name constructors, so `new user(...)` was
+		// silently returning an unpopulated object and every read/write
+		// against it was lost.
+		public function __construct($id) {
 			$user = mysql_fetch_array(mysql_query("SELECT * FROM `users` WHERE `id` = '" . mysql_real_escape_string($id) . "'"));
 
 			foreach($user as $key => $value) {
@@ -248,7 +262,7 @@ public function nhiemvu($id, $amount) {
 		
 		public function nhanvat() {
 		   $skinx = mysql_fetch_array(mysql_query("SELECT * FROM `ducnghia_shopnhanvat` WHERE `img` = '" . $this->sprite . "'"));
- return $skinx[thuong];
+ return $skinx['thuong'];
 		}
 	
 	}
@@ -309,13 +323,13 @@ if($datauser->nhiemvu->id <=0) {
 	
 	function t($text,$b) {
 	    ///vietnam
-	    if($_SESSION[ngonngu]!='en') {
+	    if($_SESSION['ngonngu']!='en') {
 	        $viet = $text;
 	    } else {
 	    ///tiếng anh
 	    	$check = mysql_fetch_assoc(mysql_query("SELECT * FROM `ducnghia_ngonngu` WHERE `vi` = '".$text."'"));
-if($check[id]>=1) {
-    $viet = $check[en];
+if($check['id']>=1) {
+    $viet = $check['en'];
 }else {
 $post = [
     'text_to_translate' => $text,

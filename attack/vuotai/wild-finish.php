@@ -1,4 +1,4 @@
-<? //Is all the information send
+<?php  //Is all the information send
 if( (isset($_GET['aanval_log_id'])) && (isset($_GET['sid']))){
   //Session On
   session_start();

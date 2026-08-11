@@ -32,7 +32,7 @@ include_once('../../templates/ducnghia.php');
   //Is the new pokemon alive
   ///ski;;;/
            	$ck_boss = mysql_fetch_assoc(mysql_query("SELECT * FROM `ducnghia_boss` WHERE `id` = '".$datauser->boss."'"));
-     mysql_query("UPDATE `pokemon_wild_gevecht` SET `leven`='".$ck_boss[hp]."' WHERE `boss`='".$datauser->boss."'");
+     mysql_query("UPDATE `pokemon_wild_gevecht` SET `leven`='".$ck_boss['hp']."' WHERE `boss`='".$datauser->boss."'");
 
 
   ///ducnghia
@@ -574,17 +574,17 @@ mysql_query("UPDATE `ducnghia_boss` SET `hp`=`hp`-'".$recoil_d."' WHERE `id`='".
 
  $boss_x = mysql_fetch_assoc(mysql_query("SELECT * FROM `ducnghia_boss` WHERE `id`='".$datauser->boss."'"));
  
-if($boss_x[uid]<=0 AND $boss_x[hp]<=0) {
-    $chat = ''.$user_ss['username'].'tiêu diệt '.$boss_x[ten].',mọi người đều ngưỡng mộ. ';
+if($boss_x['uid']<=0 AND $boss_x['hp']<=0) {
+    $chat = ''.$user_ss['username'].'tiêu diệt '.$boss_x['ten'].',mọi người đều ngưỡng mộ. ';
     
-            mysql_query("UPDATE `npcs` SET `map` = '0'  WHERE `id`='".$boss_x[map]."'");
+            mysql_query("UPDATE `npcs` SET `map` = '0'  WHERE `id`='".$boss_x['map']."'");
     
   
 $time = time()+5;
   
             mysql_query("UPDATE `ducnghia_boss` SET `uid`='".$_SESSION['id']."',`time` = '".time()."' WHERE `id`='".$datauser->boss."'");
               mysql_query("INSERT INTO `chatthegioi` SET name = 'Server', user_id = '2',`text` = '".$chat."',`time` = '".$time."'");
-          mysql_query("UPDATE `users` SET `ruby` =`ruby` + '".$boss_x[ruby]."' WHERE `user_id`='".$_SESSION['id']."'"); 
+          mysql_query("UPDATE `users` SET `ruby` =`ruby` + '".$boss_x['ruby']."' WHERE `user_id`='".$_SESSION['id']."'"); 
                      vatpham(28,rand(1,3),$_SESSION['id']);
                                         vatpham(31,rand(1,4),$_SESSION['id']);
                          vatpham(33,rand(1,4),$user_id);

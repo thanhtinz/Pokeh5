@@ -1,4 +1,4 @@
-<?
+<?php 
 function create_new_trainer_attack($trainer,$trainer_ave_level,$gebied){
 
   //Delete last attack logs

@@ -15,7 +15,11 @@
 		public $sprites = null;
 		public $follow = 0;
 
-		public function monster($id) {
+		// PHP 4 style constructor: renamed to __construct().
+		// PHP 8 removed same-name constructors, so `new monster(...)` was
+		// silently returning an unpopulated object and every read/write
+		// against it was lost.
+		public function __construct($id) {
 			$monster = mysql_fetch_array(mysql_query("SELECT * FROM `monsters` WHERE `id` = '" . mysql_real_escape_string($id) . "'"));
 
 			foreach($monster as $key => $value) {

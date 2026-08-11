@@ -1,4 +1,4 @@
-<?
+<?php 
 if(isset($_GET['duel_id'])){
   //Session On
   session_start();  

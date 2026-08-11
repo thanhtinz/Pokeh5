@@ -1,21 +1,21 @@
 <?php
 ////xử lí////
-if($_GET[nut]=='0') {
+if($_GET['nut']=='0') {
     $ndoc = '0';
 }
-if($_GET[nut]=='1') {
+if($_GET['nut']=='1') {
     $ndoc = '32';
 }
-if($_GET[nut]=='2') {
+if($_GET['nut']=='2') {
     $ndoc = '64';
 }
-if($_GET[nut]=='3') {
+if($_GET['nut']=='3') {
     $ndoc = 96;
 }
 
 ///////////
     header('Content-Type: image/png');
-    $img = imagecreatefrompng('../images/charactersets/'.$_GET[nhanvat].'');
+    $img = imagecreatefrompng('../images/charactersets/'.$_GET['nhanvat'].'');
     imagealphablending($img, true);
     imagesavealpha($img, true);
    
@@ -23,24 +23,24 @@ if($_GET[nut]=='3') {
     $y = ImageSY($img);
     /////ảnh có 3 hình
     if($x >= 90) {
-if($_GET[nghia]==0) {
+if($_GET['nghia']==0) {
     $ntrai = '0';
 }
-if($_GET[nghia]==1) {
+if($_GET['nghia']==1) {
     $ntrai = '32';
 }
-if($_GET[nghia]==2) {
+if($_GET['nghia']==2) {
     $ntrai = '64';
 }
 } else {
     ///ảnh có 2 hình :3
- if($_GET[nghia]==0) {
+ if($_GET['nghia']==0) {
     $ntrai = '0';
 }
-if($_GET[nghia]==1) {
+if($_GET['nghia']==1) {
     $ntrai = '32';
 }
-if($_GET[nghia]==2) {
+if($_GET['nghia']==2) {
     $ntrai = '0';
 }   
 }

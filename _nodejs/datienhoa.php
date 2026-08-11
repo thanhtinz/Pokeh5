@@ -8,7 +8,7 @@ if($gebruiker_item[$_GET['name']] <= 0){
 	header("Location: index.php?page=home");
 	?>
   
-  <?
+  <?php 
 }
 
 
@@ -17,7 +17,7 @@ if($gebruiker_item[$_GET['name']] <= 0){
     <center>
     <table width="100%" border="0">
     	<tr> 
-    		<td colspan="5"><? if($error) echo $error; else echo "&nbsp"; ?></td>
+    		<td colspan="5"><?php  if($error) echo $error; else echo "&nbsp"; ?></td>
     	</tr>
     	<tr> 
     		<td width="50"><center><strong>&raquo;</strong></center></td>
@@ -27,7 +27,7 @@ if($gebruiker_item[$_GET['name']] <= 0){
     		<td width="100" align="center"><strong>T.Hóa:</strong></td>
     	</tr>
     	<tr>
-    <?
+    <?php 
     //Pokemon laden van de gebruiker die hij opzak heeft
     $poke = mysql_query("SELECT pokemon_wild.* ,pokemon_speler.* FROM pokemon_wild INNER JOIN pokemon_speler ON pokemon_speler.wild_id = pokemon_wild.wild_id WHERE user_id='".$_SESSION['id']."' AND `opzak`='ja' ORDER BY `opzak_nummer` ASC");
     
@@ -76,13 +76,13 @@ if($gebruiker_item[$_GET['name']] <= 0){
      ?>
       <tr> 
         <td colspan="5">
-        <Center><a href="javascript:hienthi_tienhoa('<? echo $_GET['name']; ?>')"><button>Tiến Hóa</button> </a></Center></td>
+        <Center><a href="javascript:hienthi_tienhoa('<?php  echo $_GET['name']; ?>')"><button>Tiến Hóa</button> </a></Center></td>
       </tr>
      
     </table>
     </center>
    
-    <?
+    <?php 
     
   
 ?>

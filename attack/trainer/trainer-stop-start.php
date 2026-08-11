@@ -1,4 +1,4 @@
-<?
+<?php 
 //Session On
 //Connect With Database
   include_once('../../templates/config.php'); 

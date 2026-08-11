@@ -88,24 +88,24 @@
     <table width="400" border="0" cellspacing="0" cellpadding="0">
       <tr>
     <td width="200" height="25"><?php echo $txt['premium_days']; ?></td>
-    <td width="200"><? echo $premiumtekst; ?></td>
+    <td width="200"><?php  echo $premiumtekst; ?></td>
   </tr>
   <tr>
     <td height="25"><?php echo $txt['username']; ?></td>
-    <td><input type="text" name="username" class="text_long" value="<? echo $username; ?>" maxlength="10" /><img src="images/icons/gold.png" title="<?php echo $txt['cost_15_gold']; ?>" style="margin:0px 0px -3px 5px;" /> 15</td>
+    <td><input type="text" name="username" class="text_long" value="<?php  echo $username; ?>" maxlength="10" /><img src="images/icons/gold.png" title="<?php echo $txt['cost_15_gold']; ?>" style="margin:0px 0px -3px 5px;" /> 15</td>
   </tr>
   <tr>
     <td height="25"><?php echo $txt['firstname']; ?></td>
-    <td><input type="text" name="voornaam" class="text_long" value="<? echo $voornaam; ?>" maxlength="12" /></td>
+    <td><input type="text" name="voornaam" class="text_long" value="<?php  echo $voornaam; ?>" maxlength="12" /></td>
   </tr>
   <tr>
     <td height="25"><?php echo $txt['lastname']; ?></td>
-    <td><input type="text" name="achternaam" class="text_long" value="<? echo $achternaam; ?>" maxlength="12" /></td>
+    <td><input type="text" name="achternaam" class="text_long" value="<?php  echo $achternaam; ?>" maxlength="12" /></td>
   </tr>
   <tr>
     <td height="25"><?php echo $txt['country']; ?></td>
     <td><select name="land" class="text_select">
-    <?
+    <?php 
     $landsql = mysql_query("SELECT `en`, `nl` FROM `landen` ORDER BY `".$lang['taalshort']."` ASC"); 
 
     if(isset($land)) $landd = $land;
@@ -123,7 +123,7 @@
   <tr>
     <td height="25"><?php echo $txt['character']; ?></td>
     <td><select name="character" value="<?php if(isset($_POST ['character']) && !empty($_POST ['character'])) { echo $_POST ['character']; }?>" class="text_select">
-      <?
+      <?php 
       $charactersql = mysql_query("SELECT naam FROM characters ORDER BY id ASC");
       
       if(isset($_POST['character'])){
@@ -218,7 +218,7 @@
 </table></center>
 </form>
 
-<?
+<?php 
 		    #Persoonlijk sluiten
 		    break;
 		    
@@ -273,7 +273,7 @@
   </tr>
 </table></center>
 </form>
-<?
+<?php 
 
 		    #wachtwoord sluiten
 		    break;
@@ -315,7 +315,7 @@
     <td height="25"><?php echo $txt['link_text_effects']; ?></td>
     </tr>
   <tr>
-    <td><textarea class="text_area" rows="12" name="tekst"><? echo $tekst; ?></textarea></td>
+    <td><textarea class="text_area" rows="12" name="tekst"><?php  echo $tekst; ?></textarea></td>
     </tr>
   <tr>
     <td height="25"><input type="submit" value="<?php echo $txt['button_profile']; ?>" name="profiel" class="button" /></td>
@@ -323,7 +323,7 @@
 </table></center>
 </form>   
 
-<?
+<?php 
 		    #wijzig profiel sluiten
 		    break;
 		    
@@ -401,7 +401,7 @@
 </table>
 </form>
 </center>
-<?
+<?php 
 		    #Profiel sluiten
 		    break;
 		    

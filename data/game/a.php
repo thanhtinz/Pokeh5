@@ -71,17 +71,17 @@ if(isset($_POST['move'])){
 		<tbody>
 		<tr>
 			<td width="50%"><b>Tên:</b></td>
-		<td width="50%"><b style="font-size: 25px;font-family: ducnghiait;">'.$row[naam].'</b></td>
+		<td width="50%"><b style="font-size: 25px;font-family: ducnghiait;">'.$row['naam'].'</b></td>
 		</tr>
 		<tr>
 		
 			<td width="50%"><b>Hệ:</b></td>
-			<td width="50%"><table><tbody><tr><td style="font-size: 25px;font-family: ducnghiait;"><div class="type '.$row[soort].'">'.$row[soort].'</div></td></tr></tbody></table></td>
+			<td width="50%"><table><tbody><tr><td style="font-size: 25px;font-family: ducnghiait;"><div class="type '.$row['soort'].'">'.$row['soort'].'</div></td></tr></tbody></table></td>
 		
 		</tr>
 		<tr>
 			<td width="50%"><b>T.Công:</b></td>
-			<td width="50%"><b style="font-size: 17px;font-family: ducnghiait;">'.$row[sterkte].'</b></td>
+			<td width="50%"><b style="font-size: 17px;font-family: ducnghiait;">'.$row['sterkte'].'</b></td>
 		</tr>
 	
 	
@@ -98,7 +98,7 @@ if(isset($_POST['move'])){
 	
 		
 	  </tbody></table>  
-	  <center><img src="/ducnghia/_/'.strtolower($row[soort]).'.gif"></center>
+	  <center><img src="/ducnghia/_/'.strtolower($row['soort']).'.gif"></center>
 
 	  
   
@@ -109,7 +109,7 @@ if(isset($_POST['move'])){
 			$data .= 'không có kĩ năng nào tên :"'.$_POST['keyword'].'"';
 		}
 	}
-		$json[msg] = $data;
+		$json['msg'] = $data;
 
 
 echo json_encode($json);
@@ -126,13 +126,13 @@ if(isset($_POST['pokemon'])){
 		if(mysql_affected_rows($mysql)!=0){  
 			// Hiển thị dữ liệu
 			while($row = mysql_fetch_array($result,MYSQL_ASSOC)){
-			$data .=' <a href="javascript:info('.$row[wild_id].');"><div class="ducnghia_pokemona" style="background-image:url(/images/pokemon/icon/'.$row[wild_id].'.gif);background-position:right center;background-repeat:no-repeat;">#'.$row[wild_id].' '.$row[naam].'</div></a>   '   ;
+			$data .=' <a href="javascript:info('.$row['wild_id'].');"><div class="ducnghia_pokemona" style="background-image:url(/images/pokemon/icon/'.$row['wild_id'].'.gif);background-position:right center;background-repeat:no-repeat;">#'.$row['wild_id'].' '.$row['naam'].'</div></a>   '   ;
 		}
 		}else {
 			$data .= 'không có pokemon nào tên :"'.$keyword.'"';
 		}
 	}
-	$json[msg] = $data;
+	$json['msg'] = $data;
 
 
 echo json_encode($json);

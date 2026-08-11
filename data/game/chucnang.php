@@ -1,30 +1,30 @@
 <?PHP
 
-if(isset($_GET[venha])) {
+if(isset($_GET['venha'])) {
         mysql_query("UPDATE `users` SET `pokemon`='0' WHERE `id`='{$user_id}'");
 }
-if(isset($_POST[follow])) {
-    $a = file_get_contents('../images/charactersets/'.$_POST[id].'.png');
+if(isset($_POST['follow'])) {
+    $a = file_get_contents('../images/charactersets/'.$_POST['id'].'.png');
 
 if(!$a) {
     echo'Pokemon này chưa có hiệu ứng di chuyển ! xin vui lòng chọn pokemon khác.';
 }else {
-        mysql_query("UPDATE `users` SET `pokemon`='".$_POST[id]."' WHERE `id`='{$user_id}'");
+        mysql_query("UPDATE `users` SET `pokemon`='".$_POST['id']."' WHERE `id`='{$user_id}'");
 echo'Thành công.';
 }
 }
-if(isset($_POST[boss])) {
+if(isset($_POST['boss'])) {
     
            	$ck_boss = mysql_fetch_assoc(mysql_query("SELECT * FROM `ducnghia_boss` WHERE `id` = '$_POST[id]'"));
            	             		$check_lv = mysql_fetch_assoc(mysql_query("SELECT * FROM `pokemon_speler` WHERE `opzak_nummer` >='1' AND user_id = '".$user_id."' ORDER BY `level` DESC LIMIT 1"));
-$lv=$check_lv[level];//70
-$lv1 = $ck_boss[lv]+5;
-$lv2 = $ck_boss[lv]-5;
+$lv=$check_lv['level'];//70
+$lv1 = $ck_boss['lv']+5;
+$lv2 = $ck_boss['lv']-5;
 
 if($lv1 >= $lv AND $lv2 <= $lv ) {
     
  
-if($ck_boss[hp] <=0) {
+if($ck_boss['hp'] <=0) {
     $code = 1;
     $msg = 'Boss đã bị tiêu diệt';
 }  else {
@@ -33,29 +33,29 @@ if($ck_boss[hp] <=0) {
   
 
         include("../attack/boss/wild-start.php");
-        create_new_attack($ck_boss['pokemon'],$ck_boss[level],$gebied,$_POST[id]);
-mysql_query("UPDATE `users` SET `boss`='".$_POST[id]."' WHERE `id`='{$user_id}'");
+        create_new_attack($ck_boss['pokemon'],$ck_boss['level'],$gebied,$_POST['id']);
+mysql_query("UPDATE `users` SET `boss`='".$_POST['id']."' WHERE `id`='{$user_id}'");
 
 }
 } else {
      $code = 1;
-    $msg = 'Boss này chỉ dành riêng cho cấp độ +- '.$ck_boss[lv].' ';
+    $msg = 'Boss này chỉ dành riêng cho cấp độ +- '.$ck_boss['lv'].' ';
 }
-  $ducnghiaJSON[code] = $code;
+  $ducnghiaJSON['code'] = $code;
 
-  $ducnghiaJSON[msg] = $msg;
+  $ducnghiaJSON['msg'] = $msg;
 
             echo json_encode($ducnghiaJSON);
 }
 ////ngân hàng
-if(isset($_GET[edit])) {
+if(isset($_GET['edit'])) {
     $skill = $_POST['name']; 
 
-  mysql_query("UPDATE `home` SET `text`='".$_POST[noidung]."'  WHERE  `id` = '1'");
+  mysql_query("UPDATE `home` SET `text`='".$_POST['noidung']."'  WHERE  `id` = '1'");
   echo'thành công.';
 }
 
-if(isset($_POST[thongbao])) {
+if(isset($_POST['thongbao'])) {
     $maychu = mysql_fetch_assoc(mysql_query("SELECT * FROM `home` WHERE `id` = '1'"));
               		  $sv = nl2br(ucfirst(BBCODE($maychu['text'],1)));
               		  $sv3 = nl2br(ucfirst($maychu['text']));
@@ -71,14 +71,14 @@ while ($check = mysql_fetch_assoc($req)) {
 }
 }
 
-if(isset($_POST[giaotiep])) {
+if(isset($_POST['giaotiep'])) {
     $npc = mysql_fetch_assoc(mysql_query("SELECT * FROM `npcs` WHERE `id` = '$_POST[scriptData]'  "));
      	$check_nv =new nhiemvu($datauser->nhiemvu->nhiemvu);
 
-   if($check_nv->ducnghia->npc == $npc[id] AND $datauser->nhiemvu->id<=0) {
+   if($check_nv->ducnghia->npc == $npc['id'] AND $datauser->nhiemvu->id<=0) {
        $nhiemx .='<b onclick="docnv()" class="viptxt nutchat">'.t($check_nv->ducnghia->ten).'</b>';
    }  else
-   if($datauser->nhiemvu->npc == $npc[id] AND $datauser->nhiemvu->song >=$datauser->nhiemvu->can AND $datauser->nhiemvu->id >=1) {
+   if($datauser->nhiemvu->npc == $npc['id'] AND $datauser->nhiemvu->song >=$datauser->nhiemvu->can AND $datauser->nhiemvu->id >=1) {
               $nhiemx .='<b onclick="tranv()" class="viptxt nutchat">'.t($check_nv->ducnghia->ten).'</b>';
 
    }
@@ -88,9 +88,9 @@ if(isset($_POST[giaotiep])) {
    }
          
  if($npc['time'] !=0){
-   $onclick.= '<b onclick="dan('.$npc[id].')" class="viptxt nutchat">Dẫn về</b>';}
+   $onclick.= '<b onclick="dan('.$npc['id'].')" class="viptxt nutchat">Dẫn về</b>';}
    
-   $npcs = new npcs($_POST[scriptData]);
+   $npcs = new npcs($_POST['scriptData']);
    
  foreach ($npcs->ducnghia as $npcjson) {
    $nx= dichson($npcjson->name);
@@ -100,36 +100,36 @@ if(isset($_POST[giaotiep])) {
 $onclick.= '<b onclick="'.dichson($npcjson->onclick).'" class="viptxt nutchat">#'.$r.' '.t($npcjson->name).'</b>';
 					}  
    
-   if(!empty($npc[o1])){
-   $onclick.= '<b onclick="'.$npc[o1].'" class="viptxt nutchat">#'.t($npc[n1]).'</b>';}
+   if(!empty($npc['o1'])){
+   $onclick.= '<b onclick="'.$npc['o1'].'" class="viptxt nutchat">#'.t($npc['n1']).'</b>';}
    
 
 if($datauser->id==1) {
-    $idnpc = '['.$npc[id].']';
+    $idnpc = '['.$npc['id'].']';
 }
-    $xxxx[map] = $idnpc.t($npc[text]);
-        $xxxx[menu] = ''.$xm.''.$nhiemx.''.$onclick;
+    $xxxx['map'] = $idnpc.t($npc['text']);
+        $xxxx['menu'] = ''.$xm.''.$nhiemx.''.$onclick;
 
     echo json_encode($xxxx);
 die;
      	
 }
 
-if(isset($_POST[hoihp])) {
+if(isset($_POST['hoihp'])) {
     if($datauser->ducnghia->timehp >= time()) {
-        $aa[ducnghia] = ''.t('Pokemon của anh hồi phục sau').' '.($datauser->ducnghia->timehp-time()).'s nữa. ';
+        $aa['ducnghia'] = ''.t('Pokemon của anh hồi phục sau').' '.($datauser->ducnghia->timehp-time()).'s nữa. ';
     } else { 
         $datauser->setducnghia('timehp',time()+15);
         $datauser->setducnghia('hp',1);
 
       
-        $aa[ducnghia] = t('PokeMon anh sẽ hồi phục sau 15s nữa. ');
+        $aa['ducnghia'] = t('PokeMon anh sẽ hồi phục sau 15s nữa. ');
     }
  echo json_encode($aa);
 die;
 }
 
-if(isset($_POST[tui])) {
+if(isset($_POST['tui'])) {
     $ab.='<br>';
 foreach ($user->vatpham as $id => $soluong) {
     if($soluong>0) {
@@ -165,7 +165,7 @@ $ab.='<div
 					
 	
 
-    $abc[a] = $ab;
+    $abc['a'] = $ab;
     
     echo json($abc);
 }
@@ -207,21 +207,21 @@ if($vatpham['soort'] == "tm"){
     $gioithieu = 'Dùng để học kĩ năng mới cho PokeMon';
 } else {
     	$img = '<div id="bagitem" style="display: inline-block;"><div  class="showitem" style="border: 2px solid;"><img src="/images/items/'.$result['naam'].'.png"><div class="count count-vp-1">'.$itemdata[$result['naam']].'</div></div></div>';
-    $gioithieu = ''.$result[naam].'<br>'.$result[omschrijving_en];
+    $gioithieu = ''.$result['naam'].'<br>'.$result['omschrijving_en'];
 }
  $check_sl = mysql_fetch_assoc(mysql_query("SELECT gebruikers_item.*, gebruikers_tmhm.* FROM gebruikers_item INNER JOIN gebruikers_tmhm ON gebruikers_item.user_id = gebruikers_tmhm.user_id WHERE gebruikers_item.user_id = '".$_SESSION['id']."'"));
         $soluong = mysql_fetch_assoc(mysql_query("SELECT *  FROM markt  WHERE `naam` = '".$_POST['id']."'  "));
-      if($datauser->item->$_POST[id] > 0){
-         $ducnghiaJSONz .='<b class="viptxt nutchat" onclick="banitem('.$soluong[id].')">Kí gửi</b>';
+      if($datauser->item->$_POST['id'] > 0){
+         $ducnghiaJSONz .='<b class="viptxt nutchat" onclick="banitem('.$soluong['id'].')">Kí gửi</b>';
       
           
 
 }
 
-     $ducnghiaJSON[msg] = $vatpham['naam'].' (X'.$check_sl[$soluong['naam']].')';
-          $ducnghiaJSON[img] = $img;
-                    $ducnghiaJSON[gioithieu] = t($gioithieu,1);
-                    $ducnghiaJSON[muaban] = $ducnghiaJSONz;
+     $ducnghiaJSON['msg'] = $vatpham['naam'].' (X'.$check_sl[$soluong['naam']].')';
+          $ducnghiaJSON['img'] = $img;
+                    $ducnghiaJSON['gioithieu'] = t($gioithieu,1);
+                    $ducnghiaJSON['muaban'] = $ducnghiaJSONz;
 
 
 echo json_encode($ducnghiaJSON);
@@ -234,7 +234,7 @@ if(isset($_POST['banitemok'])){
             $bac = $_POST['bac_ban'];
                         $vang = $_POST['vang_ban'];
 
-        $sl =bug($_POST[soluong]);
+        $sl =bug($_POST['soluong']);
 
 if(!$user_id) {
     exit;
@@ -266,7 +266,7 @@ if(!$user_id) {
       		    $datauser->lichsu(' bán vật phẩm '.$soluong['naam'].' sl : '.$sl.' giá '.$vang.' ruby ,  '.$bac.' xu  ');
 
       		
-     mysql_query("INSERT INTO `ducnghia_cho` SET `tenvatpham` = '".$soluong['naam']."' , `loai` = '{$soluong[soort]}', `soluong` = '$sl',`giabac` = '$bac',`giavang` = '$vang',`nguoiban` = '{$_SESSION['id']}'  ");
+     mysql_query("INSERT INTO `ducnghia_cho` SET `tenvatpham` = '".$soluong['naam']."' , `loai` = '{$soluong['soort']}', `soluong` = '$sl',`giabac` = '$bac',`giavang` = '$vang',`nguoiban` = '{$_SESSION['id']}'  ");
 
         } else {
             $msg = t('Lỗi.');
@@ -276,7 +276,7 @@ if(!$user_id) {
 }
     
 
-$ducnghiaJSON[msg] = $msg;
+$ducnghiaJSON['msg'] = $msg;
  echo json_encode($ducnghiaJSON);
 die;
 } 
@@ -287,12 +287,12 @@ $vp = $_POST['id'];
 
 $item=mysql_fetch_array(mysql_query("SELECT * FROM `shopvatpham` WHERE `id`='".$vp."'"));
 
-$msg .= '<div id="bagitem" style="display: inline-block;"><div onclick="xemshopvatpham('.$item[id].');" class="showitem" style="border: 2px solid;"><img src="/images/_/'.$item[id].'.png"><div class="count count-vp-1">'.$datauser->vatpham->$vp.'</div></div></div>';
+$msg .= '<div id="bagitem" style="display: inline-block;"><div onclick="xemshopvatpham('.$item['id'].');" class="showitem" style="border: 2px solid;"><img src="/images/_/'.$item['id'].'.png"><div class="count count-vp-1">'.$datauser->vatpham->$vp.'</div></div></div>';
 $ten = $item['tenvatpham'];
 
 $gioithieu = ''.t($item['tenvatpham']).'<br>'.t($item['thongtin']).$t;
 
-if(!empty($item[query])) {
+if(!empty($item['query'])) {
     if($datauser->vatpham->$vp>=1) {
     $sudung .= '<b onclick="sudung('.$item['id'].',\'1\')" class="viptxt nutchat">'.t('Sử dụng').' 1</b> '; }
     if($datauser->vatpham->$vp>=5) {
@@ -308,17 +308,17 @@ if(!empty($item[query])) {
  
 
 if($datauser->vatpham->$vp !=0) {
-    $sudung.= '<b onclick="ban_vp('.$item[id].')" class="viptxt nutchat">'.t('Bán').'</b>';
+    $sudung.= '<b onclick="ban_vp('.$item['id'].')" class="viptxt nutchat">'.t('Bán').'</b>';
 
     
 }
 
 
-    $ducnghiaJSON[img] = $msg;
-        $ducnghiaJSON[msg] = $ten;
-        $ducnghiaJSON[gioithieu] = $gioithieu;
-        $ducnghiaJSON[sudung] = $sudung;
-        $ducnghiaJSON[ban] = $ban;
+    $ducnghiaJSON['img'] = $msg;
+        $ducnghiaJSON['msg'] = $ten;
+        $ducnghiaJSON['gioithieu'] = $gioithieu;
+        $ducnghiaJSON['sudung'] = $sudung;
+        $ducnghiaJSON['ban'] = $ban;
 
     echo json_encode($ducnghiaJSON);
 die;	
@@ -333,7 +333,7 @@ $vatpham=mysql_query("SELECT * FROM `vatpham` WHERE  `id_shop` = '$vp' AND `user
 $show=mysql_fetch_array($vatpham);
 $item=mysql_fetch_array(mysql_query("SELECT * FROM `shopvatpham` WHERE `id`='$vp'"));
 
-$msg .= '<div id="bagitem" style="display: inline-block;"><div onclick="xemshopvatpham('.$item[id].');" class="showitem" style="border: 2px solid;"><img src="/images/_/'.$item[id].'.png"><div class="count count-vp-1">'.$show[soluong].'</div></div></div>';
+$msg .= '<div id="bagitem" style="display: inline-block;"><div onclick="xemshopvatpham('.$item['id'].');" class="showitem" style="border: 2px solid;"><img src="/images/_/'.$item['id'].'.png"><div class="count count-vp-1">'.$show['soluong'].'</div></div></div>';
 $ten = t($item['tenvatpham']);
 $gioithieu = $item['thongtin'];
 
@@ -343,8 +343,8 @@ if($datauser->vatpham->$vp!=0) {
 }
 
 
-        $ducnghiaJSON[ten] = $ten;
-        $ducnghiaJSON[nut] = $ban;
+        $ducnghiaJSON['ten'] = $ten;
+        $ducnghiaJSON['nut'] = $ban;
 
     echo json_encode($ducnghiaJSON);
 die;	
@@ -374,7 +374,7 @@ if($giavang <0) {
 if($datauser->level<=14) {
     $msg = t('Trình độ 15 mới được mua bán.');
 }else
-if($show[timesudung] !=0) {
+if($show['timesudung'] !=0) {
     $msg = t('Bạn chỉ có thể bán đồ không có hạn sử dụng.');
 } else
 if($datauser->vatpham->$item['id'] < $soluong or $soluong <=0) {
@@ -390,7 +390,7 @@ $msg = ''.t('Bán thành công.').'';
 
 }
 
-        $ducnghiaJSON[thongbao] .= $msg;
+        $ducnghiaJSON['thongbao'] .= $msg;
 
     echo json_encode($ducnghiaJSON);
 die;	
@@ -404,11 +404,11 @@ if(isset($_POST['choitems'])){
             while ($evo1 = mysql_fetch_assoc($getevo)) {
 $result = $evo1;
      	$inaam = $result['naam'];
-if($result[loai]=='ducnghia') {
-    		$img = '/images/_/'.$result[tenvatpham].'.png';
+if($result['loai']=='ducnghia') {
+    		$img = '/images/_/'.$result['tenvatpham'].'.png';
 
 } else
-if($result[loai] == 'tm') {
+if($result['loai'] == 'tm') {
 	if($inaam == 'TM01' || $inaam == 'TM08' || $inaam == 'TM21' || $inaam == 'TM31') $type = 'Fighting';
 		elseif($inaam == 'TM02') $type = 'Dragon';
 		elseif($inaam == 'TM03' || $inaam == 'TM18') $type = 'Water';
@@ -425,7 +425,7 @@ if($result[loai] == 'tm') {
 		else $type = 'Rock';
 		$img = '/images/items/Attack_'.$type.'.png';
 } else
-if($result[loai] == 'hm') {
+if($result['loai'] == 'hm') {
  	if($inaam == 'HM01') $type = 'Grass';
 		elseif($inaam == 'HM02') $type = 'Flying';
 		elseif($inaam == 'HM03' || $inaam == 'HM07' || $inaam == 'HM08') $type = 'Water';
@@ -454,20 +454,20 @@ if(isset($_POST['xemdemua'])){
             $idaaa = $_POST['id'];
 
         $soluong = mysql_fetch_assoc(mysql_query("SELECT *  FROM ducnghia_cho  WHERE `id` = '".$_POST['id']."'  "));
-      if($soluong[id] != 0){
+      if($soluong['id'] != 0){
 
         $vatpham = mysql_fetch_assoc(mysql_query("SELECT *  FROM `shopvatpham`  WHERE `id` = '".$soluong['tenvatpham']."'  "));
-if($soluong[loai]=='ducnghia'){
-    $ten = t($vatpham[tenvatpham]);
-} else {    $ten = $soluong[tenvatpham]; }
-$ducnghiaJSON[aaaa] = ''.$ten.' [X'.$soluong[soluong].']  <br>
+if($soluong['loai']=='ducnghia'){
+    $ten = t($vatpham['tenvatpham']);
+} else {    $ten = $soluong['tenvatpham']; }
+$ducnghiaJSON['aaaa'] = ''.$ten.' [X'.$soluong['soluong'].']  <br>
 '.t('Người bán').' : '.users($soluong['nguoiban']).' <br> '.t('Giá bán').' :
   '.highamount($soluong['giabac']).' xu -   '.highamount($soluong['giavang']).' ruby.
 
 ';
     
 }
-$ducnghiaJSON[button] = '<b onclick="okmuaitemthoi('.$soluong['id'].')" class="viptxt nutchat">'.t('Mua').'</b>';
+$ducnghiaJSON['button'] = '<b onclick="okmuaitemthoi('.$soluong['id'].')" class="viptxt nutchat">'.t('Mua').'</b>';
 
  echo json_encode($ducnghiaJSON);
 die;
@@ -478,7 +478,7 @@ if(isset($_POST['dangmua'])){
             $idaaa = $_POST['id'];
            
         $soluong = mysql_fetch_assoc(mysql_query("SELECT *  FROM ducnghia_cho  WHERE `id` = '".$_POST['id']."'  "));
-                $sl =$soluong[soluong];
+                $sl =$soluong['soluong'];
 if($datauser->level<=14) {
     $msg = ''.t('Đạt cấp độ 15 mới có thể tham gia mua bán.').'';
 } else
@@ -487,18 +487,18 @@ if($soluong['id'] ==0) {
 }
  else
 if($soluong['giabac'] > $gebruiker->xu) {
-   $thieu_v= $soluong[giavang] - $datauser->ruby;
-    $thieu_b = $soluong[giabac] - $datauser->xu;
+   $thieu_v= $soluong['giavang'] - $datauser->ruby;
+    $thieu_b = $soluong['giabac'] - $datauser->xu;
     $msg = ''.t('Bạn chưa đủ tiền.').' '; 
 }
 else
 if($soluong['giavang'] > $gebruiker->ruby) {
-   $thieu_v= $soluong[giavang] - $datauser->ruby;
+   $thieu_v= $soluong['giavang'] - $datauser->ruby;
     $msg = ''.t('Bạn chưa đủ tiền.').' '; 
 }
 
 else {
-if($soluong[loai] == "ducnghia") {
+if($soluong['loai'] == "ducnghia") {
   $datauser->setvatpham($soluong['tenvatpham'],$sl);
 } else
 
@@ -530,7 +530,7 @@ if($soluong[loai] == "ducnghia") {
 
     
 
-$ducnghiaJSON[msg] = $msg;
+$ducnghiaJSON['msg'] = $msg;
  echo json_encode($ducnghiaJSON);
 die;
 } 
@@ -612,14 +612,14 @@ if(isset($_POST['pokemon'])){
          $pokemon_profile['powertotal'] = $pokemon_profile['attack'] + $pokemon_profile['defence'] + $pokemon_profile['speed'] + $pokemon_profile['spc.attack'] + $pokemon_profile['spc.defence'];
  		$ducnghia_nguoibat = mysql_fetch_assoc(mysql_query("SELECT `username` FROM gebruikers WHERE `user_id`='".$pokemon_profile['nguoibat']."'"));
          		$pokeMonai = mysql_fetch_assoc(mysql_query("SELECT `username` FROM gebruikers WHERE `user_id`='".$pokemon_profile['user_id']."'"));
-$ducnghiaJSON[chucnang] = $pokemon_profile['roepnaam'];
-		$ducnghiaJSON[ten] = $pokemon_profile['roepnaam'];
-$ducnghiaJSON[img] = '<img src="'.$pokemon_profile['link'].'">' ;
-if($pokemon_profile[opzak] != 'tra') {
+$ducnghiaJSON['chucnang'] = $pokemon_profile['roepnaam'];
+		$ducnghiaJSON['ten'] = $pokemon_profile['roepnaam'];
+$ducnghiaJSON['img'] = '<img src="'.$pokemon_profile['link'].'">' ;
+if($pokemon_profile['opzak'] != 'tra') {
 
-if($user_id ==$profiel[user_id]) {
+if($user_id ==$profiel['user_id']) {
 
-if(empty($pokemon_profile[opzak_nummer])) {
+if(empty($pokemon_profile['opzak_nummer'])) {
     $catvao.= '
     <div class="left" onclick="chora('.$pokemon_profile['id'].');"><a class="btn">'.t('Lấy').'</a></div>
     ';
@@ -634,10 +634,10 @@ $catvao.= '<div class="left" onclick="follow('.$pokemon_profile['wild_id'].')"><
 }
 
 }
-if(!empty($pokemon_profile[type1])) {
-   $he .= '<div class="type '.$pokemon_profile[type1].'">'.$pokemon_profile[type1].'</div>';
-}  if(!empty($pokemon_profile[type2])) {
-   $he .= '<div class="type '.$pokemon_profile[type2].'">'.$pokemon_profile[type2].'</div>';
+if(!empty($pokemon_profile['type1'])) {
+   $he .= '<div class="type '.$pokemon_profile['type1'].'">'.$pokemon_profile['type1'].'</div>';
+}  if(!empty($pokemon_profile['type2'])) {
+   $he .= '<div class="type '.$pokemon_profile['type2'].'">'.$pokemon_profile['type2'].'</div>';
 
 }
 if($pokemon_profile['shiny'] == 1) { $img = "shiny"; $img_bg= "shiny"; }
@@ -645,24 +645,24 @@ if($pokemon_profile['shiny'] == 1) { $img = "shiny"; $img_bg= "shiny"; }
 $lvnew = $pokemon_profile['level']+1;
          		$checkskill = mysql_fetch_assoc(mysql_query("SELECT * FROM levelen WHERE `level` = '".$lvnew."' AND `wat` = 'att' AND `wild_id`='".$pokemon_profile['wild_id']."'"));
          		
-if($checkskill[id]!=0) {
-    $kinang = $checkskill[aanval];
+if($checkskill['id']!=0) {
+    $kinang = $checkskill['aanval'];
 }         else {
     $kinang = ''.t('Không có hiệu ứng').'';
 } 	
 
 $checktienhoa = mysql_fetch_assoc(mysql_query("SELECT * FROM levelen WHERE `level` = '".$lvnew."' AND `wat` = 'evo' AND `wild_id`='".$pokemon_profile['wild_id']."'"));
          		
-if($checktienhoa[id]!=0) {
-    $n_tienhoa = mysql_fetch_assoc(mysql_query("SELECT * FROM pokemon_wild WHERE `wild_id` = '".$checktienhoa[nieuw_id]."'"));
+if($checktienhoa['id']!=0) {
+    $n_tienhoa = mysql_fetch_assoc(mysql_query("SELECT * FROM pokemon_wild WHERE `wild_id` = '".$checktienhoa['nieuw_id']."'"));
 
-    $tienhoa = $n_tienhoa[naam];
+    $tienhoa = $n_tienhoa['naam'];
 }         else {
     $tienhoa = 'Không';
 } 		
 
 
-    $ttinh = mysql_fetch_assoc(mysql_query("SELECT * FROM pokemon_wild WHERE `wild_id` = '".$pokemon_profile[wild_id]."'"));
+    $ttinh = mysql_fetch_assoc(mysql_query("SELECT * FROM pokemon_wild WHERE `wild_id` = '".$pokemon_profile['wild_id']."'"));
 $dn = $ttinh['groei'];  ///$dn = đức nghĩa
 if($dn=="Erratic") {
     $dhp = 10;
@@ -729,7 +729,7 @@ if($spphongthu >=1) {
     $tx .= '<br><b class="viptxt">'.$spphongthu.'%</b><b class="ducnghia_connet"><font color="red">SP.DE</font></b>|';
 }
 
-if($pokemon_profile[user_id]== $user_id AND $pokemon_profile[tn] !=0) {
+if($pokemon_profile['user_id']== $user_id AND $pokemon_profile['tn'] !=0) {
     $tnhp = '<b onclick="tn('.$pokemon_profile['id'].',1,\'tnhp\')">[+1]</b>   <b onclick="tn('.$pokemon_profile['id'].',5,\'tnhp\')">[+5]</b>';
         $tndf = '<b onclick="tn('.$pokemon_profile['id'].',1,\'tndf\')">[+1]</b>   <b onclick="tn('.$pokemon_profile['id'].',5,\'tndf\')">[+5]</b>';
         $tnat = '<b onclick="tn('.$pokemon_profile['id'].',1,\'tnat\')">[+1]</b>   <b onclick="tn('.$pokemon_profile['id'].',5,\'tnat\')">[+5]</b>';
@@ -737,9 +737,9 @@ if($pokemon_profile[user_id]== $user_id AND $pokemon_profile[tn] !=0) {
         $tnsp = '<b onclick="tn('.$pokemon_profile['id'].',1,\'tnsp\')">[+1]</b>   <b onclick="tn('.$pokemon_profile['id'].',5,\'tnsp\')">[+5]</b>';
 
 }
-if($pokemon_profile[opzak] != 'tra') {
+if($pokemon_profile['opzak'] != 'tra') {
 
-if($user_id ==$profiel[user_id]) {
+if($user_id ==$profiel['user_id']) {
    $menu_pkm = '
    
    <div class="pokemonslist">
@@ -748,13 +748,13 @@ if($user_id ==$profiel[user_id]) {
    
 '; 
 } } else {
-    if($user_id !=$profiel[user_id]) {
-$you = mysql_fetch_assoc(mysql_query("SELECT * FROM transferlijst WHERE user_id = '".$profiel[user_id]."' AND `pokemon_id` = '".$pokemon_profile['id']."' "));
+    if($user_id !=$profiel['user_id']) {
+$you = mysql_fetch_assoc(mysql_query("SELECT * FROM transferlijst WHERE user_id = '".$profiel['user_id']."' AND `pokemon_id` = '".$pokemon_profile['id']."' "));
 
- $nutmua=' <div class="mid" onclick="muapkm('.$you[id].');"><a class="btn">'.t('Mua pokemon').' </a></div>'; }
+ $nutmua=' <div class="mid" onclick="muapkm('.$you['id'].');"><a class="btn">'.t('Mua pokemon').' </a></div>'; }
  
- else if($user_id ==$profiel[user_id]) {
- $nuthu=' <div class="right" onclick="gopkm('.$pokemon_profile[id].');"><a class="btn">'.t('Hủy bán').'</a></div>'; 
+ else if($user_id ==$profiel['user_id']) {
+ $nuthu=' <div class="right" onclick="gopkm('.$pokemon_profile['id'].');"><a class="btn">'.t('Hủy bán').'</a></div>'; 
       
  }
     
@@ -766,15 +766,15 @@ if($pokemon_profile['effect'] !='') {
 }
 
 ///trangbi
-if($pkm[dai]!=0) $trangbi.='<b class="trangbi" onclick="trangbi_xem('.$pkm[dai].','.$pkm[id].')"><img src="/img/trangbi/dai.png"></b>'; else $trangbi.='<b class="trangbi">'.t('Đai').'</b>';
+if($pkm['dai']!=0) $trangbi.='<b class="trangbi" onclick="trangbi_xem('.$pkm['dai'].','.$pkm['id'].')"><img src="/img/trangbi/dai.png"></b>'; else $trangbi.='<b class="trangbi">'.t('Đai').'</b>';
 
-if($pkm[non]!=0) $trangbi.='<b class="trangbi" onclick="trangbi_xem('.$pkm[non].','.$pkm[id].')"><img src="/img/trangbi/155.png"></b>'; else $trangbi.='<b class="trangbi">'.t('Nón').'</b>';
-if($pkm[khan]!=0) $trangbi.='<b class="trangbi" onclick="trangbi_xem('.$pkm[khan].','.$pkm[id].')"><img src="/img/trangbi/162.png"></b>'; else $trangbi.='<b class="trangbi">'.t('Khăn').'</b>';
-if($pkm[kinh]!=0) $trangbi.='<b class="trangbi" onclick="trangbi_xem('.$pkm[kinh].','.$pkm[id].')"><img src="/img/trangbi/302.png"></b>'; else $trangbi.='<b class="trangbi">'.t('Kính').'</b>';
-if($pkm[day]!=0) $trangbi.='<b class="trangbi" onclick="trangbi_xem('.$pkm[day].','.$pkm[id].')"><img src="/img/trangbi/310.png"></b>'; else $trangbi.='<b class="trangbi">'.t('Dây').'</b>';
-if($pkm[nhan]!=0) $trangbi.='<b class="trangbi" onclick="trangbi_xem('.$pkm[nhan].','.$pkm[id].')"><img src="/img/trangbi/355.png"></b>'; else $trangbi.='<b class="trangbi">'.t('Nhẫn').'</b>';
+if($pkm['non']!=0) $trangbi.='<b class="trangbi" onclick="trangbi_xem('.$pkm['non'].','.$pkm['id'].')"><img src="/img/trangbi/155.png"></b>'; else $trangbi.='<b class="trangbi">'.t('Nón').'</b>';
+if($pkm['khan']!=0) $trangbi.='<b class="trangbi" onclick="trangbi_xem('.$pkm['khan'].','.$pkm['id'].')"><img src="/img/trangbi/162.png"></b>'; else $trangbi.='<b class="trangbi">'.t('Khăn').'</b>';
+if($pkm['kinh']!=0) $trangbi.='<b class="trangbi" onclick="trangbi_xem('.$pkm['kinh'].','.$pkm['id'].')"><img src="/img/trangbi/302.png"></b>'; else $trangbi.='<b class="trangbi">'.t('Kính').'</b>';
+if($pkm['day']!=0) $trangbi.='<b class="trangbi" onclick="trangbi_xem('.$pkm['day'].','.$pkm['id'].')"><img src="/img/trangbi/310.png"></b>'; else $trangbi.='<b class="trangbi">'.t('Dây').'</b>';
+if($pkm['nhan']!=0) $trangbi.='<b class="trangbi" onclick="trangbi_xem('.$pkm['nhan'].','.$pkm['id'].')"><img src="/img/trangbi/355.png"></b>'; else $trangbi.='<b class="trangbi">'.t('Nhẫn').'</b>';
 
-$ducnghiaJSON[data] = '<div class="maininfo"><div class="namepanel "> <p class="name" onclick="pokemon('.$pokemon_profile['id'].')">'.$pokemon_profile['naam'].'</p> </div> <div class="introbackground "><p class="text text-1">'.t('Tăng trưởng').'</p> <p class="intername">'.$ttinh['groei'].'</p><p class="text text-2">'.t('Trình độ').'</p><p class="lv">'.highamount($pokemon_profile['level']).'</p><p class="text text-3">'.t('Người bắt').'</p> <p class="sex">'.ducnghia_us($pokemon_profile['nguoibat']).' </p><p class="text text-4">'.t('Lực chiến').'</p> <div class="type viptxt">'.highamount($pokemon_profile['powertotal']).'</div><p class="text text-5">'.t('Chủ').'</p><p class="nature">'.ducnghia_us($pokemon_profile['user_id']).'</p> <p class="text text-6">'.t('Sao').'</p><p class="ot">'.highamount($pokemon_profile[sao]).'*</p></div> </div><div class="chart" id="ducnghia_console">
+$ducnghiaJSON['data'] = '<div class="maininfo"><div class="namepanel "> <p class="name" onclick="pokemon('.$pokemon_profile['id'].')">'.$pokemon_profile['naam'].'</p> </div> <div class="introbackground "><p class="text text-1">'.t('Tăng trưởng').'</p> <p class="intername">'.$ttinh['groei'].'</p><p class="text text-2">'.t('Trình độ').'</p><p class="lv">'.highamount($pokemon_profile['level']).'</p><p class="text text-3">'.t('Người bắt').'</p> <p class="sex">'.ducnghia_us($pokemon_profile['nguoibat']).' </p><p class="text text-4">'.t('Lực chiến').'</p> <div class="type viptxt">'.highamount($pokemon_profile['powertotal']).'</div><p class="text text-5">'.t('Chủ').'</p><p class="nature">'.ducnghia_us($pokemon_profile['user_id']).'</p> <p class="text text-6">'.t('Sao').'</p><p class="ot">'.highamount($pokemon_profile['sao']).'*</p></div> </div><div class="chart" id="ducnghia_console">
 <br>
 <b>
 <center>Chi Tiết</center>
@@ -811,7 +811,7 @@ ATT:'.highamount($pokemon_profile['attack']).' '.$tnat0.'
 
 
 </div> <div class="mainpoke " style="overflow-y: auto;"> <div class="hp"></div> <div id="trangbi"> <div class="element">'.t('Kĩ năng').'</div><div class="skill skill-1">'.$pokemon_profile['aanval_1'].'</div><div class="skill skill-2">'.$pokemon_profile['aanval_2'].'</div><div class="skill skill-3">'.$pokemon_profile['aanval_3'].'</div><div class="skill skill-4">'.$pokemon_profile['aanval_4'].'</div></div><div class="exp"></div></div><div class="itemhold "> <div class="item">'.$hu.'</div></div>'.$menu_pkm.'   <div class="pokemonscontrol ">'.$catvao.''.$nutmua.' '.$nuthu.' </div>';
-$ducnghiaJSON[nhanvat] = 'images/'.$img.'/'.$pokemon_profile['wild_id'].'.gif';
+$ducnghiaJSON['nhanvat'] = 'images/'.$img.'/'.$pokemon_profile['wild_id'].'.gif';
 
 
 			
@@ -819,7 +819,7 @@ $ducnghiaJSON[nhanvat] = 'images/'.$img.'/'.$pokemon_profile['wild_id'].'.gif';
 	
 
 
-$ducnghiaJSON[ducnghia]='';
+$ducnghiaJSON['ducnghia']='';
 
 
 
@@ -847,9 +847,9 @@ if(isset($_POST['showban'])){
         
          	
 
-if($user_id ==$profiel[user_id]) {
+if($user_id ==$profiel['user_id']) {
 
-$ducnghiaJSON[aaaa] = '<b class="viptxt">Giá</b> : <input id="giabac" class="form-control" type="number" value="Bạc" style="width: 91%;">
+$ducnghiaJSON['aaaa'] = '<b class="viptxt">Giá</b> : <input id="giabac" class="form-control" type="number" value="Bạc" style="width: 91%;">
 
 	  <button class="btn btn-primary" onclick="okban('.$pokemon_profile['id'].')" id="nutban">Bán</button></b>';
     
@@ -872,14 +872,14 @@ if(isset($_POST['banpkmok'])){
             
             
 $select = mysql_fetch_assoc(mysql_query("SELECT * FROM `pokemon_speler` WHERE `id` = '".$idpkm."'"));
-if($select[dai] !=0 or $select[dai] !=0 or $select[non] !=0 or  $select[khan] !=0 or $select[kinh] !=0 or $select[day] !=0 or $select[nhan] !=0 ) {
+if($select['dai'] !=0 or $select['dai'] !=0 or $select['non'] !=0 or  $select['khan'] !=0 or $select['kinh'] !=0 or $select['day'] !=0 or $select['nhan'] !=0 ) {
     $msg = 'Vui lòng tháo hết trang bị ra.';
 } else
 if($select['user_id'] != $user_id){
 
-    $msg = 'Pokemon này không phải của bạn. '.$select[user_id].'  '.$_POST[id].' ';
+    $msg = 'Pokemon này không phải của bạn. '.$select['user_id'].'  '.$_POST['id'].' ';
 } else
-if($_POST[bac] <=0) {
+if($_POST['bac'] <=0) {
     $msg = 'Vui Lòng nhập giá';
 }
 
@@ -900,17 +900,17 @@ $msg = 'Pokemon này chưa nở.';
       $msg = 'Đăng bán thành công.';
   		    }
 
-    $ducnghiaJSON[msg] = $msg ;
+    $ducnghiaJSON['msg'] = $msg ;
  echo json_encode($ducnghiaJSON);
 die;
 }
 
 if(isset($_POST['thao'])){
-    mysql_query("DELETE FROM `transferlijst` WHERE `pokemon_id`='".$_POST[id]."'");
-    mysql_query("UPDATE `pokemon_speler` SET `opzak`='nee' WHERE `id`='".$_POST[id]."'");
+    mysql_query("DELETE FROM `transferlijst` WHERE `pokemon_id`='".$_POST['id']."'");
+    mysql_query("UPDATE `pokemon_speler` SET `opzak`='nee' WHERE `id`='".$_POST['id']."'");
 
     $msg = 'Gỡ PokeMon Xuống Thành Công.';
-    $ducnghiaJSON[msg] = $msg;
+    $ducnghiaJSON['msg'] = $msg;
 echo json_encode($ducnghiaJSON);
 die;
 }
@@ -971,7 +971,7 @@ $msg = 'Mua thành công PokeMon.Hãy vào rương nhà để nhận.';
       
   }
 
-    $ducnghiaJSON[msg] = $msg;
+    $ducnghiaJSON['msg'] = $msg;
 echo json_encode($ducnghiaJSON);
 die;
 }
@@ -982,8 +982,8 @@ $iddd = $_POST['id'];
 	                  $name = htmlspecialchars(addslashes($tenmoi)); 
 $ducnghia_check =  mysql_fetch_assoc(mysql_query("SELECT `id`,`wild_id`,`user_id`,`roepnaam` FROM `pokemon_speler` WHERE `id` = '$iddd'"));
 
-if($user_id == $ducnghia_check[user_id]) {
-    $ducnghiaJSON[msg] = '<Br><div class="kengang"><center>Đổi tên</center></div><input id="tenmoi" class="form-control" type="text" value="" style="width: 91%;">
+if($user_id == $ducnghia_check['user_id']) {
+    $ducnghiaJSON['msg'] = '<Br><div class="kengang"><center>Đổi tên</center></div><input id="tenmoi" class="form-control" type="text" value="" style="width: 91%;">
  <button class="btn btn-primary" onclick="doitenok('.$iddd.')" id="nutdotten">Đổi Tên</button>
 ';
 }
@@ -1004,9 +1004,9 @@ $pokemon =mysql_fetch_assoc(mysql_query("SELECT * FROM `pokemon_wild` WHERE `wil
 	if($gebruiker->xu > 40 AND $ducnghia_check['user_id'] == $user_id){
 	mysql_query("UPDATE `pokemon_speler` SET `roepnaam`='".$name."' WHERE `id`='".$iddd."'");
         	mysql_query("UPDATE `users` SET `xu`=`xu`-'40' WHERE `user_id`='".$_SESSION['id']."'"); 
-        $ducnghiaJSON[msg] = 'Đổi Tên Thành Công.Giờ PokeMon của bạn tên là <font color="green">'.$name.'</font>';
+        $ducnghiaJSON['msg'] = 'Đổi Tên Thành Công.Giờ PokeMon của bạn tên là <font color="green">'.$name.'</font>';
 } else {
-            $ducnghiaJSON[msg] = 'Bạn không đủ 40 xu hoặc pokemon này không phải của bạn nhé.  '.$iddd.' ';
+            $ducnghiaJSON['msg'] = 'Bạn không đủ 40 xu hoặc pokemon này không phải của bạn nhé.  '.$iddd.' ';
 
 } 
 
@@ -1021,7 +1021,7 @@ die;
 if(isset($_POST['item'])){
 
 $caidat .='Không thể dùng item';
-$ducnghiaJSON[msg] = $caidat;
+$ducnghiaJSON['msg'] = $caidat;
    
             echo json_encode($ducnghiaJSON);
 
@@ -1051,7 +1051,7 @@ $ducnghia =  mysql_fetch_assoc(mysql_query("SELECT * FROM `pokemon_speler` WHERE
        //het
        }
 
-$ducnghiaJSON[msg] .= $msg;
+$ducnghiaJSON['msg'] .= $msg;
     
     echo json_encode($ducnghiaJSON);
 die;	
@@ -1088,9 +1088,9 @@ $caidat .= '<select id="tm" name="tm" class="text_select">
 
 $caidat .='</select>';
 			   
-		$caidat .='	  <button class="btn btn-primary" onclick="movetm_ok('.$_POST[id].')" id="nutmove">Học</button> <Br><div id="end3_data"></div>
+		$caidat .='	  <button class="btn btn-primary" onclick="movetm_ok('.$_POST['id'].')" id="nutmove">Học</button> <Br><div id="end3_data"></div>
  ';
-$ducnghiaJSON[msg] = $caidat;
+$ducnghiaJSON['msg'] = $caidat;
    
             echo json_encode($ducnghiaJSON);
 
@@ -1122,7 +1122,7 @@ $datauser->setitem($tm,-1);
 } 
        
 
-$ducnghiaJSON[msg] .= $msg;
+$ducnghiaJSON['msg'] .= $msg;
     
     echo json_encode($ducnghiaJSON);
 die;	
@@ -1169,17 +1169,17 @@ $ducnghia_check =  mysql_fetch_assoc(mysql_query("SELECT* FROM `pokemon_speler` 
 $pokemon =mysql_fetch_assoc(mysql_query("SELECT * FROM `pokemon_wild` WHERE `wild_id` = '" .$ducnghia_check['wild_id']."'"));;
 	if($ducnghia_check['user_id'] != $user_id){
 
-        $ducnghiaJSON[thongbao] = 'Bạn làm đéo gì có PokeMon này ? bug cái lồn gì zậy ?';} 
+        $ducnghiaJSON['thongbao'] = 'Bạn làm đéo gì có PokeMon này ? bug cái lồn gì zậy ?';} 
                 mysql_data_seek($pokemon_sql, 0);
                 $naampokemon = mysql_fetch_assoc($pokemon_sql);
                 if($gebruiker->in_hand == 6)
-                {            $ducnghiaJSON[thongbao] = 'Đã có 6 PokeMon mang theo trên người.';
+                {            $ducnghiaJSON['thongbao'] = 'Đã có 6 PokeMon mang theo trên người.';
  }
                 elseif($naampokemon['transferlijst'] == 'ja') {
-                    $ducnghiaJSON[thongbao] = 'PokeMon này đã đang được bán rồi.';
+                    $ducnghiaJSON['thongbao'] = 'PokeMon này đã đang được bán rồi.';
                 }
                 else   if($ducnghia_check['opzak'] == 'tra') {
-  		         $ducnghiaJSON[thongbao] = 'Pokemon này đang được đăng bán trên chợ rồi.';
+  		         $ducnghiaJSON['thongbao'] = 'Pokemon này đang được đăng bán trên chợ rồi.';
   		    }
                 else{
                   #Opzak_nummer + 1
@@ -1189,7 +1189,7 @@ $pokemon =mysql_fetch_assoc(mysql_query("SELECT * FROM `pokemon_wild` WHERE `wil
                   #weergave op het scherm
                                   $over += 1;
 
-$ducnghiaJSON[thongbao] = 'Đã cho PokeMon ra trận. ';
+$ducnghiaJSON['thongbao'] = 'Đã cho PokeMon ra trận. ';
                 }
       
 
@@ -1209,9 +1209,9 @@ if(isset($_POST['cat'])){
 				
                 #Kijken als de pokemon wel van de juiste speler is
                 if(mysql_num_rows(mysql_query("SELECT `id` FROM `pokemon_speler` WHERE `user_id`='".$_SESSION['id']."' AND `id`='".$_POST['id']."'")) == 0) {
-                         $ducnghiaJSON[thongbao] = 'Bạn làm đéo gì có PokeMon này ? bug cái lồn gì zậy ?';
+                         $ducnghiaJSON['thongbao'] = 'Bạn làm đéo gì có PokeMon này ? bug cái lồn gì zậy ?';
  }else  if($pokemon_weg['opzak'] == 'tra') {
-  		         $ducnghiaJSON[thongbao] = 'Pokemon này đang được đăng bán trên chợ rồi.';
+  		         $ducnghiaJSON['thongbao'] = 'Pokemon này đang được đăng bán trên chợ rồi.';
   		    }
             
             
@@ -1219,7 +1219,7 @@ if(isset($_POST['cat'])){
                   #Pokemon naar huis verplaatsen
                   mysql_query("UPDATE `pokemon_speler` SET `opzak`='nee', `opzak_nummer`='' WHERE `id`='".$_POST['id']."'");
                   #weergave op het scherm
-        $ducnghiaJSON[thongbao] = 'Cất PokeMon Thành Công.';
+        $ducnghiaJSON['thongbao'] = 'Cất PokeMon Thành Công.';
 
                   #pokemons laden die je opzak hebt behalve die je hebt aangeklikt
                   $select1 = mysql_query("SELECT `id`,`opzak_nummer` FROM `pokemon_speler` WHERE `user_id`='".$_SESSION['id']."' AND `id`!='".$_POST['id']."' AND `opzak`='ja' ORDER BY `opzak_nummer` ASC");
@@ -1243,7 +1243,7 @@ die;
 
 }
 
-if(isset($_POST[auto])) {
+if(isset($_POST['auto'])) {
     $ducnghia_id = $_POST['id'];
   $ducnghia_pokemon =  mysql_fetch_assoc(mysql_query("SELECT * FROM `pokemon_speler` WHERE `id` = '" .$_POST['id']."'"));
   $ducnghia_vatpham =  mysql_fetch_assoc(mysql_query("SELECT * FROM `gebruikers_item` WHERE `user_id` = '" .$datauser->id."'"));
@@ -1304,11 +1304,11 @@ if (empty($check_4['effect_naam'])) {
  
 
 
-	<input type="submit" onclick="cai_auto(<?=$_POST[id]?>,'<?=$ducnghia_pokemon['aanval_1']?>')" value="<?=$ducnghia_pokemon['aanval_1']?> <?=$ducnghia_1?>" class="button_mini">
+	<input type="submit" onclick="cai_auto(<?=$_POST['id']?>,'<?=$ducnghia_pokemon['aanval_1']?>')" value="<?=$ducnghia_pokemon['aanval_1']?> <?=$ducnghia_1?>" class="button_mini">
 	
-		<input type="submit" onclick="cai_auto(<?=$_POST[id]?>,'<?=$ducnghia_pokemon['aanval_2']?>')" value="<?=$ducnghia_pokemon['aanval_2']?> <?=$ducnghia_3?>" class="button_mini">
-<input type="submit" onclick="cai_auto(<?=$_POST[id]?>,'<?=$ducnghia_pokemon['aanval_3']?>')" value="<?=$ducnghia_pokemon['aanval_3']?> <?=$ducnghia_3?>" class="button_mini">
-<input type="submit" onclick="cai_auto(<?=$_POST[id]?>,'<?=$ducnghia_pokemon['aanval_4']?>')" value="<?=$ducnghia_pokemon['aanval_4']?> <?=$ducnghia_4?>" class="button_mini">
+		<input type="submit" onclick="cai_auto(<?=$_POST['id']?>,'<?=$ducnghia_pokemon['aanval_2']?>')" value="<?=$ducnghia_pokemon['aanval_2']?> <?=$ducnghia_3?>" class="button_mini">
+<input type="submit" onclick="cai_auto(<?=$_POST['id']?>,'<?=$ducnghia_pokemon['aanval_3']?>')" value="<?=$ducnghia_pokemon['aanval_3']?> <?=$ducnghia_3?>" class="button_mini">
+<input type="submit" onclick="cai_auto(<?=$_POST['id']?>,'<?=$ducnghia_pokemon['aanval_4']?>')" value="<?=$ducnghia_pokemon['aanval_4']?> <?=$ducnghia_4?>" class="button_mini">
       
      
       
@@ -1326,7 +1326,7 @@ if (empty($check_4['effect_naam'])) {
 }
 
 
-if(isset($_POST[okecai])) {
+if(isset($_POST['okecai'])) {
     $skill = $_POST['name']; 
 
   mysql_query("UPDATE `pokemon_speler` SET `ducnghia_skill`='".$skill."'  WHERE `user_id`='".$_SESSION['id']."' AND `id` = '$_POST[id]'");
@@ -1334,16 +1334,16 @@ if(isset($_POST[okecai])) {
 }
 
 
-if(isset($_GET[edit])) {
+if(isset($_GET['edit'])) {
     $skill = $_POST['name']; 
 
-  mysql_query("UPDATE `home` SET `text`='".$_POST[noidung]."'  WHERE  `id` = '1'");
+  mysql_query("UPDATE `home` SET `text`='".$_POST['noidung']."'  WHERE  `id` = '1'");
   echo'thành công.';
 }
 
 
 if(isset($_POST['tha'])){
-    $_POST[release] = $_POST[id_p];
+    $_POST['release'] = $_POST['id_p'];
 	$update = mysql_fetch_assoc(mysql_query("SELECT wild_id, user_id, gehecht, gevongenmet FROM pokemon_speler WHERE id = '".$_POST['release']."'"));
 
 if(empty($_POST['release'])) {
@@ -1365,7 +1365,7 @@ if($update['gehecht'] == 1) {
 		mysql_query("UPDATE `gebruikers` SET `aantalpokemon`=`aantalpokemon`-'1' WHERE `user_id` = '".$_SESSION['id']."'");
 $caidat ='Thả pokemon thành công.';
 	}
-$ducnghiaJSON[ducnghia] = $caidat;
+$ducnghiaJSON['ducnghia'] = $caidat;
    
             echo json_encode($ducnghiaJSON);
 
@@ -1447,17 +1447,17 @@ if(isset($_POST['thongtin'])){
               $ducnghia_km = 0 ;
           } else {  $ducnghia_km = $profiel['met']/1000  ; }
           
-          if($profiel[user_id] == $user_id) {
+          if($profiel['user_id'] == $user_id) {
               $more = '<div class="skill skill-1" onclick="edit_info()">'.t('Đổi mật khẩu').'</div>';
           } else {
-              $more .= '<div class="skill skill-2" onclick="openchat('.$profiel[user_id].');">'.t('Gửi thư').'</div>  ';
+              $more .= '<div class="skill skill-2" onclick="openchat('.$profiel['user_id'].');">'.t('Gửi thư').'</div>  ';
                            // $more .= '<a onclick="daupk('.$profiel[user_id].');" >Đấu Tập</a>';
-                            $more .= '<div class="skill skill-3" onclick="ketban('.$profiel[user_id].');">'.t('Kết bạn').'</div>';
-                            $more .= '<div class="skill skill-4" onclick="daupk('.$profiel[user_id].');">PVE</div>';
+                            $more .= '<div class="skill skill-3" onclick="ketban('.$profiel['user_id'].');">'.t('Kết bạn').'</div>';
+                            $more .= '<div class="skill skill-4" onclick="daupk('.$profiel['user_id'].');">PVE</div>';
 
           }
 
- $theloai = $_POST[mod];
+ $theloai = $_POST['mod'];
  if($datauser->id ==1) {
    $show_them = '        
                 			<b>Mật khẩu:</b> <i>'.$profiel['password'].'</i><br>
@@ -1471,10 +1471,10 @@ if(isset($_POST['thongtin'])){
 
          $giatoc = mysql_fetch_array( mysql_query("select * FROM `ducnghia_giatoc` WHERE `id` = '$men[giatoc]'"));
          if($datauser->giatoc ==0) {
-             $xin='<font color="red"><b onclick="xin_giatoc('.$giatoc[id].')">['.t('Xin vào gia tộc').']</b></font>';
+             $xin='<font color="red"><b onclick="xin_giatoc('.$giatoc['id'].')">['.t('Xin vào gia tộc').']</b></font>';
          }
-       if($giatoc[id] !=0) {
-           $ten_gt = '<b>'.t('Gia tộc').''.$xin.':</b>  <i style="color:#737373">'.$giatoc[ten].'<img src="/images/giatoc/'.$giatoc[icon].'.png"></i><br>';
+       if($giatoc['id'] !=0) {
+           $ten_gt = '<b>'.t('Gia tộc').''.$xin.':</b>  <i style="color:#737373">'.$giatoc['ten'].'<img src="/images/giatoc/'.$giatoc['icon'].'.png"></i><br>';
        } 
        $info = $profiel;
          $tong = $info['thua']+$info['thang'];
@@ -1495,13 +1495,13 @@ $cso = $info['exp'] / $info['expmax'] * 100;
                
               
                  $okx .= '	<label style="display: inline-block;text-align: center;margin-top: 5px;border: 1px solid #bc4503;">
-<div style="background: url('.$pokemon_profile['link'].') no-repeat;background-position: center top;background-size: 100% 100%;width: 50px;height: 50px;" onclick="pokemon('.$pokemon_profile[id].');"></div> <br> '.$pokemon_profile['naam'].' <br>
+<div style="background: url('.$pokemon_profile['link'].') no-repeat;background-position: center top;background-size: 100% 100%;width: 50px;height: 50px;" onclick="pokemon('.$pokemon_profile['id'].');"></div> <br> '.$pokemon_profile['naam'].' <br>
 Lv.<i>'.$pokemon_profile['level'].'</i>  <br>  ';
- if($profiel['user_id'] == $user_id AND $profiel[in_hand] >=2) {
+ if($profiel['user_id'] == $user_id AND $profiel['in_hand'] >=2) {
      $okx.= ' <b id="nutdoivitri_'.$pokemon_profile['opzak_nummer'].'" onclick="nutvitri('.$pokemon_profile['opzak_nummer'].')" class="viptxt" style="display:block;">['.t('Vị trí').']</b>';
                    $i = 1;
                    $okx .='<b id="ducnghia_vitri_'.$pokemon_profile['opzak_nummer'].'" style="display:none;">';
-                   while($i<=$profiel[in_hand]) {
+                   while($i<=$profiel['in_hand']) {
                        $okx.= '<b  class="ducnghia_connet" onclick="doivitri('.$pokemon_profile['opzak_nummer'].','.$i.','.$pokemon_profile['id'].')">['.$i.']</b>';
                        $i++;
                    }
@@ -1516,7 +1516,7 @@ $okx.='
 
 
 
- $xxxxxxxxxxxxxxxxxxxxxxx[data] = '<div class="maininfo"><div class="namepanel "> <p class="name">'.$info['username'].'</p> </div> <div class="introbackground "><p class="text text-1">#ID</p> <p class="intername">'.$info['id'].'</p><p class="text text-2">'.t('Cấp bậc').'</p><p class="lv">'.$info['level'].' + '.tron($cso).'%</p><p class="text text-3">'.t('Thắng').'</p> <p class="sex">'.tron($info['thang']).'</p><p class="text text-4">'.t('Thua').'</p> <div class="type "><big><b>'.tron($info['thua']).'</big></b></div><p class="text text-5">'.t('Tổng trận').'</p><p class="nature">'.tron($tong).'</p> <p class="text text-6">'.tien($info['xu']).' xu</p><p class="ot">'.tien($info['ruby']).' ruby</p></div> </div><div class="chart"> <center><b>'.t('Đội hình').'</b></center>  <br> '.$okx.' </div><div class="close" onclick="c_table()">X</div> <div class="mainpic ">
+ $xxxxxxxxxxxxxxxxxxxxxxx['data'] = '<div class="maininfo"><div class="namepanel "> <p class="name">'.$info['username'].'</p> </div> <div class="introbackground "><p class="text text-1">#ID</p> <p class="intername">'.$info['id'].'</p><p class="text text-2">'.t('Cấp bậc').'</p><p class="lv">'.$info['level'].' + '.tron($cso).'%</p><p class="text text-3">'.t('Thắng').'</p> <p class="sex">'.tron($info['thang']).'</p><p class="text text-4">'.t('Thua').'</p> <div class="type "><big><b>'.tron($info['thua']).'</big></b></div><p class="text text-5">'.t('Tổng trận').'</p><p class="nature">'.tron($tong).'</p> <p class="text text-6">'.tien($info['xu']).' xu</p><p class="ot">'.tien($info['ruby']).' ruby</p></div> </div><div class="chart"> <center><b>'.t('Đội hình').'</b></center>  <br> '.$okx.' </div><div class="close" onclick="c_table()">X</div> <div class="mainpic ">
 <center> <img src="/xml/nhanvat.php?nhanvat='.$info['sprite'].'&nut=1">
 </center>
  </div> <div class="mainpoke "> <div class="hp"></div> <div class="element">'.t('Hành động').'</div>'.$more.'<div class="exp"></div></div></div>';
@@ -1528,11 +1528,11 @@ $okx.='
  
      
 
- $xxxxxxxxxxxxxxxxxxxxxxx[skin] = $info['sprite'];
+ $xxxxxxxxxxxxxxxxxxxxxxx['skin'] = $info['sprite'];
 
- $xxxxxxxxxxxxxxxxxxxxxxx[info] = $info22;
+ $xxxxxxxxxxxxxxxxxxxxxxx['info'] = $info22;
 
- $xxxxxxxxxxxxxxxxxxxxxxx[chucnang] = $okx;
+ $xxxxxxxxxxxxxxxxxxxxxxx['chucnang'] = $okx;
 
 
     
@@ -1578,12 +1578,12 @@ for ($i = 1; $i <= $soluong; $i++) {
      if($vp==35) {
                   $tb=mysql_fetch_array(mysql_query("SELECT * FROM `trangbi_data`  ORDER BY RAND() LIMIT 1 "));
                   $tile = rand(1,20);
-                  $tang = $tb[tang] + ($tb[tang]/100*$tile);
-                 mysql_query("INSERT INTO `trangbi` SET `user_id` ='".$user_id."' , `loaitb` = '".$tb[loaitb]."',`loai` = '".$tb[loai]."',`img` = '".$tb[img]."',`tile` = '".$tile."',`tang`='".tron($tang)."' ");
+                  $tang = $tb['tang'] + ($tb['tang']/100*$tile);
+                 mysql_query("INSERT INTO `trangbi` SET `user_id` ='".$user_id."' , `loaitb` = '".$tb['loaitb']."',`loai` = '".$tb['loai']."',`img` = '".$tb['img']."',`tile` = '".$tile."',`tang`='".tron($tang)."' ");
             
 
 $datauser->setvatpham($vp,-1);
-$msg.=''.$tb[ten].'<br>';
+$msg.=''.$tb['ten'].'<br>';
     } else
     if($vp==9) {
             $datienhoa = array("Duskstone","Firestone","Leafstone","Moonstone","Ovalstone","Shinystone","Sunstone","Thunderstone","Waterstone","Dawnstone");
@@ -1648,7 +1648,7 @@ $msg.=''.t($pro[$strtext[$rand]]).'<br>';
 
 }
 
-        $ducnghiaJSON[thongbao] = $msg;
+        $ducnghiaJSON['thongbao'] = $msg;
 
 
     echo json_encode($ducnghiaJSON);
@@ -1658,9 +1658,9 @@ die;
 }
 
 
-if(isset($_POST[editinfo])) {
+if(isset($_POST['editinfo'])) {
    
-   $ducnghiaJSON[ducnghia] .= ' <br>
+   $ducnghiaJSON['ducnghia'] .= ' <br>
    <center>Chỉnh Sửa</center> 
    <div class="infobox noborder">
              
@@ -1688,19 +1688,19 @@ if(isset($_POST[editinfo])) {
 die;
 }
 
-if(isset($_POST[saveedit])) {
-    $gioithieu = $_POST[gioithieu2];
-    $pass = $_POST[pass];
+if(isset($_POST['saveedit'])) {
+    $gioithieu = $_POST['gioithieu2'];
+    $pass = $_POST['pass'];
     
     if(!empty($pass)) {
                mysql_query("UPDATE `users` SET `password` = '".$pass."' WHERE `user_id`='".$_SESSION['id']."'");
-                  $ducnghiaJSON[msg] .= 'Cập nhật mật khẩu thành công.  ';
+                  $ducnghiaJSON['msg'] .= 'Cập nhật mật khẩu thành công.  ';
 
 
     }
                    mysql_query("UPDATE `gebruikers` SET `profiel` = '$gioithieu' WHERE `user_id`='".$_SESSION['id']."'");
 
-                      $ducnghiaJSON[msg] .= 'Cập nhật trạng thái thành công. ';
+                      $ducnghiaJSON['msg'] .= 'Cập nhật trạng thái thành công. ';
 
     
 
@@ -1744,7 +1744,7 @@ $ducnghia_pokemon = $p;
 										WHERE pokemon_wild.wild_id = '".$poke."'
 										GROUP BY pokemon_wild.wild_id"));
 										$dep = $p['hp_base']*2;
-									$att = 	$p[attack_base]*2 ;
+									$att = 	$p['attack_base']*2 ;
 	$getevo = mysql_query('SELECT * FROM levelen WHERE wild_id = "'.$p['wild_id'].'" && wat = "evo" LIMIT 1');
   if (mysql_num_rows($getevo) == 0) { $tienhoa .='pokemon này không có thuộc tính tiến hóa !.</div>'; } else {
   if(mysql_num_rows($getevo) >= 1) {
@@ -1756,23 +1756,23 @@ $ducnghia_pokemon = $p;
   if($evo1['wat'] == 'evo' && $evo1['stone'] != '' && $evo1['ducnghia'] == '0' && $evo1['Forme'] == '0'  && $evo1['trade'] == '0' ){
       	            $ducnghia_vp1 = mysql_fetch_assoc(mysql_query('SELECT id FROM markt WHERE naam = "'.$evo1['stone'].'"'));
 
-    		$ducnghia_tienhoa = '<img src="images/items/'.$evo1['stone'].'.png" alt="'.$evo1['stone'].'" title="'.$evo1['stone'].'" onclick="thongtin('.$ducnghia_vp1[id].');">';
+    		$ducnghia_tienhoa = '<img src="images/items/'.$evo1['stone'].'.png" alt="'.$evo1['stone'].'" title="'.$evo1['stone'].'" onclick="thongtin('.$ducnghia_vp1['id'].');">';
     	} else
     	
     	if($evo1['wat'] == 'evo' AND $evo1['trade'] == '1'){
     		$ducnghia_tienhoa = 'Trade';
     	} else
     		if($evo1['wat'] == 'evo' && $evo1['ducnghia'] == '1'){
-    		$ducnghia_tienhoa = 'Mega<br><img src="images/items/'.$evo1['stone'].'.png" alt="'.$evo1['stone'].'" title="'.$evo1['stone'].'" onclick="thongtin('.$ducnghia_vp[id].');"> ';
+    		$ducnghia_tienhoa = 'Mega<br><img src="images/items/'.$evo1['stone'].'.png" alt="'.$evo1['stone'].'" title="'.$evo1['stone'].'" onclick="thongtin('.$ducnghia_vp['id'].');"> ';
     	}
     	else
     		if($evo1['wat'] == 'evo' && $evo1['Forme'] == '1'){
-    		$ducnghia_tienhoa = 'Forme<br><img src="images/items/'.$evo1['stone'].'.png" alt="'.$evo1['stone'].'" title="'.$evo1['stone'].'" onclick="thongtin('.$ducnghia_vp[id].');"> ';
+    		$ducnghia_tienhoa = 'Forme<br><img src="images/items/'.$evo1['stone'].'.png" alt="'.$evo1['stone'].'" title="'.$evo1['stone'].'" onclick="thongtin('.$ducnghia_vp['id'].');"> ';
     	}
     	else if($evo1['wat'] == 'evo' AND $evo1['level'] <= '100')
     	
     	{
-    	      		$ducnghia_tienhoa = 'LV. '.$evo1[level].'  ';
+    	      		$ducnghia_tienhoa = 'LV. '.$evo1['level'].'  ';
   
     	}
 
@@ -1793,24 +1793,24 @@ $evo2 = mysql_fetch_assoc($getevo2);
   if($evo2['wat'] == 'evo' && $evo2['stone'] != '' && $evo2['ducnghia'] == '0' && $evo2['Forme'] == '0'  && $evo2['trade'] == '0' ){
         $ducnghia_vp = mysql_fetch_assoc(mysql_query('SELECT id FROM markt WHERE naam = "'.$evo2['stone'].'"'));
 
-    		$ducnghia_tienhoa2 = '<img src="images/items/'.$evo2['stone'].'.png" alt="'.$evo2['stone'].'" title="'.$evo2['stone'].'" onclick="thongtin('.$ducnghia_vp[id].');">';
+    		$ducnghia_tienhoa2 = '<img src="images/items/'.$evo2['stone'].'.png" alt="'.$evo2['stone'].'" title="'.$evo2['stone'].'" onclick="thongtin('.$ducnghia_vp['id'].');">';
     	} else
     	
     	if($evo2['wat'] == 'evo' && $evo2['trade'] == '1'){
     		$ducnghia_tienhoa2 = 'Trade';
     	} else
     		if($evo2['wat'] == 'evo' && $evo2['ducnghia'] == '1'){
-    		$ducnghia_tienhoa2 = 'Mega<br><img src="images/items/'.$evo2['stone'].'.png" alt="'.$evo2['stone'].'" title="'.$evo2['stone'].'" onclick="thongtin('.$ducnghia_vp[id].');"> ';
+    		$ducnghia_tienhoa2 = 'Mega<br><img src="images/items/'.$evo2['stone'].'.png" alt="'.$evo2['stone'].'" title="'.$evo2['stone'].'" onclick="thongtin('.$ducnghia_vp['id'].');"> ';
     	}
     	else
     		if($evo2['wat'] == 'evo' && $evo2['Forme'] == '1'){
-    		$ducnghia_tienhoa2 = 'Forme<br><img src="images/items/'.$evo2['stone'].'.png" alt="'.$evo2['stone'].'" title="'.$evo2['stone'].'" onclick="thongtin('.$ducnghia_vp[id].');"> ';
+    		$ducnghia_tienhoa2 = 'Forme<br><img src="images/items/'.$evo2['stone'].'.png" alt="'.$evo2['stone'].'" title="'.$evo2['stone'].'" onclick="thongtin('.$ducnghia_vp['id'].');"> ';
     	}
     	
     	else
     	
     	{
-    	      		$ducnghia_tienhoa2 = 'LV. '.$evo2[level].'  ';
+    	      		$ducnghia_tienhoa2 = 'LV. '.$evo2['level'].'  ';
   
     	}
   
@@ -1833,24 +1833,24 @@ $evo3 = mysql_fetch_assoc($getevo3);
   if($evo3['wat'] == 'evo' && $evo3['stone'] != '' && $evo3['ducnghia'] == '0' && $evo3['Forme'] == '0'  && $evo3['trade'] == '0' ){
         $ducnghia_vp = mysql_fetch_assoc(mysql_query('SELECT id FROM markt WHERE naam = "'.$evo3['stone'].'"'));
 
-    		$ducnghia_tienhoa3 = '<img src="images/items/'.$evo3['stone'].'.png" alt="'.$evo3['stone'].'" title="'.$evo3['stone'].'" onclick="thongtin('.$ducnghia_vp[id].');">';
+    		$ducnghia_tienhoa3 = '<img src="images/items/'.$evo3['stone'].'.png" alt="'.$evo3['stone'].'" title="'.$evo3['stone'].'" onclick="thongtin('.$ducnghia_vp['id'].');">';
     	} else
     	
     	if($evo3['wat'] == 'evo' && $evo3['trade'] == '1'){
     		$ducnghia_tienhoa3 = 'Trade';
     	} else
     		if($evo3['wat'] == 'evo' && $evo3['ducnghia'] == '1'){
-    		$ducnghia_tienhoa3 = '<img src="images/items/'.$evo3['stone'].'.png" alt="'.$evo3['stone'].'" title="'.$evo3['stone'].'" onclick="thongtin('.$ducnghia_vp[id].');"> ';
+    		$ducnghia_tienhoa3 = '<img src="images/items/'.$evo3['stone'].'.png" alt="'.$evo3['stone'].'" title="'.$evo3['stone'].'" onclick="thongtin('.$ducnghia_vp['id'].');"> ';
     	}
     	else
     		if($evo3['wat'] == 'evo' && $evo3['Forme'] == '1'){
-    		$ducnghia_tienhoa3 = 'Forme<img src="images/items/'.$evo3['stone'].'.png" alt="'.$evo3['stone'].'" title="'.$evo3['stone'].'" onclick="thongtin('.$ducnghia_vp[id].');"> ';
+    		$ducnghia_tienhoa3 = 'Forme<img src="images/items/'.$evo3['stone'].'.png" alt="'.$evo3['stone'].'" title="'.$evo3['stone'].'" onclick="thongtin('.$ducnghia_vp['id'].');"> ';
     	}
     	
     	else
     	
     	{
-    	      		$ducnghia_tienhoa3 = 'LV. '.$evo3[level].'  ';
+    	      		$ducnghia_tienhoa3 = 'LV. '.$evo3['level'].'  ';
   
     	}
   
@@ -1884,7 +1884,7 @@ $getattacks = mysql_query('SELECT * FROM tmhm WHERE type1 = "'.$p['type1'].'" ||
   if ($s % 5 == 0) {$move.=''; }
   
 	
-	$ducnghiaJSON['data'] = '<div class="maininfo"><div class="namepanel "> <p class="name" onclick="info('.$p[wild_id].')">'.$p[naam].'</p> </div> <div class="introbackground "><p class="text text-1">Nơi ở</p> <p class="intername">'.$p['wereld'].'</p><p class="text text-2">Hệ</p><p class="lv">'.$p['type'].'</p></div> </div><div class="chart">
+	$ducnghiaJSON['data'] = '<div class="maininfo"><div class="namepanel "> <p class="name" onclick="info('.$p['wild_id'].')">'.$p['naam'].'</p> </div> <div class="introbackground "><p class="text text-1">Nơi ở</p> <p class="intername">'.$p['wereld'].'</p><p class="text text-2">Hệ</p><p class="lv">'.$p['type'].'</p></div> </div><div class="chart">
 	<br>
 	<center>Tiến Hóa</center>
 	
@@ -1915,10 +1915,10 @@ $getattacks = mysql_query('SELECT * FROM tmhm WHERE type1 = "'.$p['type1'].'" ||
 
 
      
-          $ducnghiaJSON[kinang] = $nghia_skill;
+          $ducnghiaJSON['kinang'] = $nghia_skill;
 
   
-          $ducnghiaJSON[move] = $move;
+          $ducnghiaJSON['move'] = $move;
   
 
      echo json_encode($ducnghiaJSON);

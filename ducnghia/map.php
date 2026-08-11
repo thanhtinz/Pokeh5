@@ -223,47 +223,47 @@ $prijs['alolatotaal'] = $prijs['alola']*$gebruiker['aantalpokemon'];
                   <td class="normal_td"><center><label for="traveljohto">1</center></label></td>
 
         <td class="normal_td"><label for="travelkanto">Kanto</label></td>
-        <td class="normal_td"><img src="images/icons/silver.png" title="Silver"> <? echo $prijs['kanto']; ?></td>
-        <td class="normal_td"><img src="images/icons/silver.png" title="Silver"> <? echo $prijs['kantototaal']; ?></td>
+        <td class="normal_td"><img src="images/icons/silver.png" title="Silver"> <?php  echo $prijs['kanto']; ?></td>
+        <td class="normal_td"><img src="images/icons/silver.png" title="Silver"> <?php  echo $prijs['kantototaal']; ?></td>
       </tr>
       <tr>
                   <td class="normal_td"><center><label for="traveljohto">2</center></label></td>
 
         <td class="normal_td"><label for="traveljohto">Johto</label></td>
-        <td class="normal_td"><img src="images/icons/silver.png" title="Silver"> <? echo $prijs['johto']; ?></td>
-        <td class="normal_td"><img src="images/icons/silver.png" title="Silver"> <? echo $prijs['johtototaal']; ?></td>
+        <td class="normal_td"><img src="images/icons/silver.png" title="Silver"> <?php  echo $prijs['johto']; ?></td>
+        <td class="normal_td"><img src="images/icons/silver.png" title="Silver"> <?php  echo $prijs['johtototaal']; ?></td>
       </tr>
       <tr>
         <td class="normal_td"><center>3</center></td>
         <td class="normal_td"><label for="travelhoenn">Hoenn</label></td>
-        <td class="normal_td"><img src="images/icons/silver.png" title="Silver"> <? echo $prijs['hoenn']; ?></td>
-        <td class="normal_td"><img src="images/icons/silver.png" title="Silver"> <? echo $prijs['hoenntotaal']; ?></td>
+        <td class="normal_td"><img src="images/icons/silver.png" title="Silver"> <?php  echo $prijs['hoenn']; ?></td>
+        <td class="normal_td"><img src="images/icons/silver.png" title="Silver"> <?php  echo $prijs['hoenntotaal']; ?></td>
       </tr>
       <tr>
         <td class="normal_td"><center>4</center></td>
         <td class="normal_td"><label for="travelsinnoh">Sinnoh</label></td>
-        <td class="normal_td"><img src="images/icons/silver.png" title="Silver"> <? echo $prijs['sinnoh']; ?></td>
-        <td class="normal_td"><img src="images/icons/silver.png" title="Silver"> <? echo $prijs['sinnohtotaal']; ?></td>
+        <td class="normal_td"><img src="images/icons/silver.png" title="Silver"> <?php  echo $prijs['sinnoh']; ?></td>
+        <td class="normal_td"><img src="images/icons/silver.png" title="Silver"> <?php  echo $prijs['sinnohtotaal']; ?></td>
       </tr>
       <tr>
         <td class="normal_td"><center>5</center></td>
         <td class="normal_td"><label for="travelunova">Unova</label></td>
-        <td class="normal_td"><img src="images/icons/silver.png" title="Silver"> <? echo $prijs['unova']; ?></td>
-        <td class="normal_td"><img src="images/icons/silver.png" title="Silver"> <? echo $prijs['unovatotaal']; ?></td> 
+        <td class="normal_td"><img src="images/icons/silver.png" title="Silver"> <?php  echo $prijs['unova']; ?></td>
+        <td class="normal_td"><img src="images/icons/silver.png" title="Silver"> <?php  echo $prijs['unovatotaal']; ?></td> 
         
         
          
       </tr> <tr>
       <td class="normal_td"><center>6</center></td>
         <td class="normal_td"><label for="travelunova">Kalos</label></td>
-        <td class="normal_td"><img src="images/icons/silver.png" title="Silver"> <? echo $prijs['kalos']; ?></td>
-        <td class="normal_td"><img src="images/icons/silver.png" title="Silver"> <? echo $prijs['kalostotaal']; ?></td> </tr>
+        <td class="normal_td"><img src="images/icons/silver.png" title="Silver"> <?php  echo $prijs['kalos']; ?></td>
+        <td class="normal_td"><img src="images/icons/silver.png" title="Silver"> <?php  echo $prijs['kalostotaal']; ?></td> </tr>
       
         <tr>
       <td class="normal_td"><center>7</center></td>
         <td class="normal_td"><label for="travelalola">Alola </label></td>
-        <td class="normal_td"><img src="images/icons/silver.png" title="Silver"> <? echo $prijs['alola']; ?></td>
-        <td class="normal_td"><img src="images/icons/silver.png" title="Silver"> <? echo $prijs['alolatotaal']; ?></td> </tr>
+        <td class="normal_td"><img src="images/icons/silver.png" title="Silver"> <?php  echo $prijs['alola']; ?></td>
+        <td class="normal_td"><img src="images/icons/silver.png" title="Silver"> <?php  echo $prijs['alolatotaal']; ?></td> </tr>
 
       
      

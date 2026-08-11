@@ -1,7 +1,7 @@
 <?php
 
 $usera = intval($_POST['user']);
-$toi = $_SESSION[id];
+$toi = $_SESSION['id'];
 if(!isset($_GET['all'])){
 //sleep(1);
 if(mb_strlen(trim($_POST['text'])) >0){
@@ -42,7 +42,7 @@ $data['msg_count2'] = mysql_num_rows(mysql_query("SELECT * FROM `chat_users` WHE
 } else {
 	    $get = mysql_query("SELECT * FROM `chat` WHERE (`user_fr` = $usera AND `user_id` = $toi) OR (`user_fr` = $toi AND `user_id` = $usera) ORDER BY `id` DESC");
   while($got = mysql_fetch_assoc($get)){
-  $data['msg'] .= '<div><span style="color:black;"><b>'.ducnghia_us($got['user_id']).'</b>:</span> '.nl2br(BBCODE($got['text'],1)).' <small style="color:blue;">'.display_date($got[time]).'</small></div>';
+  $data['msg'] .= '<div><span style="color:black;"><b>'.ducnghia_us($got['user_id']).'</b>:</span> '.nl2br(BBCODE($got['text'],1)).' <small style="color:blue;">'.display_date($got['time']).'</small></div>';
   }
 }
 

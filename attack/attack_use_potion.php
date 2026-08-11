@@ -1,4 +1,4 @@
-<?
+<?php 
 //Is all the information send
 if((isset($_GET['item'])) && (isset($_GET['sid'])) && (isset($_GET['aanval_log_id'])) && (isset($_GET['option_id'])) && (isset($_GET['potion_pokemon_id'])) && (isset($_GET['computer_info_name']))){
   //Session On

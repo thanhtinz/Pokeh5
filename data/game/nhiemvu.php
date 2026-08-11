@@ -1,5 +1,5 @@
 <?PHP
-if(isset($_POST[my])) {
+if(isset($_POST['my'])) {
    $check_nv = new nhiemvu($datauser->nhiemvu->nhiemvu);
 
           $check_ten_npc = mysql_fetch_assoc(mysql_query("SELECT * FROM `npcs` WHERE `id` = '".$check_nv->ducnghia->npc."'  "));
@@ -23,7 +23,7 @@ foreach(explode(',',$check_nv->ducnghia->vatpham) as $vatpham)
     $datauser->setvatpham($soluong[0],$soluong[1]);
       $shopvatpham=mysql_fetch_array(mysql_query("SELECT * FROM `shopvatpham` WHERE `id` ='".$soluong[0]."' "));
 
-$thuong .=$shopvatpham[tenvatpham].'*'.$soluong[1].',';
+$thuong .=$shopvatpham['tenvatpham'].'*'.$soluong[1].',';
 }
 
 	   	    } 
@@ -41,11 +41,11 @@ $thuong .=$soluong[0].'*'.$soluong[1].',';
        	  if($check_nv->ducnghia->loai=="pokemon") {
        	                $ck = mysql_fetch_assoc(mysql_query("SELECT * FROM `pokemon_wild` WHERE `wild_id` = '".$check_nv->ducnghia->pokemon."'  "));
 
-       	      $mapxxx = '- <B>'.t('đánh bại').'</b>  : <font color="red">'.$ck[naam].' <img src="/images/pokemon/icon/'.$ck[wild_id].'.gif"></font> ';
+       	      $mapxxx = '- <B>'.t('đánh bại').'</b>  : <font color="red">'.$ck['naam'].' <img src="/images/pokemon/icon/'.$ck['wild_id'].'.gif"></font> ';
        	  }
           	     
           	     
-                 $x[ducnghia] = '
+                 $x['ducnghia'] = '
                  <br> <big><center>'.t($check_nv->ducnghia->ten).'</center>
                -  '.t($check_nv->ducnghia->text).' <br>
                <font color="green">- '.t('Tiến trình').' '.$datauser->nhiemvu->song.'/'.$datauser->nhiemvu->can.' '.$trangthai.' </font> <br>
@@ -55,25 +55,25 @@ $thuong .=$soluong[0].'*'.$soluong[1].',';
                 '.$check_nv->ducnghia->xu.' xu,'.$check_nv->ducnghia->{'exp'}.' '.t('Kinh nghiệm').'
                 '.$thuong.'</font></b>  <br>
                 
-                - <b>'.t('Nơi nhận').'</b> : <b><font color="04B4AE">'.t($check_ten_npc[name]).'</font> - <font color="B404AE">'.t($check_map[ten]).'</font></b>
+                - <b>'.t('Nơi nhận').'</b> : <b><font color="04B4AE">'.t($check_ten_npc['name']).'</font> - <font color="B404AE">'.t($check_map['ten']).'</font></b>
 <br> '.$mapxxx.'
                 </big> </div>';
 
 } else {
     if($check_nv->id !=0) {
-        $msg_chua = '<br><big><center>'.$check_nv->ducnghia->ten.'</center></font><hr> <br> Hãy đến gặp <b><font color="04B4AE">'.$check_ten_npc[name].'</font> - <font color="B404AE">'.$check_map[ten].'</font></b><hr></center><big>';
+        $msg_chua = '<br><big><center>'.$check_nv->ducnghia->ten.'</center></font><hr> <br> Hãy đến gặp <b><font color="04B4AE">'.$check_ten_npc['name'].'</font> - <font color="B404AE">'.$check_map['ten'].'</font></b><hr></center><big>';
     } else {
         $msg_chua = 'Tạm thời chưa có nhiệm vụ...';
     }
     
-    $x[ducnghia] = ''.$msg_chua.'';
+    $x['ducnghia'] = ''.$msg_chua.'';
  
 }
 
 }
 
-if(isset($_POST[tranv])) {
-           $x[menu] = '';
+if(isset($_POST['tranv'])) {
+           $x['menu'] = '';
 
           	$check_nv = new nhiemvu($datauser->nhiemvu->nhiemvu);
           	 if($datauser->nhiemvu->song >=$datauser->nhiemvu->can AND $datauser->nhiemvu->id >0) {
@@ -89,7 +89,7 @@ foreach(explode(',',$check_nv->ducnghia->vatpham) as $vatpham)
     $datauser->setvatpham($soluong[0],$soluong[1]);
       $shopvatpham=mysql_fetch_array(mysql_query("SELECT * FROM `shopvatpham` WHERE `id` ='".$soluong[0]."' "));
 
-$item .=$shopvatpham[tenvatpham].'*'.$soluong[1].',';
+$item .=$shopvatpham['tenvatpham'].'*'.$soluong[1].',';
 }
 
 	   	    } 
@@ -116,11 +116,11 @@ $km .=$soluong[0].'*'.$soluong[1].',';
 
           	     
           	     
-                $x[text] = ''.t($check_nv->ducnghia->text2).'';
+                $x['text'] = ''.t($check_nv->ducnghia->text2).'';
 $datauser->nhiemvu('id',0);
-        $x[npc] = $check_nv->ducnghia->npc;
+        $x['npc'] = $check_nv->ducnghia->npc;
        
-       $x[xu] = $check_nv->ducnghia->xu;
+       $x['xu'] = $check_nv->ducnghia->xu;
               $x['exp'] = $check_nv->ducnghia->{'exp'};
               $x['item'] = $item.$ruby.'';
               $x['tmhm'] = $tmhm.$km;
@@ -128,7 +128,7 @@ $datauser->nhiemvu('id',0);
     $datauser->lichsu(' hoàn thành nhiệm vụ '.$check_nv->ducnghia->ten.'   ');
 
    } else {
-                $x[text] = 'lỗi.....';
+                $x['text'] = 'lỗi.....';
 
    }
 
@@ -140,14 +140,14 @@ $datauser->nhiemvu('id',0);
 
 
 
-if(isset($_POST[nhannv])) {
+if(isset($_POST['nhannv'])) {
    
         	$ne = new nhiemvu($datauser->nhiemvu->nhiemvu);
 
       if($datauser->nhiemvu->id<=0) {
-    $x[text] = t('Nhận nhiệm vụ thành công.');
-        $x[menu] = '';
-        $x[npc] = $check_nv[npc];
+    $x['text'] = t('Nhận nhiệm vụ thành công.');
+        $x['menu'] = '';
+        $x['npc'] = $check_nv['npc'];
 
 
        $datauser->nhiemvu('id',$ne->id); 
@@ -162,22 +162,22 @@ if(isset($_POST[nhannv])) {
        $datauser->nhiemvu('can',$ne->ducnghia->can);   
        
    } else {
-         $x[text] = 'lỗi,bạn đang làm một nhiệm vụ nào đó....';
+         $x['text'] = 'lỗi,bạn đang làm một nhiệm vụ nào đó....';
   
    }       
 
     
 }
 
-if(isset($_POST[docnv])) {
+if(isset($_POST['docnv'])) {
    
         $new = new nhiemvu($datauser->nhiemvu->nhiemvu);
 
       if($datauser->nhiemvu->id<=0) {
        $nhiemx .='<b onclick="nhannv()" class="viptxt nutchat">#'.t('Nhận nhiệm vụ').'</b>';
    }       
-    $x[text] = t($new->ducnghia->text).'';
-        $x[menu] = ''.$nhiemx.'';
+    $x['text'] = t($new->ducnghia->text).'';
+        $x['menu'] = ''.$nhiemx.'';
 
 
     
@@ -189,10 +189,10 @@ if(isset($_POST[docnv])) {
 
 
 
-if(isset($_POST[add])) {
+if(isset($_POST['add'])) {
   
           	    $get_nv = mysql_fetch_assoc(mysql_query("SELECT * FROM `ducnghia_nhiemvu`  ORDER BY `nhiemvu` DESC LIMIT 1"));
-$nnz = $get_nv[nhiemvu] + 1;
+$nnz = $get_nv['nhiemvu'] + 1;
              mysql_query("INSERT INTO `ducnghia_nhiemvu` SET 
              `nhiemvu` = '".$nnz."'
              ");
@@ -211,7 +211,7 @@ $nnz = $get_nv[nhiemvu] + 1;
          $add->add('vatpham',$_POST['vatpham']);  
          $add->add('item',$_POST['item']);  
          
-                 $x[msg] = 'done';
+                 $x['msg'] = 'done';
 
 
     }

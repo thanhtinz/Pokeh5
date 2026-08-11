@@ -2,7 +2,7 @@
 
 
 
-if(isset($_POST[giftcode])) {
+if(isset($_POST['giftcode'])) {
  
 $msg = '<center><div class="input-group">
 <input id="macode" class="form-control" type="text" value="" style="width: 40%;"> <a href="javascript:nhapcode();" class="btn btn-success" style="  -webkit-animation: glowing 1500ms infinite;
@@ -20,8 +20,8 @@ echo $n;
 
 }
 
-if(isset($_POST[top])) {
- $g = $_POST[id];
+if(isset($_POST['top'])) {
+ $g = $_POST['id'];
  if($g==1) {
  
   $req=mysql_query("SELECT * FROM `users` WHERE `level`>=0 AND `user_id` >=5 ORDER BY `level` DESC, exp DESC LIMIT 0,10");
@@ -29,10 +29,10 @@ if(isset($_POST[top])) {
  $i = 1;
 
 while ($res = mysql_fetch_array($req)) {
-$_chiso = $res[exp] / $res[expmax] * 100;
+$_chiso = $res['exp'] / $res['expmax'] * 100;
 
-$msg.= '#'.$i.' <img src="/xml/nhanvat.php?nhanvat='.$res[sprite].'&nut=1" style="float:left;margin:15px 15px;border:2px solid #000;"><B class="viptxt"> '.nick($res[user_id]).'</b> Lv.'.$res[level].' + '.highamount($_chiso).'% <br>
-Exp: '.highamount($res[exp]).'/'.highamount($res[expmax]).'
+$msg.= '#'.$i.' <img src="/xml/nhanvat.php?nhanvat='.$res['sprite'].'&nut=1" style="float:left;margin:15px 15px;border:2px solid #000;"><B class="viptxt"> '.nick($res['user_id']).'</b> Lv.'.$res['level'].' + '.highamount($_chiso).'% <br>
+Exp: '.highamount($res['exp']).'/'.highamount($res['expmax']).'
 
 <div class="kengang"></div> ';
 ++$i;
@@ -46,8 +46,8 @@ if($g==2) {
  $i = 1;
 while ($res = mysql_fetch_array($req)) {
 
-$msg.= '#'.$i.' <img src="/xml/nhanvat.php?nhanvat='.$res[sprite].'&nut=1" style="float:left;margin:15px 15px;border:2px solid #000;"><B class="viptxt"> '.nick($res[user_id]).'</b><br>
-Xu: '.highamount($res[xu]).'
+$msg.= '#'.$i.' <img src="/xml/nhanvat.php?nhanvat='.$res['sprite'].'&nut=1" style="float:left;margin:15px 15px;border:2px solid #000;"><B class="viptxt"> '.nick($res['user_id']).'</b><br>
+Xu: '.highamount($res['xu']).'
 
 <div class="kengang"></div> ';
 ++$i;
@@ -65,8 +65,8 @@ if($g==3) {
  $i = 1;
 while ($res = mysql_fetch_array($req)) {
 
-$msg.= '#'.$i.' <img src="/xml/nhanvat.php?nhanvat='.$res[sprite].'&nut=1" style="float:left;margin:15px 15px;border:2px solid #000;"><B class="viptxt"> '.nick($res[user_id]).'</b><br>
-Điểm: '.highamount($res[sukien]).'
+$msg.= '#'.$i.' <img src="/xml/nhanvat.php?nhanvat='.$res['sprite'].'&nut=1" style="float:left;margin:15px 15px;border:2px solid #000;"><B class="viptxt"> '.nick($res['user_id']).'</b><br>
+Điểm: '.highamount($res['sukien']).'
 
 <div class="kengang"></div> ';
 ++$i;
@@ -80,8 +80,8 @@ if($g==4) {
  $i = 1;
 while ($res = mysql_fetch_array($req)) {
 
-$msg.= '#'.$i.' <img src="/xml/nhanvat.php?nhanvat='.$res[sprite].'&nut=1" style="float:left;margin:15px 15px;border:2px solid #000;"><B class="viptxt"> '.nick($res[user_id]).'</b><br>
-ruby: '.highamount($res[ruby]).'
+$msg.= '#'.$i.' <img src="/xml/nhanvat.php?nhanvat='.$res['sprite'].'&nut=1" style="float:left;margin:15px 15px;border:2px solid #000;"><B class="viptxt"> '.nick($res['user_id']).'</b><br>
+ruby: '.highamount($res['ruby']).'
 
 <div class="kengang"></div> ';
 ++$i;
@@ -95,8 +95,8 @@ if($g==5) {
  $i = 1;
 while ($res = mysql_fetch_array($req)) {
 
-$msg.= '#'.$i.' <img src="/xml/nhanvat.php?nhanvat='.$res[sprite].'&nut=1" style="float:left;margin:15px 15px;border:2px solid #000;"><B class="viptxt"> '.nick($res[user_id]).'</b><br>
-Thắng - Thua: '.highamount($res[thang]).' - '.highamount($res[thua]).'
+$msg.= '#'.$i.' <img src="/xml/nhanvat.php?nhanvat='.$res['sprite'].'&nut=1" style="float:left;margin:15px 15px;border:2px solid #000;"><B class="viptxt"> '.nick($res['user_id']).'</b><br>
+Thắng - Thua: '.highamount($res['thang']).' - '.highamount($res['thua']).'
 
 <div class="kengang"></div> ';
 ++$i;
@@ -127,7 +127,7 @@ while($pokemon = mysql_fetch_array($top5pokemonsql)){
     $pokemon = pokemonei($pokemon);
     $pokemon['naam'] = pokemon_naam($pokemon['naam'],$pokemon['roepnaam']);
     $popup = pokemon_popup($pokemon, $txt);
-  $msg.= '#'.$i.' <img onclick="pokemon('.$pokemon[id].')" src="images/'.$type.'/'.$wildid.'.gif" style="float:left;margin:15px 15px;border:2px solid #000;"><B class="viptxt"> '.ducnghia_us($pokemon[user_id]).'</b><br>
+  $msg.= '#'.$i.' <img onclick="pokemon('.$pokemon['id'].')" src="images/'.$type.'/'.$wildid.'.gif" style="float:left;margin:15px 15px;border:2px solid #000;"><B class="viptxt"> '.ducnghia_us($pokemon['user_id']).'</b><br>
 
 
 <div class="kengang"></div> ';

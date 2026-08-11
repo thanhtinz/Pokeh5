@@ -104,17 +104,17 @@ include_once('../../templates/ducnghia.php');
       $ducnghia_siver = $money;
        $ducnghia = rand(1,5);
        
-       if($_SESSION[leotop] >=1) {
-                  $u_pk=mysql_fetch_array(mysql_query("SELECT * FROM `users` WHERE `id`  = '".$_SESSION[leotop]."' LIMIT 1"));
- $toptoi = $datauser[top];
- $toppk = $u_pk[top];
+       if($_SESSION['leotop'] >=1) {
+                  $u_pk=mysql_fetch_array(mysql_query("SELECT * FROM `users` WHERE `id`  = '".$_SESSION['leotop']."' LIMIT 1"));
+ $toptoi = $datauser['top'];
+ $toppk = $u_pk['top'];
  
                  mysql_query("UPDATE `users` SET `top`='".$toppk."' WHERE `id`='".$user_id."'");
-                 mysql_query("UPDATE `users` SET `top`='".$toptoi."' WHERE `id`='".$u_pk[id]."'");
+                 mysql_query("UPDATE `users` SET `top`='".$toptoi."' WHERE `id`='".$u_pk['id']."'");
 if($toppk <10) {
-    tin(''.$datauser[username].' vừa lên Top #'.$toppk.' ');
+    tin(''.$datauser['username'].' vừa lên Top #'.$toppk.' ');
 }
-$_SESSION[leotop] =0;
+$_SESSION['leotop'] =0;
 
        }
 
@@ -129,7 +129,7 @@ $_SESSION[leotop] =0;
 
       	$check_nv = mysql_fetch_assoc(mysql_query("SELECT * FROM `ducnghia_data_nhiemvu` WHERE `user_id` = '$user_id' AND `loai` = 'sotai'  "));
              	
-             	if($datauser->nhiemvu->loai=="sotai" AND $datauser->nhiemvu->pokemon ==$chiendau[id] AND $datauser->nhiemvu->id>=1 ){
+             	if($datauser->nhiemvu->loai=="sotai" AND $datauser->nhiemvu->pokemon ==$chiendau['id'] AND $datauser->nhiemvu->id>=1 ){
              	            $song = $datauser->nhiemvu->song +1;
              	            $datauser->nhiemvu('song',$song);
  

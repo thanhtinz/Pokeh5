@@ -3,7 +3,7 @@
 function nick2($gid){
  return   ducnghia_us2($gid);
 }
-if(isset($_POST[fixket])) {
+if(isset($_POST['fixket'])) {
         		      mysql_query("UPDATE `users` SET `map`='{\"id\":1,\"x\":23,\"y\":48}' WHERE `id`='".$_SESSION['id']."'");
 
 }
@@ -13,17 +13,17 @@ function ducnghia_us2($gid){
 	$gunner = mysql_fetch_assoc(mysql_query("SELECT * FROM `users` WHERE `id` = $gid"));
 $tkm = $gunner;
 
-if(empty($tkm[name])) {$tennv =ucfirst($gunner['username']);}else{ $tennv =ucfirst($gunner['name']);}
+if(empty($tkm['name'])) {$tennv =ucfirst($gunner['username']);}else{ $tennv =ucfirst($gunner['name']);}
 
-if($tkm[admin]==1)  {
+if($tkm['admin']==1)  {
     $chuc = 'style="background-image: url(img/2.gif);width:350px;"'; $ma = 'mod'; }
-    if($tkm[admin]==2) {
+    if($tkm['admin']==2) {
     $chuc = '[GM]'; }
-    if($tkm[admin]==3) {
+    if($tkm['admin']==3) {
         $chuc .= 'style="background-image: url(img/backround3.gif);width:350px;"';
         $ma = 'admin';
     }
-if($tkm[ducnghia_thoigiankhoa] > time()) {
+if($tkm['ducnghia_thoigiankhoa'] > time()) {
 return '<a href="javascript:ttnv('.$gid.')" style="color:#190B07;"><strike>'.$tennv.'</strike></a>'; 
 } else {
 	return '<img src="/images/items/Poke ball.png">'.$tennv.''; }
@@ -36,9 +36,9 @@ if(isset($_POST['mychat'])){
 $x = mysql_query("SELECT * FROM `chat_users` WHERE `user_fr` = $user_id ORDER BY `time` DESC, `amount` DESC");
 while($xx = mysql_fetch_assoc($x)){
 	if(!$xx['view'])
-	$view .= '<a href="javascript:msg('.$xx[user_id].',1)">'.nick2($xx['user_id'],2).' <b style="color:red;">+'.$xx['amountplus'].'</b></a><div class="kengang"></div>';
+	$view .= '<a href="javascript:msg('.$xx['user_id'].',1)">'.nick2($xx['user_id'],2).' <b style="color:red;">+'.$xx['amountplus'].'</b></a><div class="kengang"></div>';
 else
-	$view2 .= '<a href="javascript:msg('.$xx[user_id].',1)">'.nick2($xx['user_id'],2).' <b style="color:blue;">('.$xx['amount'].')</b></a><div class="kengang"></div>';
+	$view2 .= '<a href="javascript:msg('.$xx['user_id'].',1)">'.nick2($xx['user_id'],2).' <b style="color:blue;">('.$xx['amount'].')</b></a><div class="kengang"></div>';
 }
 echo '<b><i class="fa fa-inbox fixbot"></i> CHƯA ĐỌC</b><br>
 '.$view.'<br>
@@ -47,7 +47,7 @@ echo '<b><i class="fa fa-inbox fixbot"></i> CHƯA ĐỌC</b><br>
 }
 
 
-if(isset($_POST[ruongdo])) {
+if(isset($_POST['ruongdo'])) {
  	$out .='
 <div onclick="ok_skin('.$ducnghia_do['id'].')" class="showitem" style="border: 2px solid;"><img src="'.$ducnghia_img.'"><div class="count count-vp-1"></div></div>		';
 
@@ -94,7 +94,7 @@ echo $n;
 }
 
 
-if(isset($_POST[amthanh])) {
+if(isset($_POST['amthanh'])) {
     if($datauser->sound ==1) {
     		      mysql_query("UPDATE `users` SET `sound`='0',`music`='0' WHERE `id`='".$_SESSION['id']."'");
     		      echo'Tắt âm thanh thành công,vui lòng tải lại game.';

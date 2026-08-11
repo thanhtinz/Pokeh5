@@ -18,18 +18,18 @@ if(isset($_POST['pk'])){
 
 if(isset($_POST['gym'])){
 
-$ducnghia_vh_Trainer = mysql_fetch_assoc(mysql_query("SELECT `naam` FROM `trainer` WHERE id='".$_GET[id]."'"));
+$ducnghia_vh_Trainer = mysql_fetch_assoc(mysql_query("SELECT `naam` FROM `trainer` WHERE id='".$_GET['id']."'"));
         include('../attack/trainer/trainer-start.php');
         mysql_data_seek($pokemon_sql, 0);
         $opzak = mysql_num_rows($pokemon_sql);
         $level = 0;
         while($pokemon = mysql_fetch_assoc($pokemon_sql)){ $level += $pokemon['level']; }
         $trainer_ave_level = $level/$opzak;
-        $lv = $_POST[lv];
+        $lv = $_POST['lv'];
         //Make Fight
         create_new_trainer_attack($ducnghia_vh_Trainer['naam'],$trainer_ave_level,$gebied);
 
-$ducnghiaJSON[ducnghia] = $ducnghia_vh_Trainer[naam];
+$ducnghiaJSON['ducnghia'] = $ducnghia_vh_Trainer['naam'];
 
  echo json_encode($ducnghiaJSON);
 die;
@@ -38,11 +38,11 @@ die;
 
 if(isset($_POST['trainer'])){
 
-$v = mysql_fetch_assoc(mysql_query("SELECT * FROM `chiendau` WHERE `id` = '".$_POST[id]."'"));
+$v = mysql_fetch_assoc(mysql_query("SELECT * FROM `chiendau` WHERE `id` = '".$_POST['id']."'"));
 
-if($v[level] > $datauser->level) {
-    $a[code] = 0;
-    $a[msg] = 'Bạn phải đạt trình độ cấp '.$v[level].' để có thể khiêu chiến với người này. ';
+if($v['level'] > $datauser->level) {
+    $a['code'] = 0;
+    $a['msg'] = 'Bạn phải đạt trình độ cấp '.$v['level'].' để có thể khiêu chiến với người này. ';
 } else {
         include('../attack/trainer/trainer-start.php');
         mysql_data_seek($pokemon_sql, 0);
@@ -50,10 +50,10 @@ if($v[level] > $datauser->level) {
         $level = 0;
         while($pokemon = mysql_fetch_assoc($pokemon_sql)){ $level += $pokemon['level']; }
         $trainer_ave_level = $level/$opzak;
-        $lv = $_POST[lv];
+        $lv = $_POST['lv'];
         //Make Fight
         create_new_trainer_attack($v['id'],5,$gebied);
-        $a[code]=1;
+        $a['code']=1;
 }
 
 
@@ -68,7 +68,7 @@ die;
 
 if(isset($_POST['wild'])){
      $ktra = mysql_fetch_assoc(mysql_query("SELECT `id` FROM `aanval_log` WHERE `user_id`='".$_SESSION['id']."'"));
-if($ktra[id] !=0 ) {
+if($ktra['id'] !=0 ) {
     
 } else {
     	$wid = $datauser->ducnghia_pokemon;
@@ -79,7 +79,7 @@ if($ktra[id] !=0 ) {
         create_new_attack($wid,$leveltegenstander,$gebied);
                     mysql_query("UPDATE `users` SET `ducnghia_pokemon` = '0' , `ducnghia_level` = '0' WHERE `id`='".$_SESSION['id']."'");
 }
-$ducnghiaJSON[ducnghia] = $msg;
+$ducnghiaJSON['ducnghia'] = $msg;
 
  echo json_encode($ducnghiaJSON);
 die;
@@ -97,7 +97,7 @@ if(isset($_POST['hp'])){
     mysql_query("UPDATE `pokemon_speler` SET `leven`=`levenmax` WHERE `user_id`='" .$datauser->id."' AND `opzak_nummer` = '1'");mysql_query("UPDATE `pokemon_speler` SET `leven`=`levenmax` WHERE `user_id`='" .$datauser->id."' AND `opzak_nummer` = '2'");mysql_query("UPDATE `pokemon_speler` SET `leven`=`levenmax` WHERE `user_id`='" .$datauser->id."' AND `opzak_nummer` = '3'");mysql_query("UPDATE `pokemon_speler` SET `leven`=`levenmax` WHERE `user_id`='" .$datauser->id."' AND `opzak_nummer` = '4'"); mysql_query("UPDATE `pokemon_speler` SET `leven`=`levenmax` WHERE `user_id`='" .$datauser->id."' AND `opzak_nummer` = '5'");mysql_query("UPDATE `pokemon_speler` SET `leven`=`levenmax` WHERE `user_id`='" .$datauser->id."' AND `opzak_nummer` = '6'");
  $msg = 'Toàn bộ pokemon , của anh đã được hồi phục.';
 }
-$ducnghiaJSON[ducnghia] = $msg;
+$ducnghiaJSON['ducnghia'] = $msg;
 
  echo json_encode($ducnghiaJSON);
 die;
@@ -114,7 +114,7 @@ if(isset($_POST['skill'])){
 		  list ($nieuweaanval['pokemonid'], $nieuweaanval['aanvalnaam']) = split ('[/]', $link);
      $pokemoninfo  = mysql_fetch_assoc(mysql_query("SELECT pokemon_wild.wild_id, pokemon_wild.naam, pokemon_speler.id, pokemon_speler.aanval_1, pokemon_speler.aanval_2, pokemon_speler.aanval_3, pokemon_speler.aanval_4 FROM pokemon_wild INNER JOIN pokemon_speler ON pokemon_wild.wild_id = pokemon_speler.wild_id WHERE `id`='".$nieuweaanval['pokemonid']."'"));
           $finish = False;
-    $id = $_POST[id];
+    $id = $_POST['id'];
  
  
  if($id ==5) {
@@ -173,7 +173,7 @@ if(isset($_POST['skill'])){
             if($count == 0) unset($_SESSION['aanvalnieuw']);  
           }
 
-$ducnghiaJSON[ducnghia] = $msg;
+$ducnghiaJSON['ducnghia'] = $msg;
 
  echo json_encode($ducnghiaJSON);
 die;
@@ -184,7 +184,7 @@ die;
 
 if(isset($_POST['tienhoa'])){
      
-    $id = $_POST[id];
+    $id = $_POST['id'];
  $link = base64_decode($_SESSION['evolueren']);
 		  #Code splitten, zodat informatie duidelijk word
 		  list ($evolueren['pokemonid'], $evolueren['nieuw_id']) = split ('[/]', $link);
@@ -313,7 +313,7 @@ $update = mysql_fetch_assoc(mysql_query("SELECT * FROM `pokemon_wild` WHERE `wil
  
  
 
-$ducnghiaJSON[ducnghia] = $msg;
+$ducnghiaJSON['ducnghia'] = $msg;
 
  echo json_encode($ducnghiaJSON);
 die;

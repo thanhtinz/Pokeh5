@@ -1,4 +1,4 @@
-<?
+<?php 
 
 if(isset($_POST['here'])){
   //Check alive pokemon.
@@ -52,7 +52,7 @@ if(isset($_POST['here'])){
         <script type="text/javascript">
         var t
         function status_check(){
-          $.get("attack/tour_ready.php?duel_id="+<? echo $duel_id; ?>+"&sid="+Math.random(), function(data) {
+          $.get("attack/tour_ready.php?duel_id="+<?php  echo $duel_id; ?>+"&sid="+Math.random(), function(data) {
             if(data == 0){
               $("#status").append(".")
               t = setTimeout('status_check()', 2000)
@@ -74,7 +74,7 @@ if(isset($_POST['here'])){
         $("#status").html("Loading")
         status_check()
         </script>
-      <?
+      <?php 
     }
     else{
       $excist = mysql_fetch_array($excist_sql);

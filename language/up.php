@@ -90,7 +90,7 @@ $nick = mysql_fetch_array(mysql_query("SELECT * FROM `user_reg` WHERE `id`='".$i
 	<div class="mini-line"></div>
 <marquee style="border:red 2px SOLID">		«Hệ Thống» 
 </span>
-</b>: <span style="color: #9c9;">Nhân Vật Của Bạn Đang Được Bảo Vệ Trong Vòng <span style="color: #fffabd;"> <?php echo ' '.thoigiantinh($set[timebaove]).' '  ?></span> bạn sẽ không bị người khác cướp</span></b></marquee></div>	<div class="dot-line"></div>
+</b>: <span style="color: #9c9;">Nhân Vật Của Bạn Đang Được Bảo Vệ Trong Vòng <span style="color: #fffabd;"> <?php echo ' '.thoigiantinh($set['timebaove']).' '  ?></span> bạn sẽ không bị người khác cướp</span></b></marquee></div>	<div class="dot-line"></div>
 <?php
 }
 

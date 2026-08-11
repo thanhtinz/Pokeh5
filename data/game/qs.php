@@ -1,14 +1,14 @@
 <?PHP
 
 
-if(isset($_POST[quay])) {
+if(isset($_POST['quay'])) {
   echo'Phiên bản thử nghiệm không có tính năng này.
 Nâng cấp phiên bản vui lòng liên hệ <br>
 <a href="//fb.com/ducnghiast">DUCNGHIA</a>';
 }
 
 
-if(isset($_POST[show])) {
+if(isset($_POST['show'])) {
 echo'<br><br><br><center><div id="phanthuong" class="none"></div>
 <div id="error" class="error none">Bạn không có 3 ruby hoặc chưa đủ level 10.</div>
 <ul class="play">

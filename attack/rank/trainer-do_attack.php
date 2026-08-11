@@ -1,4 +1,4 @@
-<?
+<?php 
 //Is all the information send
 if((isset($_GET['attack_name'])) && (isset($_GET['wie'])) && (isset($_GET['aanval_log_id'])) && (isset($_GET['sid']))){
   //Session On

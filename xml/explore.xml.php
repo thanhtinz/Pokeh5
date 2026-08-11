@@ -204,7 +204,7 @@ $danhan ='1';
    }
    
 
-if($_SESSION[id]==1) {
+if($_SESSION['id']==1) {
     $nt = '['.$npc->id.']'.t($npc->name);
 } else {
     $nt = t($npc->name);

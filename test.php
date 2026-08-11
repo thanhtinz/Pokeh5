@@ -20,8 +20,8 @@
 
     $trans_colour = imagecolorallocatealpha($img2, 0, 0, 0, 127);
     imagefill($img2, 0, 0, $trans_colour);
-    $doc = $_GET[doc];
-    $trai = $_GET[trai];  ///0,34,66
+    $doc = $_GET['doc'];
+    $trai = $_GET['trai'];  ///0,34,66
     imagecopy($img2, $img, 0, 0, $trai, $doc, 40, 40);
     imagedestroy($img);
     // output cropped image to the browser

@@ -8,7 +8,7 @@ if($user_id !=1) {
     exit();
 }
 
-    if(isset($_GET[admin])) {
+    if(isset($_GET['admin'])) {
         echo'<center>bạn muốn làm gì</center>';
         
         echo'<button onclick="cp_chon(\'pokemon\')">ADD POKEMON</button> <br>';
@@ -32,8 +32,8 @@ echo'<br> - Trận : ' .number_format($tran) . ' ';
       
     }
 
-if(isset($_GET[tool])) {
-    if($_POST[name]=="pokemon") {
+if(isset($_GET['tool'])) {
+    if($_POST['name']=="pokemon") {
     echo'<div id="admin">
     <BR><BR><BR><BR><BR>
 #ID TV : <input type="text"  name="users" value="">  <br>
@@ -48,7 +48,7 @@ Cấp độ : <input type="text"  name="level" value="">
 
     }
     
-if($_POST[name]=="khoa") {
+if($_POST['name']=="khoa") {
     echo'<div id="admin">
     <BR><BR><BR><BR><BR>
 #ID TV : <input type="text"  name="users" value="">  <br>
@@ -62,7 +62,7 @@ Thời gian(tính = giây) : <input type="text"  name="thoigian" value="">
 
     }    
     
-if($_POST[name]=="vatpham") {
+if($_POST['name']=="vatpham") {
     echo'<div id="admin">
     <BR><BR><BR><BR><BR>
 #ID TV : <input type="text"  name="users" value="">  <br>
@@ -72,7 +72,7 @@ if($_POST[name]=="vatpham") {
 echo'<select name="vatpham"> ';
  $datam = mysql_query("SELECT * FROM shopvatpham ORDER BY `id` DESC");
                                 while ($data_map = mysql_fetch_assoc($datam)){
-echo ' <option value="'.$data_map[id].'">#'.$data_map[tenvatpham].'</option>';
+echo ' <option value="'.$data_map['id'].'">#'.$data_map['tenvatpham'].'</option>';
 }
 echo'</select><br>
 
@@ -83,7 +83,7 @@ echo'</select><br>
 
     } 
     
-    if($_POST[name]=="xu") {
+    if($_POST['name']=="xu") {
     echo'<div id="admin">
     <BR><BR><BR><BR><BR>
 #ID TV : <input type="text"  name="users" value="">  <br>
@@ -99,7 +99,7 @@ ruby : <input type="text"  name="ruby" value="">
     }   
     
     
-     if($_POST[name]=="npc") {
+     if($_POST['name']=="npc") {
 foreach (glob("../images/charactersets/*.png") as $filename) {
     $ducnghiaxxx =explode("/",$filename);
     $get_x = explode(".",$ducnghiaxxx[3]);
@@ -108,7 +108,7 @@ foreach (glob("../images/charactersets/*.png") as $filename) {
 }
     }
     
-     if($_POST[name]=="saochep") {
+     if($_POST['name']=="saochep") {
     echo'<div id="admin">
     <BR><BR><BR><BR><BR>
 MAP : <input type="text"  name="id" value=""> 
@@ -123,15 +123,15 @@ NPC ID : <input type="text"  name="npc" value="">
     }   
     
     
-if($_POST[name]=="them") {
+if($_POST['name']=="them") {
     echo'<div id="admin">
     <BR><BR><BR><BR><BR>
-map : <input type="text"  name="map" value="'.$_POST[mapID].'">  <br>
-x : <input type="text"  name="x" value="'.($_POST[x]+1).'">  <br>
-y : <input type="text"  name="y" value="'.($_POST[y]+1).'">  <br>
+map : <input type="text"  name="map" value="'.$_POST['mapID'].'">  <br>
+x : <input type="text"  name="x" value="'.($_POST['x']+1).'">  <br>
+y : <input type="text"  name="y" value="'.($_POST['y']+1).'">  <br>
 ảnh : <input type="text"  name="style" value="">  <br>
 
-Di : <input type="text"  name="direction" value="'.$_POST[di].'">  <br>
+Di : <input type="text"  name="direction" value="'.$_POST['di'].'">  <br>
 
 
 LEVEL : <input type="text"  name="level" value="0">  <br>
@@ -148,7 +148,7 @@ Pokemon ( cách nhau dấu phẩy) : <input type="text"  name="pokemon" value=""
     }       
     
     
-    if($_POST[name]=="code") {
+    if($_POST['name']=="code") {
     echo'<div id="admin">
     <BR><BR>
 xu : <input type="text"  name="xu" value="0">  <br>
@@ -175,7 +175,7 @@ Về Vật phẩm,item,HM,TM : <Br>
     
 }
 
-if(isset($_GET[code])) {
+if(isset($_GET['code'])) {
      function ducnghia_sql_code($ducnghia_code) {
 $chars ="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 $size = strlen($char);
@@ -186,63 +186,63 @@ $str=substr(str_shuffle($chars), 0, $ducnghia_code);
 return$str;
 }
 $c = ducnghia_sql_code(16);
-if($_SESSION[id]==1) {
+if($_SESSION['id']==1) {
 mysql_query("INSERT INTO `giftcode` SET 
- `vinhvien` = '".$_POST[vinhvien]."', `xu` = '".$_POST[xu]."', `ruby` = '".$_POST[ruby]."', `vatpham` = '".$_POST[vatpham]."', `item` = '".$_POST[item]."', `tmhm` = '".$_POST[tmhm]."',`code` = '".$c."'");          }
+ `vinhvien` = '".$_POST['vinhvien']."', `xu` = '".$_POST['xu']."', `ruby` = '".$_POST['ruby']."', `vatpham` = '".$_POST['vatpham']."', `item` = '".$_POST['item']."', `tmhm` = '".$_POST['tmhm']."',`code` = '".$c."'");          }
      echo' Mã quà tặng : '.$c.' ';
 }
 
-if(isset($_GET[them])) {
+if(isset($_GET['them'])) {
 
 mysql_query("INSERT INTO `chiendau` SET 
- `level` = '".$_POST[level]."', `lvpkm` = '".$_POST[lvpkm]."', `pokemon` = '".$_POST[pokemon]."'");          
+ `level` = '".$_POST['level']."', `lvpkm` = '".$_POST['lvpkm']."', `pokemon` = '".$_POST['pokemon']."'");          
  
  $t = mysql_insert_id();
 
  $npc = '[{"line":1,"function":"DISPLAY MESSAGE","arguments":{"@cdata":"DUCNGHIA"}}]';
 
-mysql_query("INSERT INTO `npcs` SET `map` = '".$_POST[map]."',`x` = '".$_POST[x]."',`y` = '".$_POST[y]."',`name`='So Tài.".$t."',`movement` = 'Still',`style`='".$_POST[style]."',`client_script`='".$npc."',`type`='Action Button',`direction`='".$_POST[direction]."',`text`='Muốn so tài với ta ?',`o1`='huanluyen(".$t.")',`n1`='So tài'");
+mysql_query("INSERT INTO `npcs` SET `map` = '".$_POST['map']."',`x` = '".$_POST['x']."',`y` = '".$_POST['y']."',`name`='So Tài.".$t."',`movement` = 'Still',`style`='".$_POST['style']."',`client_script`='".$npc."',`type`='Action Button',`direction`='".$_POST['direction']."',`text`='Muốn so tài với ta ?',`o1`='huanluyen(".$t.")',`n1`='So tài'");
 
 echo $t.' Thành công.';
 }
 
 
-if(isset($_GET[addpkm])) {
-    pokemon($_POST[pokemon],$_POST[level],$_POST[users]);
+if(isset($_GET['addpkm'])) {
+    pokemon($_POST['pokemon'],$_POST['level'],$_POST['users']);
     echo'OKE';
 }
 
 
-if(isset($_GET[khoanick])) {
-$thoigian = $_POST[thoigian] + time();
-             mysql_query("UPDATE `users` SET `khoa`='".$thoigian."' WHERE `id`='".$_POST[users]."'");
+if(isset($_GET['khoanick'])) {
+$thoigian = $_POST['thoigian'] + time();
+             mysql_query("UPDATE `users` SET `khoa`='".$thoigian."' WHERE `id`='".$_POST['users']."'");
 
-    echo'KHÓA THÀNH CÔNG ID'.$_POST[user_id].' với thời gian '.($thoigian-time()).'s.  ';
+    echo'KHÓA THÀNH CÔNG ID'.$_POST['user_id'].' với thời gian '.($thoigian-time()).'s.  ';
 }
 
-if(isset($_GET[vatpham])) {
+if(isset($_GET['vatpham'])) {
 echo'Thành công.';
-                       vatpham($_POST[vatpham],$_POST[soluong],$_POST[users]);
+                       vatpham($_POST['vatpham'],$_POST['soluong'],$_POST['users']);
 
 }
 
 
-if(isset($_GET[xu])) {
-             mysql_query("UPDATE `users` SET `xu`=`xu`+'".$_POST[xu]."',`ruby` = `ruby` + '".$_POST[ruby]."' WHERE `id`='".$_POST[users]."'");
+if(isset($_GET['xu'])) {
+             mysql_query("UPDATE `users` SET `xu`=`xu`+'".$_POST['xu']."',`ruby` = `ruby` + '".$_POST['ruby']."' WHERE `id`='".$_POST['users']."'");
 
     echo'OK.  ';
 }
 
 
-if(isset($_GET[map])) {
-        $map=mysql_fetch_array(mysql_query("SELECT * FROM `npcs` WHERE `id` = '".$_POST[npc]."'"));
+if(isset($_GET['map'])) {
+        $map=mysql_fetch_array(mysql_query("SELECT * FROM `npcs` WHERE `id` = '".$_POST['npc']."'"));
         
 mysql_query("INSERT INTO `npcs` SET 
- `map` = '".$_POST[id]."',`name` = '".$map['name']."',`direction` = '".$map['direction']."',
- `x` = '".$map['x']."',`y` = '".$map['y']."',`type` = '".$map['type']."',`style` = '".$map['style']."',`movement` = '".$map['movement']."',`o1` = '".$map[o1]."',`n1` = '".$map[n1]."',`text` = '".$map[text]."',`client_script` = '".$map['client_script']."',`server_script` = '".$map['server_script']."',`o2` = '".$map[o1]."',`n2` = '".$map[n1]."',`o3` = '".$map[o3]."',`n3` = '".$map[n3]."',`o4` = '".$map[o4]."',`n4` = '".$map[n4]."'
+ `map` = '".$_POST['id']."',`name` = '".$map['name']."',`direction` = '".$map['direction']."',
+ `x` = '".$map['x']."',`y` = '".$map['y']."',`type` = '".$map['type']."',`style` = '".$map['style']."',`movement` = '".$map['movement']."',`o1` = '".$map['o1']."',`n1` = '".$map['n1']."',`text` = '".$map['text']."',`client_script` = '".$map['client_script']."',`server_script` = '".$map['server_script']."',`o2` = '".$map['o1']."',`n2` = '".$map['n1']."',`o3` = '".$map['o3']."',`n3` = '".$map['n3']."',`o4` = '".$map['o4']."',`n4` = '".$map['n4']."'
 ");           
 
-echo $map[name].' Thành công.';
+echo $map['name'].' Thành công.';
 }
 
 
