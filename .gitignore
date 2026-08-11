@@ -1,0 +1,11 @@
+# Sprite pack shipped as a release asset (images.zip, ~218 MB) — see scripts/fetch-assets.sh
+/images/pokemon/
+/images/shiny/
+
+# Local config & runtime state
+/config.local.php
+/storage/
+*.log
+
+vendor/
+node_modules/
