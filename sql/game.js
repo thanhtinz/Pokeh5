@@ -20,16 +20,65 @@ PokeMon Vietnam is just a small game for Vietnamese people! License of the probl
     opengame();
 });
 
-function opengame(){
-    var ducnghia_wcs=$(window).height();
-    var ducnghia_wcw=$(window).width();
-    if(ducnghia_wcw>=490)
-    {
-        ducnghia_wcw=490;
-        
-    }
-          var ducnghiacssx = document.getElementsByTagName('ducnghia');
+/**
+ * The interface is laid out for a 490px-wide phone screen: the map canvas,
+ * the HUD and every absolutely positioned panel in data.php are sized against
+ * it. Re-flowing all of that is not something a stylesheet can do, so the
+ * frame keeps its 490px design width and is scaled to fill the window
+ * instead - which is what makes it read as full screen rather than a small
+ * column sitting in the middle of a wallpaper.
+ */
+var DUCNGHIA_DESIGN_WIDTH = 490;
 
-    
-    ducnghiacssx[0].innerHTML  = '<iframe src="/game.json" style="width: '+ducnghia_wcw+'px; height: '+ducnghia_wcs+'px"scrolling="no" marginwidth="0" marginheight="0" frameborder="0" vspace="0" hspace="0"></iframe>';
+/**
+ * The vertical layout is elastic, but it still needs room: the HUD, the map
+ * and the chat panel stack down the screen, and the main menu's buttons sit
+ * near the bottom. Scaling on width alone shrinks the usable design height
+ * until those buttons fall off the screen, so the frame is fitted as a
+ * portrait screen of this height and centred.
+ */
+var DUCNGHIA_DESIGN_HEIGHT = 850;
+
+var DUCNGHIA_MAX_SCALE = 3;
+
+function opengame(){
+    var host = document.getElementsByTagName('ducnghia')[0];
+    if (!host) {
+        return;
+    }
+
+    host.innerHTML = '<iframe id="ducnghia_frame" src="/game.json" scrolling="no" marginwidth="0" marginheight="0" frameborder="0" vspace="0" hspace="0"></iframe>';
+
+    sizegame();
 }
+
+function sizegame(){
+    var frame = document.getElementById('ducnghia_frame');
+    if (!frame) {
+        return;
+    }
+
+    var vw = window.innerWidth || document.documentElement.clientWidth;
+    var vh = window.innerHeight || document.documentElement.clientHeight;
+
+    var scale = Math.min(
+        vw / DUCNGHIA_DESIGN_WIDTH,
+        vh / DUCNGHIA_DESIGN_HEIGHT,
+        DUCNGHIA_MAX_SCALE
+    );
+
+    // The frame is laid out at the design width and then scaled, so the page
+    // inside it still believes it is 490px wide and every fixed offset lands
+    // where it was drawn. Height is divided by the scale so the scaled result
+    // is exactly the window height - no letterboxing, no inner scrollbar.
+    frame.style.width = DUCNGHIA_DESIGN_WIDTH + 'px';
+    frame.style.height = Math.ceil(vh / scale) + 'px';
+    frame.style.transform = 'scale(' + scale + ')';
+    frame.style.transformOrigin = 'top left';
+    frame.style.position = 'absolute';
+    frame.style.top = '0';
+    frame.style.left = Math.max(0, (vw - DUCNGHIA_DESIGN_WIDTH * scale) / 2) + 'px';
+}
+
+window.addEventListener('resize', sizegame);
+window.addEventListener('orientationchange', sizegame);
