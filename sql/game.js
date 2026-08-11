@@ -1,11 +1,11 @@
 /* 
 Xin chao ban toi PokeMon Viet Nam ! Tro choi duoc Build Xay dung boi DucNghia ( fb.com/ducnghiaq)
-cac ma nguon chinh cua tro choi : PHP,Nodejs(socket.io),Mysql,html5,javascript
+cac ma nguon chinh cua tro choi : PHP 8,Mysql,html5,javascript (realtime dung Server-Sent Events)
 Cac game duoc tich hop duoc share tren mang xa hoi !
 ////ENGLISH 
 
 Welcome to PokeMOn Vietnam. The game was founded by DucNghia with the source code shared on social networks!
-The game works on servers: php 5.6, mysql, websocket, html5 etc.
+The game works on servers: php 8.3+, mysql, html5 etc. Realtime uses Server-Sent Events, so no separate socket server is needed.
 When participating in Vietnam pokemon, you must accept the following terms:
 1, User account must be responsible for the use license! accounts must not be vulgar, disrespectful regarding organizations ...
 

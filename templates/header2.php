@@ -53,7 +53,8 @@
 
 <script type="text/javascript" src="/js/jquery.hotkeys.min.js"></script>
 <script type="text/javascript" src="/js/jsGif/gif.js"></script>
-	 <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.js"></script>    
+<!-- socket.io replaced by the SSE + POST transport in sql/realtime.js -->
+<script src="/sql/realtime.js"></script>
 <script src="/js/original-popper.min.js"></script>
     <script src="/js/originaltheme.min.js"></script>
     <script src="/js/original-holder.min.js"></script>

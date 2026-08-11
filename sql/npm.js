@@ -1,6 +1,9 @@
   ////chat
 
-var socket = io.connect('URLSOCKEY');
+// `socket` is provided by sql/realtime.js, which is loaded first and speaks
+// SSE + POST instead of the WebSocket this file was originally written for.
+// The io.connect('URLSOCKEY') call that used to be here pointed at a
+// placeholder URL and never resolved to a real server.
 
 socket.on("socket_chat", function(ducnghiadzvc)	{
     if(ducnghiadzvc != "msg") {

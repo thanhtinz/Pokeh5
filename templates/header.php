@@ -29,7 +29,8 @@ content="width=device-width,user-scalable=no,initial-scale=1, minimum-scale=1,ma
 <?PHP if(isset($_GET['ducnghia'])) { ?>
 <link rel="stylesheet" type="text/css" href="/style/ducnghia.php?versio=1.2&t=<?=time()?>"/>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.js"></script>   
+<!-- socket.io replaced by the SSE + POST transport in sql/realtime.js -->
+<script src="/sql/realtime.js"></script>
 <?PHP }?>
 <title>PokeMon H5 Online</title>
 <link rel="shortcut icon" type="image/png" href="/images/items/Master ball.png"/>
