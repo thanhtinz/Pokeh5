@@ -22,17 +22,17 @@ $(document).ready( function () {
 });
 </script>
 <style>
-/* No wallpaper: the game frame is full screen, so this page is the whole
-   window rather than a column sitting on top of an image. */
-html, body {
-	height: 100%;
-	margin: 0;
-	padding: 0;
-	background-color: #101418;
+html{background-color: rgba(246, 220, 161, 0.5);
+    background-image: url("/sql/4c0d4c540923dd54e318f34dd009b3de9c82484e.jpg");
+    
 }
 
     body,p,form,table,img,td,tr,li,ul{margin:0;padding:0;border:0;}
-body{
+body{	
+
+ max-width: auto;
+   margin: auto;
+    margin-top: 0;
     font-size: 13px;
     font-family: Comfortaa;
     line-height: 20px;

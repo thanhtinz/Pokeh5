@@ -26,35 +26,22 @@ $decode = base64_encode($_SESSION['ducnghia_game']);
 <script type='text/javascript' src='sql/game.js?loadgame'></script>
 
 <style>
-/* Full-screen shell. The wallpaper that used to sit behind a 490px column is
-   gone; the game frame now fills the window. */
-html, body {
-	height: 100%;
-	margin: 0;
-	padding: 0;
-	overflow: hidden;
-	background-color: #101418;
+html{background-color: rgba(246, 220, 161, 0.5);
+    background-image: url("/sql/58422.jpg");
+			background-size: cover;
+
 }
 body,p,form,table,img,td,tr,li,ul{margin:0;padding:0;border:0;}
-body{
+body{	
+ max-width: auto;
+   margin: auto;
+    margin-top: 0;
     font-size: 13px;
     font-family: Comfortaa;
     line-height: 20px;
 }
-ducnghia {
-	display: block;
-	position: relative;
-	width: 100%;
-	height: 100%;
-	overflow: hidden;
-}
-/* The frame is positioned and scaled by sizegame() in sql/game.js. */
-ducnghia iframe {
-	display: block;
-	border: 0;
-}
 </style>
-<ducnghia>Đang tải dữ liệu trò chơi.</ducnghia>
+<center><ducnghia>Đang tải dữ liệu trò chơi.</ducnghia></center>
         </body>
         </html>
    
