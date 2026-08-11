@@ -126,7 +126,24 @@ public function add($id, $amount) {
 		public $battle = 0;
 		public $npcsPhase = 0;
 		public $statistics = 0;
-public function check_quest($id) {
+		/**
+		 * Make sure $holder->{$key} is an object before something is assigned
+		 * into it.
+		 *
+		 * PHP used to turn null into a stdClass on the fly when you wrote to a
+		 * property of it. PHP 8 removed that and raises
+		 * "Attempt to assign property ... on null", which is fatal - it is what
+		 * took down every endpoint that recorded a visit through setcode().
+		 */
+		private static function ensureObject($holder, $key) {
+			if (!isset($holder->{$key}) || !is_object($holder->{$key})) {
+				$holder->{$key} = new stdClass();
+			}
+
+			return $holder->{$key};
+		}
+
+		public function check_quest($id) {
 			if ($this->quests->{$id}->finished > 0) {
 				return 2;
 			} else if ($this->quests->{$id}->started > 0) {
@@ -137,6 +154,8 @@ public function check_quest($id) {
 		}
 
 		public function start_quest($id) {
+			self::ensureObject($this, 'quests');
+			self::ensureObject($this->quests, $id);
 			$this->quests->{$id}->started = time();
 
 			mysql_query("UPDATE `users` SET `quests` = '" . json_encode($this->quests) . "' WHERE `id` = '" . $this->id . "'");
@@ -145,6 +164,8 @@ public function check_quest($id) {
 		}
 
 		public function finish_quest($id) {
+			self::ensureObject($this, 'quests');
+			self::ensureObject($this->quests, $id);
 			$this->quests->{$id}->finished = time();
 
 			mysql_query("UPDATE `users` SET `quests` = '" . json_encode($this->quests) . "' WHERE `id` = '" . $this->id . "'");
@@ -269,13 +290,19 @@ public function nhiemvu($id, $amount) {
 
 
 	public function setcode($id,$id2,$dulieu) {
+			self::ensureObject($this, 'code');
+			self::ensureObject($this->code, $id);
 			$this->code->{$id}->{$id2} = $dulieu;
 			mysql_query("UPDATE `users` SET `code` = '" .json_encode($this->code,JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT) . "' WHERE `id` = '" . $this->id . "'");
 			return $this->code->{$id}->{$id2};
 		}
 		
 	public function lichsu($dulieu) {
-			$this->code->lichsu->{''.time().''}->noidung = $dulieu;
+			$moment = ''.time().'';
+			self::ensureObject($this, 'code');
+			self::ensureObject($this->code, 'lichsu');
+			self::ensureObject($this->code->lichsu, $moment);
+			$this->code->lichsu->{$moment}->noidung = $dulieu;
 
 			mysql_query("UPDATE `users` SET `code` = '" .json_encode($this->code,JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT) . "' WHERE `id` = '" . $this->id . "'");
 
