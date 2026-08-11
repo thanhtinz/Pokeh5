@@ -1397,7 +1397,7 @@ tin($bossn['id']);
 if(!empty($_SESSION['evolueren'])) {
 $link = base64_decode($_SESSION['evolueren']);
 		  #Code splitten, zodat informatie duidelijk word
-		  list ($evolueren['pokemonid'], $evolueren['nieuw_id']) = split ('[/]', $link);
+		  list ($evolueren['pokemonid'], $evolueren['nieuw_id']) = explode('/', $link);
 		  $pokemon = mysql_fetch_assoc(mysql_query("SELECT pokemon_wild.wild_id, pokemon_wild.naam, pokemon_wild.groei, pokemon_speler.* FROM pokemon_wild INNER JOIN pokemon_speler ON pokemon_wild.wild_id = pokemon_speler.wild_id WHERE pokemon_speler.id='".$evolueren['pokemonid']."'"));
 
 $update = mysql_fetch_assoc(mysql_query("SELECT * FROM `pokemon_wild` WHERE `wild_id`='".$evolueren['nieuw_id']."'"));
@@ -1478,6 +1478,10 @@ $update = mysql_fetch_assoc(mysql_query("SELECT * FROM `pokemon_wild` WHERE `wil
  
              	}	
       
+ // Columns are copied onto the object with $this->{$key} = $value, so the
+ // property set is whatever the table has. PHP 8.2 deprecates undeclared
+ // properties and PHP 9 makes them an error; this opts the class back in.
+ #[\AllowDynamicProperties]
  class hethong {
 		public $id = 0;
 	
@@ -1488,6 +1492,12 @@ $update = mysql_fetch_assoc(mysql_query("SELECT * FROM `pokemon_wild` WHERE `wil
 		// against it was lost.
 		public function __construct($id) {
 			$map = mysql_fetch_array(mysql_query("SELECT * FROM `ducnghia_hethong` WHERE `id` = '" . mysql_real_escape_string($id) . "'"));
+
+			// No such row: leave the declared defaults in place instead of
+			// letting foreach() fail on the boolean false that a miss returns.
+			if (!is_array($map)) {
+				return;
+			}
 
 			foreach($map as $key => $value) {
 				$this->{$key} = $value;

@@ -6,7 +6,7 @@ include_once('../templates/ducnghia.php');
 #Code opvragen en decoderen
 		  $link = base64_decode($_SESSION['aanvalnieuw']);
 		  #Code splitten, zodat informatie duidelijk word
-		  list ($nieuweaanval['pokemonid'], $nieuweaanval['aanvalnaam']) = split ('[/]', $link);
+		  list ($nieuweaanval['pokemonid'], $nieuweaanval['aanvalnaam']) = explode('/', $link);
 		  #Andere huidige pagina toewijzen
   $pokemoninfo  = mysql_fetch_assoc(mysql_query("SELECT pokemon_wild.wild_id, pokemon_wild.naam, pokemon_speler.id, pokemon_speler.aanval_1, pokemon_speler.aanval_2, pokemon_speler.aanval_3, pokemon_speler.aanval_4 FROM pokemon_wild INNER JOIN pokemon_speler ON pokemon_wild.wild_id = pokemon_speler.wild_id WHERE `id`='".$nieuweaanval['pokemonid']."'"));
           $finish = False;

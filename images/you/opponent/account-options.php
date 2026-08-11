@@ -290,7 +290,7 @@
 
     		  $ptekst = mysql_fetch_array(mysql_query("SELECT `profiel` FROM `gebruikers` WHERE `user_id`='".$_SESSION['id']."'"));
     		  $tekst = htmlspecialchars_decode($ptekst['profiel']);
-    		  $tekst = eregi_replace("\[remove]","",$tekst);
+    		  $tekst = preg_replace('/\[remove\]/i', '', $tekst);
 ?>
 
 		<script type="text/javascript" src="javascripts/jquery.colorbox.js"></script>

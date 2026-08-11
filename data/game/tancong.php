@@ -111,7 +111,7 @@ die;
 if(isset($_POST['skill'])){
      $link = base64_decode($_SESSION['aanvalnieuw']);
 		  #Code splitten, zodat informatie duidelijk word
-		  list ($nieuweaanval['pokemonid'], $nieuweaanval['aanvalnaam']) = split ('[/]', $link);
+		  list ($nieuweaanval['pokemonid'], $nieuweaanval['aanvalnaam']) = explode('/', $link);
      $pokemoninfo  = mysql_fetch_assoc(mysql_query("SELECT pokemon_wild.wild_id, pokemon_wild.naam, pokemon_speler.id, pokemon_speler.aanval_1, pokemon_speler.aanval_2, pokemon_speler.aanval_3, pokemon_speler.aanval_4 FROM pokemon_wild INNER JOIN pokemon_speler ON pokemon_wild.wild_id = pokemon_speler.wild_id WHERE `id`='".$nieuweaanval['pokemonid']."'"));
           $finish = False;
     $id = $_POST['id'];
@@ -187,7 +187,7 @@ if(isset($_POST['tienhoa'])){
     $id = $_POST['id'];
  $link = base64_decode($_SESSION['evolueren']);
 		  #Code splitten, zodat informatie duidelijk word
-		  list ($evolueren['pokemonid'], $evolueren['nieuw_id']) = split ('[/]', $link);
+		  list ($evolueren['pokemonid'], $evolueren['nieuw_id']) = explode('/', $link);
 		  $pokemon = mysql_fetch_assoc(mysql_query("SELECT pokemon_wild.wild_id, pokemon_wild.naam, pokemon_wild.groei, pokemon_speler.* FROM pokemon_wild INNER JOIN pokemon_speler ON pokemon_wild.wild_id = pokemon_speler.wild_id WHERE pokemon_speler.id='".$evolueren['pokemonid']."'"));
 
 $update = mysql_fetch_assoc(mysql_query("SELECT * FROM `pokemon_wild` WHERE `wild_id`='".$evolueren['nieuw_id']."'"));

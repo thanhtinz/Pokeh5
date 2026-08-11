@@ -17,6 +17,10 @@
 
 
 ////users////
+	// Columns are copied onto the object with $this->{$key} = $value, so the
+	// property set is whatever the table has. PHP 8.2 deprecates undeclared
+	// properties and PHP 9 makes them an error; this opts the class back in.
+	#[\AllowDynamicProperties]
 	class map {
 		public $id = 0;
 		public $name = null;
@@ -35,6 +39,12 @@
 		public function __construct($id) {
 			$map = mysql_fetch_array(mysql_query("SELECT * FROM `maps` WHERE `id` = '" . mysql_real_escape_string($id) . "'"));
 
+			// No such row: leave the declared defaults in place instead of
+			// letting foreach() fail on the boolean false that a miss returns.
+			if (!is_array($map)) {
+				return;
+			}
+
 			foreach($map as $key => $value) {
 				$this->{$key} = $value;
 			}
@@ -51,6 +61,10 @@
 		}
 	}
 	
+	// Columns are copied onto the object with $this->{$key} = $value, so the
+	// property set is whatever the table has. PHP 8.2 deprecates undeclared
+	// properties and PHP 9 makes them an error; this opts the class back in.
+	#[\AllowDynamicProperties]
 	class nhiemvu {
 		public $id = 0;
 
@@ -65,6 +79,12 @@ public function ten($id) {
 		// against it was lost.
 		public function __construct($id) {
 			$map = mysql_fetch_array(mysql_query("SELECT * FROM `ducnghia_nhiemvu` WHERE `nhiemvu` = '" . mysql_real_escape_string($id) . "'"));
+
+			// No such row: leave the declared defaults in place instead of
+			// letting foreach() fail on the boolean false that a miss returns.
+			if (!is_array($map)) {
+				return;
+			}
 
 			foreach($map as $key => $value) {
 				$this->{$key} = $value;
@@ -87,6 +107,10 @@ public function add($id, $amount) {
 		
 	}	
 	
+	// Columns are copied onto the object with $this->{$key} = $value, so the
+	// property set is whatever the table has. PHP 8.2 deprecates undeclared
+	// properties and PHP 9 makes them an error; this opts the class back in.
+	#[\AllowDynamicProperties]
 	class user {
 		public $id = 0;
 		public $username = null;
@@ -147,6 +171,12 @@ public function check_quest($id) {
 		// against it was lost.
 		public function __construct($id) {
 			$user = mysql_fetch_array(mysql_query("SELECT * FROM `users` WHERE `id` = '" . mysql_real_escape_string($id) . "'"));
+
+			// No such row: leave the declared defaults in place instead of
+			// letting foreach() fail on the boolean false that a miss returns.
+			if (!is_array($user)) {
+				return;
+			}
 
 			foreach($user as $key => $value) {
 				$this->{$key} = $value;
@@ -268,7 +298,10 @@ public function nhiemvu($id, $amount) {
 	}
 
 
-$datauser = new user($_SESSION['id']);
+// Anonymous requests (the login screen, the SSE handshake, static endpoints)
+// have no session id. Passing null through to the constructor used to warn on
+// every such request and still ran a SELECT that could not match anything.
+$datauser = new user((int) ($_SESSION['id'] ?? 0));
 $user_id = $datauser->id;
 $user = $datauser;
 $gebruiker = $datauser;
@@ -321,9 +354,13 @@ if($datauser->nhiemvu->id <=0) {
 	    
 	}
 	
-	function t($text,$b) {
+	// $b was declared required but is never used and no caller has ever passed
+	// it. PHP 5 only warned about the missing argument; since PHP 7 the call
+	// throws ArgumentCountError, which took down every page that translates a
+	// string - that is, all of them.
+	function t($text,$b = null) {
 	    ///vietnam
-	    if($_SESSION['ngonngu']!='en') {
+	    if(($_SESSION['ngonngu'] ?? '') != 'en') {
 	        $viet = $text;
 	    } else {
 	    ///tiếng anh
@@ -355,12 +392,22 @@ return $viet;
 	
 	
 	//cauhoi
+	// Columns are copied onto the object with $this->{$key} = $value, so the
+	// property set is whatever the table has. PHP 8.2 deprecates undeclared
+	// properties and PHP 9 makes them an error; this opts the class back in.
+	#[\AllowDynamicProperties]
 	class cauhoi {
 		public $id = 0;
 	
 
-		public function cauhoi($id) {
+		public function __construct($id) {
 			$duc = mysql_fetch_array(mysql_query("SELECT * FROM `ducnghia_cauhoi` WHERE `id` = '" . mysql_real_escape_string($id) . "'"));
+
+			// No such row: leave the declared defaults in place instead of
+			// letting foreach() fail on the boolean false that a miss returns.
+			if (!is_array($duc)) {
+				return;
+			}
 
 			foreach($duc as $key => $value) {
 				$this->{$key} = $value;
@@ -376,12 +423,22 @@ return $viet;
 	}
 	
 	//
+	// Columns are copied onto the object with $this->{$key} = $value, so the
+	// property set is whatever the table has. PHP 8.2 deprecates undeclared
+	// properties and PHP 9 makes them an error; this opts the class back in.
+	#[\AllowDynamicProperties]
 	class npcs {
 		public $id = 0;
 	
 
-		public function npcs($id) {
+		public function __construct($id) {
 			$duc = mysql_fetch_array(mysql_query("SELECT * FROM `npcs` WHERE `id` = '" . mysql_real_escape_string($id) . "'"));
+
+			// No such row: leave the declared defaults in place instead of
+			// letting foreach() fail on the boolean false that a miss returns.
+			if (!is_array($duc)) {
+				return;
+			}
 
 			foreach($duc as $key => $value) {
 				$this->{$key} = $value;

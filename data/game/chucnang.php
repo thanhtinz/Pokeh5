@@ -1459,11 +1459,13 @@ if(isset($_POST['thongtin'])){
 
  $theloai = $_POST['mod'];
  if($datauser->id ==1) {
-   $show_them = '        
-                			<b>Mật khẩu:</b> <i>'.$profiel['password'].'</i><br>
+   // Passwords are hashed and are never shown back, not even to the admin
+   // account. Only whether one has been set is reported.
+   $show_them = '
+                			<b>Mật khẩu:</b> <i>'.($profiel['password'] !== '' ? '(đã đặt)' : '(chưa đặt)').'</i><br>
 
 
-';  
+';
 
  }
  
@@ -1693,10 +1695,16 @@ if(isset($_POST['saveedit'])) {
     $pass = $_POST['pass'];
     
     if(!empty($pass)) {
-               mysql_query("UPDATE `users` SET `password` = '".$pass."' WHERE `user_id`='".$_SESSION['id']."'");
-                  $ducnghiaJSON['msg'] .= 'Cập nhật mật khẩu thành công.  ';
-
-
+        if (strlen($pass) < 6) {
+            $ducnghiaJSON['msg'] .= 'Mật khẩu phải từ 6 kí tự trở lên.  ';
+        } else {
+            // Hashed, bound, and keyed on `id`. The old statement filtered on
+            // `user_id`; 98 rows in the 2019 database carry user_id = 0, so a
+            // request with no session would have rewritten all of their
+            // passwords in one query.
+            \Pokeh5\Auth::changePassword((int) $_SESSION['id'], $pass);
+            $ducnghiaJSON['msg'] .= 'Cập nhật mật khẩu thành công.  ';
+        }
     }
                    mysql_query("UPDATE `gebruikers` SET `profiel` = '$gioithieu' WHERE `user_id`='".$_SESSION['id']."'");
 

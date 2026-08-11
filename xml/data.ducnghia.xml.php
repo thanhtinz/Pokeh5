@@ -3,10 +3,14 @@
 include_once('../templates/config.php');
 	include_once('../templates/lib.php');
 	include_once('../templates/includes/Array2XML.php');
+// Columns are copied onto the object with $this->{$key} = $value, so the
+// property set is whatever the table has. PHP 8.2 deprecates undeclared
+// properties and PHP 9 makes them an error; this opts the class back in.
+#[\AllowDynamicProperties]
 class mapg {
 		public $id = 0;
 	
-		public function mapg($id) {
+		public function __construct($id) {
 			$user = mysql_fetch_array(mysql_query("SELECT * FROM `bando` WHERE `id` = '" . mysql_real_escape_string($id) . "'"));
 
 			foreach($user as $key => $value) {
