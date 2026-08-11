@@ -67,6 +67,15 @@ function sizegame(){
         DUCNGHIA_MAX_SCALE
     );
 
+    // Never render smaller than the original fixed 490px layout. On a short
+    // desktop window - 1280x800, say - fitting on height alone works out to
+    // 0.94 and would shrink the game below the size it used to be, which is a
+    // regression, not a full-screen view. Below 1x the frame keeps its design
+    // size and the window simply shows less of it, exactly as before.
+    if (scale < 1) {
+        scale = 1;
+    }
+
     // The frame is laid out at the design width and then scaled, so the page
     // inside it still believes it is 490px wide and every fixed offset lands
     // where it was drawn. Height is divided by the scale so the scaled result
