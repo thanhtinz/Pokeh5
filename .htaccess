@@ -13,3 +13,15 @@ RewriteRule ^(.*).json$ data/index.php [L]
 RewriteCond %{HTTP_HOST} ^sc1.lol$ [OR]
 RewriteCond %{HTTP_HOST} ^www.sc1.lol$
 RewriteRule ^(.*)$ _blog/$1
+
+# Runtime state, local credentials and the developer tooling are not web
+# content. Serving storage/ would hand out the realtime event log, and
+# config.local.php holds the database password.
+RedirectMatch 404 ^/(storage|app|scripts|tests|db)(/|$)
+RedirectMatch 404 ^/config\.local\.php$
+
+# Buffering a Server-Sent Events response holds every message until the
+# connection closes, which stalls chat and the player list.
+<IfModule mod_env.c>
+    SetEnvIf Request_URI "^/realtime/stream\.php$" no-gzip=1
+</IfModule>
