@@ -1,0 +1,225 @@
+/* Written from scratch rather than reusing the release's stylesheets, so the
+   portal runs without shipping the previous operator's artwork. Drop the
+   original img/ and css/ back in if you want the old look. */
+
+:root {
+  color-scheme: dark;
+  --bg: #0d1220;
+  --panel: #17203a;
+  --panel-alt: #1f2b4d;
+  --stroke: #33477a;
+  --text: #e8eeff;
+  --dim: #93a3c9;
+  --accent: #4fc3f7;
+  --gold: #ffd44d;
+  --good: #34d399;
+  --bad: #f87171;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: radial-gradient(circle at 50% -10%, #1d2b52 0%, var(--bg) 60%);
+  color: var(--text);
+  font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  min-height: 100vh;
+}
+
+.topbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  padding: 12px 18px;
+  background: var(--panel);
+  border-bottom: 2px solid var(--stroke);
+}
+
+.brand {
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--gold);
+  text-decoration: none;
+  margin-right: auto;
+}
+
+.topbar nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.btn {
+  display: inline-block;
+  padding: 8px 16px;
+  border-radius: 8px;
+  background: var(--accent);
+  color: #06121f;
+  font-weight: 600;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-play {
+  background: var(--gold);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--stroke);
+}
+
+.wrap {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 24px 18px 48px;
+}
+
+h1 {
+  font-size: 26px;
+  margin: 0 0 18px;
+}
+
+h2 {
+  font-size: 19px;
+  margin: 0 0 12px;
+}
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--stroke);
+  border-radius: 12px;
+  padding: 18px;
+  margin-bottom: 18px;
+}
+
+.grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.tile {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+.tile:hover {
+  border-color: var(--accent);
+}
+
+.form {
+  display: grid;
+  gap: 10px;
+}
+
+label {
+  font-size: 14px;
+  color: var(--dim);
+}
+
+input,
+button[type='submit'],
+.form button {
+  font: inherit;
+}
+
+input {
+  padding: 11px 13px;
+  border-radius: 8px;
+  border: 1px solid var(--stroke);
+  background: #0b1526;
+  color: var(--text);
+  width: 100%;
+}
+
+input:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+button {
+  padding: 11px 18px;
+  border-radius: 8px;
+  border: none;
+  background: var(--accent);
+  color: #06121f;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.chip {
+  display: inline-block;
+  margin: 3px 4px 3px 0;
+  padding: 6px 10px;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 999px;
+  background: var(--panel-alt);
+  color: var(--text);
+  border: 1px solid var(--stroke);
+}
+
+.alert {
+  padding: 11px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--stroke);
+  background: var(--panel-alt);
+  margin-bottom: 16px;
+}
+
+.alert-good {
+  border-color: var(--good);
+  color: var(--good);
+}
+
+.alert-bad {
+  border-color: var(--bad);
+  color: var(--bad);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table td {
+  padding: 9px 6px;
+  border-bottom: 1px solid var(--stroke);
+  vertical-align: middle;
+}
+
+.table tr:last-child td {
+  border-bottom: none;
+}
+
+.note {
+  color: var(--dim);
+  font-size: 14px;
+}
+
+code {
+  background: #0b1526;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 13px;
+}
+
+.foot {
+  text-align: center;
+  padding: 16px;
+  color: var(--dim);
+  border-top: 1px solid var(--stroke);
+  font-size: 14px;
+}
