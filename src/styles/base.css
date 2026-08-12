@@ -1,0 +1,137 @@
+/* Fonts are subset by scripts/fetch-fonts.mjs; see ASSETS.md for licences. */
+
+@font-face {
+  font-family: 'Noto Serif';
+  src: url('/fonts/NotoSerif-subset.woff2') format('woff2-variations');
+  font-weight: 300 800;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Be Vietnam Pro';
+  src: url('/fonts/BeVietnamPro-Regular-subset.woff2') format('woff2');
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Be Vietnam Pro';
+  src: url('/fonts/BeVietnamPro-Bold-subset.woff2') format('woff2');
+  font-weight: 700;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Ma Shan Zheng';
+  src: url('/fonts/MaShanZheng-subset.woff2') format('woff2');
+  font-weight: 400;
+  font-display: block;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body {
+  height: 100%;
+  overflow: hidden;
+  /* A WebView drags the whole page on a swipe unless every default gesture is
+     taken away from it. */
+  overscroll-behavior: none;
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+body {
+  background: var(--paper-shadow);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+#app {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  /* The layout is designed for a phone; on anything wider it is centred rather
+     than stretched, because a 1200px-wide cultivation screen looks absurd. */
+  background: var(--paper-shadow);
+}
+
+/* ---------------------------------------------------------------- boot ---- */
+
+#boot {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: var(--s4);
+  background: radial-gradient(circle at 50% 40%, var(--paper-lit) 0%, var(--paper-shadow) 78%);
+  color: var(--text-dim);
+  font-family: var(--font-serif);
+  letter-spacing: 0.28em;
+  font-size: 13px;
+  z-index: 100;
+  transition: opacity 420ms ease;
+}
+
+#boot.gone {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.boot-seal {
+  width: 78px;
+  height: 78px;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-brush);
+  font-size: 46px;
+  color: #f2e5d0;
+  background: var(--cinnabar);
+  box-shadow: 0 0 0 2px rgba(242, 229, 208, 0.35) inset;
+  animation: seal-breathe 2.4s ease-in-out infinite;
+}
+
+@keyframes seal-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+  50% {
+    transform: scale(1.06);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

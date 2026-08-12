@@ -1,0 +1,12 @@
+{
+  "name": "Vấn Đạo Tu Tiên",
+  "short_name": "Vấn Đạo",
+  "description": "Game tu tiên nhàn rỗi",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "portrait",
+  "background_color": "#20241f",
+  "theme_color": "#20241f",
+  "icons": [{ "src": "./icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }]
+}
