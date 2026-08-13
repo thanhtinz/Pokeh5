@@ -1,0 +1,846 @@
+/* The interface: shell, HUD, screens, and the overlays that sit above them. */
+
+.shell {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  height: 100%;
+  width: 100%;
+  max-width: var(--shell);
+  margin-inline: auto;
+  padding-top: env(safe-area-inset-top);
+}
+
+/* On a wide screen the shell reads as a device rather than a stretched page. */
+@media (min-width: 560px) {
+  .shell {
+    border-inline: 1px solid var(--panel-edge);
+    box-shadow: 0 0 120px hsl(var(--hue) 60% 4% / 0.9);
+  }
+}
+
+/* ------------------------------------------------------------------- HUD -- */
+
+.hud {
+  position: relative;
+  padding: 14px 18px 12px;
+  border-bottom: 1px solid var(--panel-edge);
+  background: linear-gradient(180deg, hsl(var(--hue) 22% 7% / 0.9), hsl(var(--hue) 22% 7% / 0.25));
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.hud__label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.hud__cash {
+  display: block;
+  font-size: clamp(30px, 9vw, 40px);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 1.05;
+  color: var(--ink);
+  text-shadow: 0 0 28px var(--glow);
+}
+
+.hud__cash--debt {
+  color: hsl(var(--hue) 82% 68%);
+}
+
+.hud__stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.hud__next {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  font-size: 11px;
+  color: var(--ink-faint);
+}
+
+.hud__next .bar {
+  flex: 1;
+}
+
+.hud__boost {
+  position: absolute;
+  top: 14px;
+  right: 18px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--accent-ink);
+  background: linear-gradient(135deg, var(--accent-bright), var(--accent));
+  box-shadow: 0 0 22px var(--glow);
+  animation: pulse 1.6s var(--ease) infinite;
+}
+
+@keyframes pulse {
+  50% {
+    box-shadow: 0 0 6px var(--glow-soft);
+  }
+}
+
+/* ------------------------------------------------------------------ bars -- */
+
+.bar {
+  position: relative;
+  height: 5px;
+  border-radius: 999px;
+  background: hsl(var(--hue) 20% 100% / 0.07);
+  overflow: hidden;
+}
+
+.bar__fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--accent-deep), var(--accent-bright));
+  /* Matches the store's flush rate, so a stepped update reads as continuous. */
+  transition: width 0.12s linear;
+}
+
+.bar--tall {
+  height: 7px;
+}
+
+/* --------------------------------------------------------------- screens -- */
+
+.screen {
+  padding: 16px 16px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.section__title {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+/* A rate is not a heading; upper-casing it turns "/s" into "/S". */
+.section__title .num {
+  letter-spacing: 0.02em;
+  text-transform: none;
+}
+
+.panel {
+  border: 1px solid var(--panel-edge);
+  border-radius: var(--radius);
+  background: var(--panel);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow:
+    inset 0 1px 0 hsl(0 0% 100% / 0.05),
+    0 10px 30px hsl(var(--hue) 40% 3% / 0.5);
+}
+
+.empty {
+  padding: 28px 20px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--ink-faint);
+}
+
+/* ----------------------------------------------------------- the grind ---- */
+
+.refinery {
+  display: grid;
+  justify-items: center;
+  gap: 14px;
+  padding: 22px 16px 20px;
+}
+
+.refinery__tap {
+  position: relative;
+  width: min(210px, 56vw);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(circle at 50% 32%, hsl(var(--hue) var(--sat) 62% / 0.5), transparent 62%),
+    conic-gradient(from 210deg, var(--accent-deep), var(--accent-bright), var(--accent-deep));
+  box-shadow:
+    0 0 0 1px hsl(var(--hue) var(--sat) 70% / 0.35),
+    0 0 60px var(--glow),
+    inset 0 -14px 34px hsl(var(--hue) 60% 6% / 0.65);
+  transition:
+    transform 0.09s var(--ease),
+    box-shadow 0.2s var(--ease);
+}
+
+.refinery__tap:active {
+  transform: scale(0.955);
+  box-shadow:
+    0 0 0 1px hsl(var(--hue) var(--sat) 70% / 0.5),
+    0 0 90px var(--glow),
+    inset 0 -8px 24px hsl(var(--hue) 60% 6% / 0.7);
+}
+
+.refinery__face {
+  display: grid;
+  place-items: center;
+  gap: 2px;
+  width: 78%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 30%, hsl(var(--hue) 20% 13%), hsl(var(--hue) 30% 6%));
+  box-shadow: inset 0 1px 0 hsl(0 0% 100% / 0.08);
+}
+
+.refinery__icon {
+  font-size: 34px;
+  line-height: 1;
+  filter: drop-shadow(0 2px 10px hsl(var(--hue) 60% 4% / 0.8));
+}
+
+.refinery__value {
+  font-size: 19px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.refinery__hint {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.refinery__ore {
+  width: 100%;
+  display: grid;
+  gap: 6px;
+}
+
+.refinery__ore-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--ink-dim);
+}
+
+/* Numbers that fly off the tap target. */
+.spark {
+  position: absolute;
+  left: 50%;
+  top: 34%;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--ink);
+  text-shadow: 0 2px 12px hsl(var(--hue) 60% 5% / 0.9);
+  pointer-events: none;
+  animation: fly 0.85s var(--ease) forwards;
+}
+
+@keyframes fly {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 0) scale(0.7);
+  }
+  25% {
+    opacity: 1;
+    transform: translate(-50%, -18px) scale(1.08);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, -74px) scale(0.95);
+  }
+}
+
+.upgrades {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--gap);
+}
+
+.upgrade {
+  display: grid;
+  gap: 3px;
+  padding: 12px 13px;
+  text-align: left;
+  border: 1px solid var(--panel-edge);
+  border-radius: var(--radius-sm);
+  background: var(--panel);
+  transition:
+    border-color 0.18s var(--ease),
+    transform 0.09s var(--ease);
+}
+
+.upgrade:not(:disabled):active {
+  transform: scale(0.98);
+}
+
+.upgrade--ready {
+  border-color: var(--panel-edge-lit);
+}
+
+.upgrade:disabled {
+  opacity: 0.45;
+}
+
+.upgrade__name {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.upgrade__detail {
+  font-size: 11px;
+  color: var(--ink-faint);
+}
+
+.upgrade__cost {
+  margin-top: 3px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent-bright);
+}
+
+/* ------------------------------------------------------------------ rows -- */
+
+.row {
+  display: grid;
+  grid-template-columns: 42px 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 13px;
+  border: 1px solid var(--panel-edge);
+  border-radius: var(--radius-sm);
+  background: var(--panel);
+  transition: border-color 0.2s var(--ease);
+}
+
+.row + .row {
+  margin-top: 8px;
+}
+
+.row--lit {
+  border-color: var(--panel-edge-lit);
+}
+
+.row__icon {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  font-size: 20px;
+  background: hsl(var(--hue) 22% 100% / 0.05);
+  box-shadow: inset 0 1px 0 hsl(0 0% 100% / 0.06);
+}
+
+/* Everything in a row is a span, so the stack has to be declared rather than
+ * assumed — inline children would run the name and the detail together. */
+.row__body {
+  display: grid;
+  min-width: 0;
+}
+
+.row__name {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.row__meta {
+  display: block;
+  font-size: 11.5px;
+  color: var(--ink-faint);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.row__side .row__meta {
+  white-space: normal;
+  text-align: right;
+}
+
+.row__side {
+  display: grid;
+  justify-items: end;
+  gap: 5px;
+}
+
+.row__bar {
+  grid-column: 1 / -1;
+}
+
+/* --------------------------------------------------------------- buttons -- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  background: hsl(var(--hue) 22% 100% / 0.07);
+  border: 1px solid var(--panel-edge);
+  transition:
+    transform 0.09s var(--ease),
+    opacity 0.18s var(--ease),
+    background 0.18s var(--ease);
+}
+
+.btn:not(:disabled):active {
+  transform: scale(0.96);
+}
+
+.btn:disabled {
+  opacity: 0.38;
+}
+
+.btn--primary {
+  color: var(--accent-ink);
+  border-color: transparent;
+  background: linear-gradient(135deg, var(--accent-bright), var(--accent));
+  box-shadow: 0 4px 18px var(--glow);
+}
+
+.btn--ghost {
+  color: var(--ink-dim);
+}
+
+.btn--wide {
+  width: 100%;
+}
+
+.btn--sm {
+  padding: 6px 10px;
+  font-size: 12px;
+  border-radius: 9px;
+}
+
+.segments {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 12px;
+  background: hsl(var(--hue) 22% 100% / 0.05);
+  border: 1px solid var(--panel-edge);
+}
+
+.segments button {
+  flex: 1;
+  padding: 7px 0;
+  border-radius: 9px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink-faint);
+  transition:
+    background 0.2s var(--ease),
+    color 0.2s var(--ease);
+}
+
+.segments button[aria-pressed='true'] {
+  color: var(--accent-ink);
+  background: linear-gradient(135deg, var(--accent-bright), var(--accent));
+}
+
+/* ---------------------------------------------------------------- market -- */
+
+.market__summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  padding: 14px;
+}
+
+.stat {
+  display: grid;
+  gap: 2px;
+}
+
+.stat__label {
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.stat__value {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.spark-line {
+  width: 62px;
+  height: 22px;
+  overflow: visible;
+}
+
+.spark-line path {
+  fill: none;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.trade {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 8px;
+  padding-top: 10px;
+  margin-top: 2px;
+  border-top: 1px solid var(--panel-edge);
+}
+
+.trade__row {
+  display: flex;
+  gap: 6px;
+}
+
+.trade__row .btn {
+  flex: 1;
+}
+
+/* ------------------------------------------------------------------ life -- */
+
+.life {
+  display: grid;
+  gap: 0;
+}
+
+.life__item {
+  position: relative;
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  gap: 12px;
+  padding: 12px 0;
+}
+
+/* The thread running through the timeline, brightest where it is already won. */
+.life__item::before {
+  content: '';
+  position: absolute;
+  left: 21px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: hsl(var(--hue) 20% 100% / 0.07);
+}
+
+.life__item:first-child::before {
+  top: 28px;
+}
+
+.life__item:last-child::before {
+  bottom: calc(100% - 28px);
+}
+
+.life__item--won::before {
+  background: var(--accent-deep);
+}
+
+.life__dot {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  font-size: 19px;
+  background: var(--panel-solid);
+  border: 1px solid var(--panel-edge);
+}
+
+.life__item--won .life__dot {
+  border-color: transparent;
+  background: linear-gradient(135deg, var(--accent-bright), var(--accent-deep));
+  box-shadow: 0 0 24px var(--glow);
+}
+
+.life__item--locked .life__dot {
+  filter: grayscale(1);
+  opacity: 0.4;
+}
+
+.life__body {
+  display: grid;
+  justify-items: start;
+  padding-top: 3px;
+}
+
+.life__title {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.life__line {
+  display: block;
+  font-size: 12px;
+  color: var(--ink-dim);
+}
+
+.life__bonus {
+  display: block;
+  margin-top: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--accent-bright);
+}
+
+.life__item--locked .life__line {
+  color: var(--ink-faint);
+}
+
+/* Still legible — the bonus is the pull — but clearly not yours yet. */
+.life__item--locked .life__bonus {
+  opacity: 0.5;
+}
+
+/* -------------------------------------------------------------------- nav -- */
+
+.tabs {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  padding: 6px 8px calc(6px + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--panel-edge);
+  background: linear-gradient(0deg, hsl(var(--hue) 24% 6% / 0.96), hsl(var(--hue) 24% 6% / 0.7));
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.tab {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  padding: 7px 0 5px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--ink-faint);
+  transition: color 0.2s var(--ease);
+}
+
+.tab__icon {
+  font-size: 19px;
+  line-height: 1;
+  transition: transform 0.2s var(--ease);
+}
+
+.tab[aria-current='page'] {
+  color: var(--accent-bright);
+}
+
+.tab[aria-current='page'] .tab__icon {
+  transform: translateY(-1px) scale(1.12);
+}
+
+/* A dot on a tab that has something waiting behind it. */
+.tab__pip {
+  position: absolute;
+  top: 5px;
+  right: calc(50% - 17px);
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent-bright);
+  box-shadow: 0 0 10px var(--glow);
+}
+
+/* -------------------------------------------------------------- overlays -- */
+
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  align-items: end;
+  justify-items: center;
+  padding: 16px;
+  background: hsl(var(--hue) 40% 3% / 0.72);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  animation: fade 0.22s var(--ease);
+}
+
+.scrim--centre {
+  align-items: center;
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}
+
+.sheet {
+  width: 100%;
+  max-width: calc(var(--shell) - 32px);
+  padding: 20px;
+  border-radius: 22px;
+  border: 1px solid var(--panel-edge-lit);
+  background: linear-gradient(165deg, hsl(var(--hue) 18% 12%), hsl(var(--hue) 22% 8%));
+  box-shadow:
+    0 0 70px var(--glow),
+    0 24px 60px hsl(var(--hue) 50% 2% / 0.7);
+  margin-bottom: env(safe-area-inset-bottom);
+  animation: rise 0.3s var(--ease);
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(26px);
+  }
+}
+
+.sheet__head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.sheet__icon {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  flex: none;
+  border-radius: 16px;
+  font-size: 26px;
+  background: linear-gradient(135deg, var(--accent-bright), var(--accent-deep));
+  box-shadow: 0 0 30px var(--glow);
+}
+
+.sheet__head-text {
+  display: grid;
+  min-width: 0;
+}
+
+.sheet__title {
+  display: block;
+  font-size: 19px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.sheet__sub {
+  display: block;
+  font-size: 12.5px;
+  color: var(--ink-dim);
+}
+
+.sheet__body {
+  font-size: 13.5px;
+  color: var(--ink-dim);
+  margin-bottom: 16px;
+}
+
+.sheet__prize {
+  display: block;
+  margin: 2px 0 14px;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--accent-bright);
+  text-shadow: 0 0 30px var(--glow);
+}
+
+.sheet__actions {
+  display: flex;
+  gap: 8px;
+}
+
+.sheet__actions .btn {
+  flex: 1;
+}
+
+/* The card's own countdown, so an ignored offer visibly runs out. */
+.sheet__timer {
+  margin-top: 12px;
+}
+
+/* ---------------------------------------------------------------- toasts -- */
+
+.toasts {
+  position: fixed;
+  left: 50%;
+  bottom: calc(78px + env(safe-area-inset-bottom));
+  z-index: 30;
+  display: grid;
+  gap: 6px;
+  justify-items: center;
+  transform: translateX(-50%);
+  pointer-events: none;
+  width: max-content;
+  max-width: calc(100vw - 32px);
+}
+
+.toast {
+  padding: 7px 14px;
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ink);
+  background: hsl(var(--hue) 20% 10% / 0.92);
+  border: 1px solid var(--panel-edge-lit);
+  box-shadow: 0 8px 26px hsl(var(--hue) 50% 3% / 0.6);
+  animation: toast 2.6s var(--ease) forwards;
+}
+
+@keyframes toast {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  12%,
+  78% {
+    opacity: 1;
+    transform: none;
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+}
+
+/* ----------------------------------------------------------------- boot --- */
+
+.boot {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  gap: 10px;
+  color: var(--ink-faint);
+  font-size: 12px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
