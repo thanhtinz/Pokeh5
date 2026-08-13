@@ -7,7 +7,9 @@
  *
  *   node scripts/screenshot.mjs [outDir]
  */
+import { spawn } from 'node:child_process';
 import { mkdir, rm } from 'node:fs/promises';
+import { DatabaseSync } from 'node:sqlite';
 import { chromium } from 'playwright';
 import { createServer } from 'vite';
 
@@ -15,6 +17,98 @@ const OUT = process.argv[2] ?? 'shots';
 const VIEWPORT = { width: 393, height: 852 };
 
 const SAVE_KEY = 'broketoboss.save.v1';
+const TOKEN_KEY = 'broketoboss.token';
+
+/**
+ * Máy chủ tài khoản riêng cho lần chụp này, cổng riêng, kho riêng.
+ *
+ * Chụp màn bảng xếp hạng mà giả lập câu trả lời của máy chủ thì bức ảnh chỉ
+ * chứng minh được cái giả lập chạy đúng. Dựng hẳn máy chủ thật rồi đăng ký
+ * mấy tài khoản qua đúng đường mà game dùng thì bức ảnh mới nói được điều gì.
+ */
+const API_PORT = 8788;
+const API_DB = `${OUT}-api.sqlite`;
+const API = `http://localhost:${API_PORT}/api`;
+
+process.env['API_URL'] = `http://localhost:${API_PORT}`;
+
+const apiServer = spawn('node', ['server/index.mjs'], {
+  env: { ...process.env, PORT: String(API_PORT), DB_FILE: API_DB },
+  stdio: 'ignore',
+});
+
+/** Đợi máy chủ mở cổng, tối đa mười giây. */
+async function waitForApi() {
+  for (let i = 0; i < 100; i += 1) {
+    try {
+      const response = await fetch(`${API}/health`);
+      if (response.ok) return true;
+    } catch {
+      // Chưa lên. Thử lại.
+    }
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  }
+  return false;
+}
+
+const PASSWORD = 'matkhaudaingoangoan';
+
+/**
+ * Vài người chơi để cái bảng có gì mà xếp.
+ *
+ * `tinz` cố tình nằm giữa bảng chứ không đứng đầu: hạng nhất thì không nhìn ra
+ * được dòng "mình" kẹp giữa những người khác trông thế nào.
+ *
+ * Có một bước không hiển nhiên ở giữa. Máy chủ chặn tài khoản vừa lập mà đã
+ * khai tài sản lớn — đó là toàn bộ tác dụng của `ceilingFor` — nên gửi thẳng
+ * 9,4 nghìn tỷ vào một tài khoản mới toanh thì bị trả về `score.tooFast`, đúng
+ * như nó phải thế. Cách chữa không phải là nới cổng, mà là **cho mấy tài khoản
+ * này già đi một tuần** rồi mới gửi điểm. Đăng ký và gửi điểm vẫn đi qua đúng
+ * hai đường mà game dùng; thứ duy nhất bị làm giả là thời gian.
+ */
+async function seedBoard() {
+  // Xếp quanh mức mà bản lưu giàu thật sự đạt tới. Con số của `tinz` ở đây chỉ
+  // là chỗ giữ hàng: client đăng nhập xong sẽ tự đẩy kỷ lục thật của nó lên, và
+  // kỷ lục thì chỉ đi lên, nên cái to hơn sẽ thắng.
+  const people = [
+    ['ba_tam', 9.4e21, 96, 4],
+    ['chu_bay', 2.2e20, 46, 3],
+    ['co_hai', 8.1e19, 28, 2],
+    ['tinz', 1e19, 60, 2],
+    ['anh_tu', 4.4e18, 2, 1],
+    ['di_ba', 6.6e17, 0, 0],
+  ];
+
+  const tokens = new Map();
+  for (const [name] of people) {
+    const registered = await fetch(`${API}/register`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ name, password: PASSWORD }),
+    }).then((response) => response.json());
+    tokens.set(name, registered.token);
+  }
+
+  const db = new DatabaseSync(API_DB);
+  db.prepare('UPDATE users SET created_at = ?').run(Date.now() - 7 * 86_400_000);
+  db.close();
+
+  for (const [name, best, reputationTotal, runs] of people) {
+    await fetch(`${API}/save`, {
+      method: 'PUT',
+      headers: {
+        'content-type': 'application/json',
+        authorization: `Bearer ${tokens.get(name)}`,
+      },
+      body: JSON.stringify({
+        save: { version: 1, lastSeenAt: 1 },
+        score: { bestNetWorth: best, reputationTotal, runs, claimed: 8 },
+      }),
+    });
+  }
+
+  return tokens.get('tinz');
+}
 
 /** Cùng phép tính với `dayIndex` trong `src/game/daily.ts`. */
 function dayIndex(at) {
@@ -66,7 +160,11 @@ function richSave(now) {
   };
 }
 
-const TABS = ['grind', 'empire', 'market', 'life', 'more'];
+const TABS = ['grind', 'empire', 'market', 'life', 'board', 'more'];
+
+const apiUp = await waitForApi();
+const boardToken = apiUp ? await seedBoard() : null;
+if (!apiUp) console.warn('api did not start — the board screens will show the offline state');
 
 const server = await createServer({ server: { port: 5199 }, logLevel: 'warn' });
 await server.listen();
@@ -85,9 +183,14 @@ for (const stage of ['broke', 'rich']) {
   const page = await context.newPage();
 
   if (stage === 'rich') {
+    // Bản giàu cũng là bản đã đăng nhập: hai màn hình của tab Bảng — chưa có
+    // tài khoản và đã có — đều phải nhìn thấy, và đây là chỗ chia đôi sẵn.
     await page.addInitScript(
-      ([key, save]) => window.localStorage.setItem(key, JSON.stringify(save)),
-      [SAVE_KEY, richSave(Date.now())],
+      ([saveKey, save, tokenKey, token]) => {
+        window.localStorage.setItem(saveKey, JSON.stringify(save));
+        if (token) window.localStorage.setItem(tokenKey, token);
+      },
+      [SAVE_KEY, richSave(Date.now()), TOKEN_KEY, boardToken],
     );
   }
 
@@ -221,4 +324,10 @@ for (const stage of ['broke', 'rich']) {
 
 await browser.close();
 await server.close();
+
+apiServer.kill();
+await rm(API_DB, { force: true });
+await rm(`${API_DB}-wal`, { force: true });
+await rm(`${API_DB}-shm`, { force: true });
+
 console.log(`Wrote ${TABS.length * 2 + 3} screenshots to ${OUT}/`);

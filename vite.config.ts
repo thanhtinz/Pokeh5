@@ -16,5 +16,11 @@ export default defineConfig({
     minify: 'terser',
     terserOptions: { compress: { passes: 2, drop_console: true } },
   },
-  server: { host: true, port: 5173 },
+  // Máy chủ tài khoản chạy riêng ở cổng khác; proxy để lúc dev cả hai cùng
+  // một origin, đúng như khi bản web dựng thật đứng sau một reverse proxy.
+  server: {
+    host: true,
+    port: 5173,
+    proxy: { '/api': { target: process.env['API_URL'] ?? 'http://localhost:8787', changeOrigin: true } },
+  },
 });

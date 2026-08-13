@@ -1,6 +1,7 @@
 import { render } from 'preact';
 
 import { derive, store } from './game/store';
+import { account } from './net/account';
 import { App } from './ui/App';
 import { applyTheme } from './ui/theme';
 
@@ -13,7 +14,12 @@ const FLUSH_SECONDS = 0.1;
 const root = document.getElementById('app');
 if (root) render(<App />, root);
 
-void store.boot().then(startLoop);
+// Ván chơi khởi động trước, tài khoản theo sau. Thứ tự này là cố ý: người chơi
+// chạm được vào game ngay, còn phần mạng thì tới lúc nào cũng được.
+void store.boot().then(() => {
+  startLoop();
+  void account.boot();
+});
 
 /**
  * One loop for the whole game.
@@ -40,6 +46,8 @@ function startLoop(): void {
       sinceFlush = 0;
       applyTheme(derive(store.state).netWorth, html);
       store.flush();
+      // Tự chặn nhịp bên trong, nên gọi mỗi lần vẽ cũng chỉ đẩy mỗi phút một lần.
+      void account.push();
     }
 
     requestAnimationFrame(frame);
@@ -50,6 +58,7 @@ function startLoop(): void {
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) {
       store.suspend();
+      void account.push(true);
       return;
     }
     // Frames stopped while hidden, so the clock has to be reset before the

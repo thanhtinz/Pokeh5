@@ -10,20 +10,23 @@ import { CityScene } from './Scene';
 import { derive } from '../game/store';
 import { Hud } from './Hud';
 import { CardSheet, MilestoneSheet, OfflineSheet } from './Overlays';
+import { Board } from './screens/Board';
 import { Empire } from './screens/Empire';
 import { Grind } from './screens/Grind';
 import { Life } from './screens/Life';
 import { Market } from './screens/Market';
 import { More } from './screens/More';
+import { useAccount } from './useAccount';
 import { useGame } from './useStore';
 
-type Tab = 'grind' | 'empire' | 'market' | 'life' | 'more';
+type Tab = 'grind' | 'empire' | 'market' | 'life' | 'board' | 'more';
 
 const TABS: readonly { id: Tab; icon: string }[] = [
   { id: 'grind', icon: 'ore' },
   { id: 'empire', icon: 'skyline' },
   { id: 'market', icon: 'chart' },
   { id: 'life', icon: 'heart' },
+  { id: 'board', icon: 'board' },
   { id: 'more', icon: 'star' },
 ];
 
@@ -34,6 +37,7 @@ interface Toast {
 
 export function App() {
   const game = useGame();
+  const account = useAccount();
   const [tab, setTab] = useState<Tab>('grind');
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [celebrated, setCelebrated] = useState<LifeMilestone | null>(null);
@@ -83,6 +87,9 @@ export function App() {
         (state.cycles[def.id] ?? 0) === 0,
     ),
     market: false,
+    // Chưa có tài khoản thì chấm một lần cho biết là có chỗ đó, chứ không chấm
+    // mãi: một cái chấm đỏ không tắt được là một cái chấm người ta học cách lờ đi.
+    board: false,
     life: game.pendingMilestones().length > 0 || derived.pendingReputation > 0,
     // Điểm danh và việc trong ngày là hai thứ đáng chấm nhất trên thanh tab:
     // cả hai đều chỉ có hôm nay.
@@ -101,6 +108,7 @@ export function App() {
         {tab === 'empire' && <Empire game={game} state={state} derived={derived} />}
         {tab === 'market' && <Market game={game} state={state} />}
         {tab === 'life' && <Life game={game} state={state} derived={derived} now={now} />}
+        {tab === 'board' && <Board account={account} state={state} />}
         {tab === 'more' && <More game={game} state={state} derived={derived} />}
       </main>
 

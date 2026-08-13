@@ -53,7 +53,7 @@ import {
 import { Rng, randomSeed } from './rng';
 import { newlyPassed, rivalReward, rivalState, RIVALS, type RivalState } from './rivals';
 import { rootMultiplier, rootsOf, totalRootTiers, type RootState } from './roots';
-import { loadSave, saveNow, wipeSave } from './save';
+import { loadSave, sanitise, saveNow, wipeSave } from './save';
 import {
   STARTING_BALANCE,
   createNewSave,
@@ -935,6 +935,29 @@ export class Store {
   /** Forces a redraw when something outside the save changed, like language. */
   refresh(): void {
     this.emit();
+  }
+
+  /**
+   * Thay cả ván bằng một bản lưu từ nơi khác — hiện chỉ có một nơi: trên mây,
+   * lúc đăng nhập trên máy mới.
+   *
+   * Đi qua `sanitise` chứ không tin thẳng, dù nó vừa từ máy chủ về. Máy chủ chỉ
+   * giữ hộ cái blob mà chính client đã gửi lên, nên "tin máy chủ" ở đây thực ra
+   * là tin một cái client nào đó — và đó đúng là thứ mà `sanitise` sinh ra để
+   * không phải tin.
+   */
+  adopt(incoming: unknown): boolean {
+    const clean = sanitise(incoming);
+    if (!clean) return false;
+
+    this.state = clean;
+    this.rng = new Rng(clean.rngSeed);
+    this.marketCarry = 0;
+    this.offline = this.catchUp();
+    this.rollQuests(Date.now());
+    this.persist();
+    this.emit();
+    return true;
   }
 
   /**

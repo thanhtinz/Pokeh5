@@ -5,3 +5,8 @@ android/
 ios/
 *.local
 .DS_Store
+
+# A mistyped screenshot target once landed here.
+undefined/
+*.sqlite
+*.sqlite-journal

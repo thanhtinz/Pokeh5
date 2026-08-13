@@ -10,14 +10,16 @@ Bối cảnh và tiền tệ là Việt Nam. Chơi bằng **tiếng Việt**, đ
 
 TypeScript, Preact and Vite, wrapped in Capacitor for Android and iOS.
 No canvas, no engine, no runtime dependencies beyond Preact — the whole bundle
-is **46 kB gzipped**.
+is **50 kB gzipped**, and the server it talks to has no dependencies at all.
 
 ## Running it
 
 ```bash
 npm install
 npm run dev        # http://localhost:5173
-npm test           # 83 tests over the rule layer and the dictionaries
+npm run server     # the account API on :8787 (optional — the game plays without it)
+npm run dev:all    # both at once
+npm test           # 103 tests over the rule layer, the dictionaries and the server
 npm run build      # typecheck, then a production bundle in dist/
 npm run shot       # screenshots every screen at both ends of the palette
 ```
@@ -299,7 +301,106 @@ A save written before any of this existed has its `beaten` list **backfilled
 from its peak rather than paid out** — opening the game to fourteen lump sums and
 fourteen toasts is a bug, not a present.
 
-83 tests now, from 50.
+103 tests now, from 50.
+
+## Accounts, cloud saves and the real leaderboard
+
+`server/`. Sign-up and sign-in, the save kept on a server so a new phone picks
+up where the old one left off, and a board of actual people.
+
+**Zero dependencies, same as the client.** Node 22 ships `node:sqlite`, and
+`node:crypto` ships scrypt — a real password KDF, deliberately memory-hard.
+Pulling in Express, bcrypt and an ORM to do what three built-in modules already
+do would leave the server permanently out of step with a client whose only
+dependency is Preact, and every package added is a CVE feed subscribed to for
+life. The whole thing is five files.
+
+```
+server/auth.mjs     scrypt hashing, opaque tokens, credential shape
+server/db.mjs       schema and every prepared statement
+server/scores.mjs   what a submitted score has to survive
+server/http.mjs     json, CORS, rate limiting — the bits under a framework
+server/index.mjs    routing
+```
+
+```
+POST /api/register  {name, password}   → {token, user}
+POST /api/login     {name, password}   → {token, user}
+POST /api/logout                       → 204
+GET  /api/me                           → {user}
+PUT  /api/save      {save, score}      → {user}
+GET  /api/save                         → {save, seenAt}
+GET  /api/board?limit=50               → {rows, total, you}
+```
+
+### What the security actually is
+
+- **Passwords are never stored**, only a salted scrypt hash, compared with
+  `timingSafeEqual`. Raising the cost parameter later will not lock anyone out,
+  because each hash carries the parameters it was made with.
+- **Tokens are never stored either** — the database holds their SHA-256. Leaking
+  the whole file does not let anyone sign in, because what is in it is not what
+  the client sends.
+- **Sign-in leaks nothing about who exists.** Same error either way, and — the
+  part that is easy to miss — the *same amount of time* either way: a missing
+  account skips scrypt and answers in a millisecond instead of a hundred, and
+  that gap is itself the answer to "does this name exist". A decoy hash makes
+  both paths cost the same.
+- **The unique-name check is not the check.** Hashing a password takes long
+  enough for another request to take the name in between, so the `UNIQUE`
+  constraint is what decides, and the insert is wrapped so losing that race
+  reads as `name.taken` rather than a 500.
+- Prepared statements throughout, a 256 kB body cap, per-IP rate limits that are
+  tightest on the two routes worth brute-forcing, thirty-day sessions swept
+  hourly, and no stack traces in responses.
+- `Access-Control-Allow-Origin: *` is deliberate and safe here: auth is a Bearer
+  token in our own `localStorage`, not a cookie, so there is no ambient
+  credential for another origin to ride — and the Capacitor build has no
+  same-origin to fall back on, since it runs at `capacitor://localhost`.
+
+### What the leaderboard cannot do, stated plainly
+
+**The rules run on the player's own device**, so someone determined can submit
+whatever number they like. Making that impossible means moving the simulation to
+the server, which is a different game architecture, not a validation function.
+`server/scores.mjs` therefore does not pretend. It blocks the three cheap things
+that *are* blockable, which is enough to keep the board useful for people
+playing honestly:
+
+1. **Impossible numbers.** `1e308`, `Infinity`, `NaN` — the rules cannot produce
+   them, so they are refused. The ceiling is `1e45`; the last business costs
+   `2.9e41`.
+2. **A minutes-old account at the top of the board.** The ceiling opens at a
+   nghìn tỷ and widens one order of magnitude every five minutes, so it is fully
+   open after about three hours. It is not there to slow real players down; it is
+   there so "register, POST `1e40`" goes nowhere.
+3. **Going backwards.** Records only rise, and standing is checked against the
+   record it claims to come from — reputation cannot exceed `sqrt(best / 1e9)`.
+
+One thing worth knowing about that gate: it is what made the screenshot script
+fail the first time. Seeding a board of brand-new accounts with trillions got
+`score.tooFast` on every one, exactly as designed. The fix was to age the fixture
+accounts by a week, not to widen the gate.
+
+### Sync
+
+The board reads **the same row the save writes** — there is no separate score
+endpoint, so the two can never disagree about a player.
+
+Conflicts resolve by **newest `lastSeenAt` wins**, which is the identical rule
+the Capacitor Preferences mirror already uses. One rule for every copy of a save
+is a rule you can still reason about; two is a coin flip the day they disagree.
+
+A remote save is put through `sanitise()` like any other, because the server
+stores a blob some client sent it — "trusting the server" here is really trusting
+whatever client wrote that blob, and not having to do that is what `sanitise()`
+is for.
+
+Signing in is **additive, never required**. No network, no account, server down —
+the game plays exactly as before, because the real save is still on the device
+and this layer only mirrors it. Nothing in `src/net/` throws; every call returns
+`{ok}` or `{ok: false, error}`, and the errors are ids that `src/i18n/` turns
+into sentences, same as everything else.
 
 ## How the money works
 
@@ -346,10 +447,12 @@ src/game/     the rules — runs in plain node, no DOM, fully tested
   save.ts         sanitising, localStorage, native mirror
   store.ts        the mutable world and every action on it
   rng.ts          mulberry32 + Box–Muller
+src/net/      the account client and save sync — optional, never required
 src/i18n/     every string the player reads, in vi and en
 src/ui/       Preact components, the theme engine, icons, assets and scenes
 src/styles/   two stylesheets: tokens, then components
-tests/        vitest over src/game/
+server/       the account API: five files, no dependencies
+tests/        vitest over src/game/, and server/*.test.mjs beside the server
 scripts/      playwright screenshots of every screen
 ```
 

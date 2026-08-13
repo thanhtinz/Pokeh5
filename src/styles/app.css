@@ -1049,6 +1049,82 @@ button.row__icon:not(:disabled):active {
   margin-bottom: 0;
 }
 
+/* ------------------------------------------------------------ tài khoản -- */
+
+.auth {
+  display: grid;
+  gap: 12px;
+}
+
+.auth__form {
+  display: grid;
+  gap: 10px;
+}
+
+.auth__field {
+  display: grid;
+  gap: 5px;
+}
+
+.auth__label {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+}
+
+/* Inputs are the one place the app takes typing, so they get a real box —
+   everything else here is a button and reads as one at a glance. */
+.auth__input {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--panel-edge);
+  background: hsl(var(--hue) 22% 100% / 0.05);
+  color: var(--ink);
+  font: inherit;
+  font-size: 14px;
+  transition: border-color 0.15s var(--ease), background 0.15s var(--ease);
+}
+
+.auth__input:focus {
+  outline: none;
+  border-color: hsl(var(--hue) var(--sat) 62% / 0.7);
+  background: hsl(var(--hue) 22% 100% / 0.08);
+}
+
+.auth__error {
+  font-size: 12px;
+  line-height: 1.4;
+  color: hsl(2 78% 68%);
+}
+
+.auth__actions {
+  display: flex;
+  gap: 8px;
+}
+
+.auth__actions .btn {
+  flex: 1;
+}
+
+.auth__sync {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+}
+
+.auth__sync--idle {
+  color: var(--accent);
+}
+
+.auth__sync--error {
+  color: hsl(2 78% 68%);
+}
+
 /* -------------------------------------------------------- bảng người ta -- */
 
 .board {
@@ -1122,6 +1198,29 @@ button.row__icon:not(:disabled):active {
 .board__worth {
   font-size: 11.5px;
   color: var(--ink-dim);
+}
+
+.board__refresh {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+/* The honest note about what the board can police. Small, but not hidden. */
+.board__fair {
+  display: grid;
+  grid-template-columns: 14px 1fr;
+  align-items: start;
+  gap: 7px;
+  white-space: normal;
+  line-height: 1.45;
+  opacity: 0.7;
+}
+
+.board__fair .icon {
+  width: 14px;
+  height: 14px;
+  margin-top: 1px;
 }
 
 /* ------------------------------------------------------------- cắm rễ ---- */

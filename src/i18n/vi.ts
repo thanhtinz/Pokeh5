@@ -31,7 +31,7 @@ export const vi: Record<string, string> = {
 
   'tab.grind': 'Cày',
   'tab.empire': 'Cơ ngơi',
-  'tab.market': 'Chứng khoán',
+  'tab.market': 'Sàn',
   'tab.life': 'Cuộc đời',
 
   // -------------------------------------------------------------- màn Cày --
@@ -182,6 +182,50 @@ export const vi: Record<string, string> = {
   'goal.trades': 'Đặt {target} lệnh mua bán',
   'goal.units': 'Mở thêm {target} suất',
   'goal.upgrades': 'Nâng cấp {target} lần',
+  'tab.board': 'Bảng',
+
+  // ------------------------------------------------------------ tài khoản --
+  'auth.register': 'Đăng ký',
+  'auth.login': 'Đăng nhập',
+  'auth.logout': 'Đăng xuất',
+  'auth.name': 'Tên',
+  'auth.password': 'Mật khẩu',
+  'auth.rules': 'Tên 3–16 ký tự, chỉ chữ không dấu, số, gạch dưới. Mật khẩu từ 8 ký tự.',
+  'auth.working': 'Đang gửi…',
+  'auth.why': 'Có tài khoản thì bản lưu nằm trên máy chủ, đổi máy vẫn chơi tiếp, và tên mình lên bảng.',
+  'auth.syncNote': 'Bản lưu tự đẩy lên mỗi phút và mỗi lần tắt game.',
+  'auth.pushNow': 'Đẩy lên ngay',
+  'sync.off': 'Chưa nối',
+  'sync.idle': 'Đã đồng bộ',
+  'sync.busy': 'Đang gửi',
+  'sync.error': 'Lỗi đồng bộ',
+
+  // -------------------------------------------------------- bảng xếp hạng --
+  'board.title': 'Bảng xếp hạng',
+  'board.players': '{count} người chơi',
+  'board.load': 'Tải lại',
+  'board.empty': 'Chưa tải được bảng. Kiểm tra mạng rồi bấm Tải lại.',
+  'board.detail': '{runs} lần làm lại · chuộc {claimed}/12',
+  'board.anon': 'Kỷ lục của mình là {amount}. Đăng ký để lên bảng.',
+  'board.fair': 'Xếp theo kỷ lục tổng tài sản. Số gửi lên có kiểm, nhưng luật chơi chạy ở máy người chơi nên bảng này là sân chơi của người chơi thật.',
+
+  // ------------------------------------------------------------------ lỗi --
+  'err.name.shape': 'Tên phải 3–16 ký tự, chỉ chữ không dấu, số, gạch dưới hoặc gạch ngang.',
+  'err.name.taken': 'Tên này có người lấy rồi.',
+  'err.password.short': 'Mật khẩu phải từ 8 ký tự.',
+  'err.password.long': 'Mật khẩu dài quá.',
+  'err.login.wrong': 'Sai tên hoặc mật khẩu.',
+  'err.auth.required': 'Phiên hết hạn rồi, đăng nhập lại nhé.',
+  'err.rate.limited': 'Thử nhiều quá rồi, đợi một phút.',
+  'err.body.invalid': 'Dữ liệu gửi lên không hợp lệ.',
+  'err.score.shape': 'Điểm gửi lên không hợp lệ.',
+  'err.score.tooFast': 'Tài khoản mới quá so với con số này. Chơi thêm rồi bảng sẽ nhận.',
+  'err.score.impossible': 'Con số này luật chơi không sinh ra được.',
+  'err.net.offline': 'Không nối được máy chủ. Game vẫn chơi bình thường.',
+  'err.net.timeout': 'Máy chủ trả lời chậm quá. Thử lại xem.',
+  'err.server.error': 'Máy chủ đang trục trặc. Thử lại sau.',
+  'err.not.found': 'Không tìm thấy.',
+
   'rival.title': 'Bảng người ta',
   'rival.rank': 'Hơn {rank}/{total} người',
   'rival.next': 'Còn {amount} nữa là qua mặt',
