@@ -15,6 +15,8 @@
  *   POST   /api/login     {name, password}      → {token, user}
  *   POST   /api/logout                          → 204
  *   GET    /api/me                              → {user}
+ *   POST   /api/password  {current, next}       → 204
+ *   DELETE /api/account   {password}            → 204
  *   PUT    /api/save      {save, score}         → {user}
  *   GET    /api/save                            → {save, seenAt}
  *   GET    /api/board?limit=50                  → {rows, total, you}
@@ -156,6 +158,57 @@ async function route(req, res, url, now) {
     const session = sessionOf(req, now);
     if (!session) return fail(res, 401, 'auth.required');
     return send(res, 200, { user: publicUser(session.user) });
+  }
+
+  /*
+   * Đổi mật khẩu.
+   *
+   * Bắt buộc đăng nhập mới chơi được, nên quên mật khẩu là mất luôn ván. Không
+   * có email thì không gửi được link đặt lại, và cái làm được thì phải làm:
+   * người còn nhớ mật khẩu cũ phải đổi được sang cái mới.
+   *
+   * Đổi xong thì **mọi phiên khác chết**. Lý do người ta đổi mật khẩu thường là
+   * vì nghi có người khác đang dùng, mà đổi xong phiên của người kia vẫn sống
+   * thì việc vừa làm chẳng có tác dụng gì.
+   */
+  if (path === '/api/password' && req.method === 'POST') {
+    const session = sessionOf(req, now);
+    if (!session) return fail(res, 401, 'auth.required');
+    if (!allowAuth(ip, now)) return fail(res, 429, 'rate.limited');
+
+    const body = await readJson(req);
+    if (!body) return fail(res, 400, 'body.invalid');
+
+    const problem = checkCredentials(session.user.name, body.next);
+    if (problem) return fail(res, 400, problem);
+
+    const ok = await verifyPassword(String(body.current ?? ''), session.user.password);
+    if (!ok) return fail(res, 403, 'password.wrong');
+
+    q.setPassword.run(await hashPassword(body.next), session.user.id);
+    q.deleteOtherSessions.run(session.user.id, session.hash);
+
+    return send(res, 204);
+  }
+
+  /*
+   * Xoá tài khoản.
+   *
+   * Bắt người ta lập tài khoản mới thì phải để người ta bỏ đi được — và bỏ đi
+   * nghĩa là dữ liệu biến mất thật, không phải một lá cờ "đã ẩn". Phiên đăng
+   * nhập tự đi theo nhờ `ON DELETE CASCADE`.
+   */
+  if (path === '/api/account' && req.method === 'DELETE') {
+    const session = sessionOf(req, now);
+    if (!session) return fail(res, 401, 'auth.required');
+    if (!allowAuth(ip, now)) return fail(res, 429, 'rate.limited');
+
+    const body = await readJson(req);
+    const ok = await verifyPassword(String(body?.password ?? ''), session.user.password);
+    if (!ok) return fail(res, 403, 'password.wrong');
+
+    q.deleteUser.run(session.user.id);
+    return send(res, 204);
   }
 
   // -------------------------------------------------------------- bản lưu --

@@ -111,6 +111,12 @@ export const api = {
 
   me: (token: string) => call<{ user: AccountUser }>('/me', { token }),
 
+  changePassword: (token: string, current: string, next: string) =>
+    call<void>('/password', { method: 'POST', token, body: { current, next } }),
+
+  deleteAccount: (token: string, password: string) =>
+    call<void>('/account', { method: 'DELETE', token, body: { password } }),
+
   pushSave: (token: string, save: PlayerState, score: Score) =>
     call<{ user: AccountUser }>('/save', { method: 'PUT', token, body: { save, score } }),
 

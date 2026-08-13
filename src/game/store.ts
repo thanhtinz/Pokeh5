@@ -313,6 +313,16 @@ export class Store {
     return isNew;
   }
 
+  /** Xoá sạch ván khỏi máy — dùng khi tài khoản sở hữu nó vừa bị xoá. */
+  wipe(): void {
+    wipeSave();
+    this.ready = false;
+    this.offline = null;
+    this.notices = [];
+    this.state = createNewSave(this.state.marketSeed);
+    this.emit();
+  }
+
   /** Rời ván hiện tại khi đăng xuất, để màn sau không thấy tiền của người trước. */
   unload(): void {
     this.persist();

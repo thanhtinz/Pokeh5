@@ -4,6 +4,9 @@
  * Chạy trên chính `.mjs` mà máy chủ chạy — không qua bundler, không bước dựng,
  * nên thứ được kiểm đúng là thứ sẽ chạy thật.
  */
+import { spawn } from 'node:child_process';
+import { rmSync } from 'node:fs';
+
 import { describe, expect, it } from 'vitest';
 
 import { checkCredentials, hashPassword, hashToken, mintToken, verifyPassword } from './auth.mjs';
@@ -186,5 +189,162 @@ describe('kho dữ liệu', () => {
     q.expireSessions.run(5_000);
     expect(q.sessionByHash.get('cu')).toBeUndefined();
     expect(q.sessionByHash.get('moi')).toBeTruthy();
+  });
+});
+
+describe('đổi mật khẩu và xoá tài khoản', () => {
+  /**
+   * Chạy máy chủ thật trên một cổng riêng.
+   *
+   * Mấy đường này là chuyện của cả một phiên — đổi mật khẩu rồi *phiên kia*
+   * phải chết — nên gọi hàm rời rạc không kiểm được. Phải đi qua HTTP.
+   */
+  async function serve() {
+    const port = 8790 + Math.floor(performance.now() % 40);
+    const file = `test-${port}.sqlite`;
+    for (const leftover of [file, `${file}-wal`, `${file}-shm`]) rmSync(leftover, { force: true });
+
+    const child = spawn('node', ['server/index.mjs'], {
+      env: { ...process.env, PORT: String(port), DB_FILE: file },
+      stdio: 'ignore',
+    });
+
+    const base = `http://localhost:${port}/api`;
+    for (let i = 0; i < 100; i += 1) {
+      try {
+        if ((await fetch(`${base}/health`)).ok) break;
+      } catch {
+        // Chưa lên.
+      }
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    }
+
+    const call = (path, options = {}) =>
+      fetch(base + path, {
+        method: options.method ?? 'GET',
+        headers: {
+          ...(options.body ? { 'content-type': 'application/json' } : {}),
+          ...(options.token ? { authorization: `Bearer ${options.token}` } : {}),
+        },
+        body: options.body ? JSON.stringify(options.body) : undefined,
+      });
+
+    const stop = () => {
+      child.kill();
+      for (const leftover of [file, `${file}-wal`, `${file}-shm`]) {
+        rmSync(leftover, { force: true });
+      }
+    };
+
+    return { call, stop };
+  }
+
+  const signUp = (call, name, password) =>
+    call('/register', { method: 'POST', body: { name, password } }).then((r) => r.json());
+
+  it('đổi được mật khẩu, và mật khẩu cũ thôi dùng được', async () => {
+    const { call, stop } = await serve();
+    try {
+      const me = await signUp(call, 'doimatkhau', 'matkhaucu123');
+
+      const wrong = await call('/password', {
+        method: 'POST',
+        token: me.token,
+        body: { current: 'doanbua123', next: 'matkhaumoi123' },
+      });
+      expect(wrong.status).toBe(403);
+
+      const ok = await call('/password', {
+        method: 'POST',
+        token: me.token,
+        body: { current: 'matkhaucu123', next: 'matkhaumoi123' },
+      });
+      expect(ok.status).toBe(204);
+
+      const old = await call('/login', {
+        method: 'POST',
+        body: { name: 'doimatkhau', password: 'matkhaucu123' },
+      });
+      expect(old.status).toBe(401);
+
+      const fresh = await call('/login', {
+        method: 'POST',
+        body: { name: 'doimatkhau', password: 'matkhaumoi123' },
+      });
+      expect(fresh.status).toBe(200);
+    } finally {
+      stop();
+    }
+  });
+
+  // Người ta đổi mật khẩu thường là vì nghi có người khác đang dùng. Đổi xong
+  // mà phiên của người kia vẫn sống thì việc vừa làm chẳng có tác dụng gì.
+  it('đổi xong thì phiên trên máy khác chết, phiên đang thao tác thì không', async () => {
+    const { call, stop } = await serve();
+    try {
+      const first = await signUp(call, 'haiphien', 'matkhaucu123');
+      const second = await call('/login', {
+        method: 'POST',
+        body: { name: 'haiphien', password: 'matkhaucu123' },
+      }).then((r) => r.json());
+
+      await call('/password', {
+        method: 'POST',
+        token: second.token,
+        body: { current: 'matkhaucu123', next: 'matkhaumoi123' },
+      });
+
+      expect((await call('/me', { token: first.token })).status).toBe(401);
+      expect((await call('/me', { token: second.token })).status).toBe(200);
+    } finally {
+      stop();
+    }
+  });
+
+  it('không cho đặt mật khẩu mới quá ngắn', async () => {
+    const { call, stop } = await serve();
+    try {
+      const me = await signUp(call, 'ngan', 'matkhaucu123');
+      const response = await call('/password', {
+        method: 'POST',
+        token: me.token,
+        body: { current: 'matkhaucu123', next: 'ngan' },
+      });
+      expect(response.status).toBe(400);
+      expect((await response.json()).error).toBe('password.short');
+    } finally {
+      stop();
+    }
+  });
+
+  it('xoá tài khoản thì tên trả lại cho người khác, và phiên cũng đi theo', async () => {
+    const { call, stop } = await serve();
+    try {
+      const me = await signUp(call, 'roi_di', 'matkhaudai123');
+
+      expect((await call('/account', {
+        method: 'DELETE',
+        token: me.token,
+        body: { password: 'doanbua123' },
+      })).status).toBe(403);
+
+      expect((await call('/account', {
+        method: 'DELETE',
+        token: me.token,
+        body: { password: 'matkhaudai123' },
+      })).status).toBe(204);
+
+      // Phiên đi theo nhờ ON DELETE CASCADE.
+      expect((await call('/me', { token: me.token })).status).toBe(401);
+
+      // Và cái tên không còn bị giữ chỗ bởi một tài khoản không tồn tại.
+      const again = await call('/register', {
+        method: 'POST',
+        body: { name: 'roi_di', password: 'matkhaudai123' },
+      });
+      expect(again.status).toBe(201);
+    } finally {
+      stop();
+    }
   });
 });

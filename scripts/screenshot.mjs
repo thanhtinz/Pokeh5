@@ -284,6 +284,25 @@ for (const stage of ['broke', 'rich']) {
   await context.close();
 }
 
+// Khối tài khoản lúc mở phần đổi mật khẩu / xoá tài khoản — nó gấp lại mặc
+// định, nên không lần chụp nào theo tab chạm tới được.
+{
+  const context = await browser.newContext({ viewport: VIEWPORT, deviceScaleFactor: 2 });
+  const page = await context.newPage();
+  await signedIn(page, richSave(Date.now(), players.rich.user.id));
+
+  await page.goto(base, { waitUntil: 'networkidle' });
+  await page.waitForSelector('.shell', { timeout: 15_000 });
+  const offline = page.locator('.sheet .btn--primary');
+  if (await offline.count()) await offline.first().click();
+
+  await page.locator('.tab').nth(4).click();
+  await page.locator('.auth__more').click();
+  await page.waitForTimeout(400);
+  await page.screenshot({ path: `${OUT}/account.png` });
+  await context.close();
+}
+
 // The opportunity card, which only ever exists for twenty-five seconds.
 {
   const now = Date.now();
@@ -355,4 +374,4 @@ await rm(API_DB, { force: true });
 await rm(`${API_DB}-wal`, { force: true });
 await rm(`${API_DB}-shm`, { force: true });
 
-console.log(`Wrote ${TABS.length * 2 + 4} screenshots to ${OUT}/`);
+console.log(`Wrote ${TABS.length * 2 + 5} screenshots to ${OUT}/`);

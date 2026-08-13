@@ -19,7 +19,7 @@ npm install
 npm run dev        # http://localhost:5173
 npm run server     # the account API on :8787 (required — the game is behind a sign-in)
 npm run dev:all    # both at once
-npm test           # 106 tests over the rule layer, the dictionaries and the server
+npm test           # 110 tests over the rule layer, the dictionaries and the server
 npm run build      # typecheck, then a production bundle in dist/
 npm run shot       # screenshots every screen at both ends of the palette
 npm run art        # all 58 drawn assets on one sheet, large enough to judge
@@ -350,7 +350,7 @@ A save written before any of this existed has its `beaten` list **backfilled
 from its peak rather than paid out** — opening the game to fourteen lump sums and
 fourteen toasts is a bug, not a present.
 
-106 tests now, from 50.
+110 tests now, from 50.
 
 ## Accounts, cloud saves and the real leaderboard
 
@@ -373,13 +373,15 @@ server/index.mjs    routing
 ```
 
 ```
-POST /api/register  {name, password}   → {token, user}
-POST /api/login     {name, password}   → {token, user}
-POST /api/logout                       → 204
-GET  /api/me                           → {user}
-PUT  /api/save      {save, score}      → {user}
-GET  /api/save                         → {save, seenAt}
-GET  /api/board?limit=50               → {rows, total, you}
+POST   /api/register  {name, password}   → {token, user}
+POST   /api/login     {name, password}   → {token, user}
+POST   /api/logout                       → 204
+GET    /api/me                           → {user}
+POST   /api/password  {current, next}    → 204
+DELETE /api/account   {password}         → 204
+PUT    /api/save      {save, score}      → {user}
+GET    /api/save                         → {save, seenAt}
+GET    /api/board?limit=50               → {rows, total, you}
 ```
 
 ### What the security actually is
@@ -455,6 +457,22 @@ not that account any more", and then you sign in again.
 The simulation loop only starts once you are through the gate. Running it behind
 the sign-in screen would have businesses cycling, cards landing and money
 arriving for a save nobody had claimed yet.
+
+**A required account has to have a way out, and a way to fix itself.** There is
+no email on file, so there is no reset link to send — but the thing that *can* be
+built has to be: someone who still knows their password can change it, and
+anyone can delete the account outright. Without those two, requiring sign-in
+means one forgotten password is a permanently lost game and there is no way to
+leave.
+
+Changing a password **kills every other session** and keeps the one doing the
+changing. People change a password because they think somebody else is using the
+account; leaving that somebody signed in makes the whole act pointless. Deleting
+takes the row, and `ON DELETE CASCADE` takes the sessions with it, so the name
+goes back into circulation rather than being held by an account that no longer
+exists. Both ask for the current password — obvious for the first, and for the
+second it is the brake that stops an unlocked phone in someone else's hand from
+erasing a run.
 
 ### Sync
 

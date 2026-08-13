@@ -59,8 +59,16 @@ export function createQueries(db) {
     userByName: db.prepare(`SELECT * FROM users WHERE name_lower = ?`),
     userById: db.prepare(`SELECT * FROM users WHERE id = ?`),
 
+    setPassword: db.prepare(`UPDATE users SET password = ? WHERE id = ?`),
+    deleteUser: db.prepare(`DELETE FROM users WHERE id = ?`),
+
     insertSession: db.prepare(
       `INSERT INTO sessions (token_hash, user_id, created_at, last_used_at) VALUES (?, ?, ?, ?)`,
+    ),
+    // Đổi mật khẩu thì mọi phiên khác phải chết. Giữ lại đúng phiên đang thao
+    // tác, vì đá luôn cả người vừa đổi ra ngoài là phạt nhầm người.
+    deleteOtherSessions: db.prepare(
+      `DELETE FROM sessions WHERE user_id = ? AND token_hash <> ?`,
     ),
     sessionByHash: db.prepare(`SELECT * FROM sessions WHERE token_hash = ?`),
     touchSession: db.prepare(`UPDATE sessions SET last_used_at = ? WHERE token_hash = ?`),

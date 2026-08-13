@@ -1,4 +1,4 @@
-import { useEffect } from 'preact/hooks';
+import { useEffect, useState } from 'preact/hooks';
 
 import { money } from '../../game/money';
 import type { Account } from '../../net/account';
@@ -34,6 +34,7 @@ export function Board({ account }: Props) {
 
 function Signed({ account }: { account: Account }) {
   const user = account.user!;
+  const [open, setOpen] = useState(false);
 
   return (
     <section class="panel panel--inset auth">
@@ -58,7 +59,98 @@ function Signed({ account }: { account: Account }) {
           {t('auth.logout')}
         </button>
       </div>
+
+      {/* Đổi mật khẩu và xoá tài khoản gấp lại. Hai thứ này phải có mặt, nhưng
+          bày thẳng ra cạnh nút Đăng xuất thì có ngày ai đó bấm nhầm cái không
+          hoàn tác được. */}
+      <button class="auth__more" onClick={() => setOpen(!open)}>
+        {open ? t('auth.hideSettings') : t('auth.settings')}
+      </button>
+
+      {open && <Danger account={account} />}
     </section>
+  );
+}
+
+/**
+ * Hai việc không hoàn tác được.
+ *
+ * Cả hai đều bắt nhập lại mật khẩu hiện tại. Với đổi mật khẩu thì đó là điều
+ * hiển nhiên; với xoá tài khoản thì nó là cái phanh — một cái điện thoại mở sẵn
+ * bị người khác cầm không xoá được ván chơi của mình.
+ */
+function Danger({ account }: { account: Account }) {
+  const [current, setCurrent] = useState('');
+  const [next, setNext] = useState('');
+  const [done, setDone] = useState(false);
+
+  async function changePassword(event: Event) {
+    event.preventDefault();
+    if (account.busy || current.length < 1 || next.length < 8) return;
+
+    const failure = await account.changePassword(current, next);
+    if (failure === null) {
+      setCurrent('');
+      setNext('');
+      setDone(true);
+    }
+  }
+
+  async function remove() {
+    if (current.length < 1 || account.busy) return;
+    if (!window.confirm(t('auth.deleteConfirm', { name: account.user?.name ?? '' }))) return;
+    await account.deleteAccount(current);
+  }
+
+  return (
+    <form class="auth__form" onSubmit={changePassword}>
+      <label class="auth__field">
+        <span class="auth__label">{t('auth.currentPassword')}</span>
+        <input
+          class="auth__input"
+          type="password"
+          autocomplete="current-password"
+          value={current}
+          onInput={(event) => {
+            setCurrent((event.target as HTMLInputElement).value);
+            setDone(false);
+          }}
+        />
+      </label>
+
+      <label class="auth__field">
+        <span class="auth__label">{t('auth.newPassword')}</span>
+        <input
+          class="auth__input"
+          type="password"
+          autocomplete="new-password"
+          value={next}
+          onInput={(event) => {
+            setNext((event.target as HTMLInputElement).value);
+            setDone(false);
+          }}
+        />
+      </label>
+
+      {account.error && <span class="auth__error">{errorText(account.error)}</span>}
+      {done && <span class="auth__done">{t('auth.passwordChanged')}</span>}
+
+      <button
+        class="btn btn--wide"
+        disabled={account.busy || current.length < 1 || next.length < 8}
+      >
+        {t('auth.changePassword')}
+      </button>
+
+      <button
+        type="button"
+        class="btn btn--wide auth__danger"
+        disabled={account.busy || current.length < 1}
+        onClick={() => void remove()}
+      >
+        {t('auth.deleteAccount')}
+      </button>
+    </form>
   );
 }
 

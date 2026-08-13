@@ -166,6 +166,52 @@ export class Account {
     await this.push(true);
   }
 
+  /**
+   * Đổi mật khẩu. Trả về `null` khi xong, hoặc id lỗi để màn hình hiện câu.
+   *
+   * Máy chủ giết mọi phiên khác, giữ lại phiên này — nên không phải đăng nhập
+   * lại ở đây, còn cái máy kia thì lần đồng bộ sau sẽ ăn 401 và bị đá ra, đúng
+   * như ý.
+   */
+  async changePassword(current: string, next: string): Promise<string | null> {
+    if (this.token === null) return 'auth.required';
+
+    this.busy = true;
+    this.error = null;
+    this.emit();
+
+    const result = await api.changePassword(this.token, current, next);
+    this.busy = false;
+    this.error = result.ok ? null : result.error;
+    this.emit();
+    return result.ok ? null : result.error;
+  }
+
+  /** Xoá tài khoản, rồi trở về đúng chỗ một người lạ đứng: cái cổng. */
+  async deleteAccount(password: string): Promise<string | null> {
+    if (this.token === null) return 'auth.required';
+
+    this.busy = true;
+    this.error = null;
+    this.emit();
+
+    const result = await api.deleteAccount(this.token, password);
+    this.busy = false;
+
+    if (!result.ok) {
+      this.error = result.error;
+      this.emit();
+      return result.error;
+    }
+
+    // Ván trong máy cũng phải đi theo. Để lại một bản lưu mang dấu một tài
+    // khoản không còn tồn tại là để lại một cái xác không ai dọn được.
+    store.wipe();
+    this.forget();
+    this.emit();
+    return null;
+  }
+
   async logout(): Promise<void> {
     const token = this.token;
     this.forget();
