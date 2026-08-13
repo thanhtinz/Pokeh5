@@ -11,7 +11,8 @@ import {
   unitCost,
 } from '../../game/businesses';
 import { clock, count, money, rate } from '../../game/money';
-import { hasManager, ownedOf, type PlayerState } from '../../game/state';
+import { hasManager, ownedOf, upgradeOf, type PlayerState } from '../../game/state';
+import { TIERS, isMaxed, nextUpgrade, upgradeMultiplier } from '../../game/upgrades';
 import type { Derived, Store } from '../../game/store';
 import { t } from '../../i18n';
 import { Art } from '../Art';
@@ -93,6 +94,9 @@ export function Empire({ game, state, derived }: Props) {
               const progress = (state.cycles[def.id] ?? 0) / def.cycleSeconds;
               const target = nextMilestone(owned);
 
+              const level = upgradeOf(state, def.id);
+              const upgrade = nextUpgrade(def, owned, level);
+
               return (
                 <div key={def.id} class={`row${affordable ? ' row--lit' : ''}`}>
                   <button
@@ -145,6 +149,36 @@ export function Empire({ game, state, derived }: Props) {
                         </button>
                       ))}
                   </span>
+
+                  {/* Nâng cấp chỉ hiện khi đã có cơ sở: trước đó nó là một dòng
+                      chữ vô nghĩa giữa danh sách những thứ chưa mua nổi. */}
+                  {owned > 0 && (
+                    <span class="row__upgrade">
+                      {isMaxed(level) ? (
+                        <span class="row__meta">
+                          {t('empire.upgradeLevel', {
+                            level,
+                            max: TIERS.length,
+                            multiplier: upgradeMultiplier(level),
+                          })}
+                        </span>
+                      ) : (
+                        <button
+                          class={`btn btn--sm btn--wide${
+                            upgrade && upgrade.unlocked && game.canAfford(upgrade.cost)
+                              ? ' btn--primary'
+                              : ''
+                          }`}
+                          disabled={!upgrade || !upgrade.unlocked || !game.canAfford(upgrade.cost)}
+                          onClick={() => game.buyUpgrade(def.id)}
+                        >
+                          {upgrade && !upgrade.unlocked
+                            ? t('empire.upgradeLocked', { count: upgrade.tier.at })
+                            : t('empire.upgrade', { cost: money(upgrade?.cost ?? 0) })}
+                        </button>
+                      )}
+                    </span>
+                  )}
 
                   {owned > 0 && (
                     <span class="row__bar bar">

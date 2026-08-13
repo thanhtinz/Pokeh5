@@ -14,15 +14,17 @@ import { Empire } from './screens/Empire';
 import { Grind } from './screens/Grind';
 import { Life } from './screens/Life';
 import { Market } from './screens/Market';
+import { More } from './screens/More';
 import { useGame } from './useStore';
 
-type Tab = 'grind' | 'empire' | 'market' | 'life';
+type Tab = 'grind' | 'empire' | 'market' | 'life' | 'more';
 
 const TABS: readonly { id: Tab; icon: string }[] = [
   { id: 'grind', icon: 'ore' },
   { id: 'empire', icon: 'skyline' },
   { id: 'market', icon: 'chart' },
   { id: 'life', icon: 'heart' },
+  { id: 'more', icon: 'star' },
 ];
 
 interface Toast {
@@ -81,7 +83,9 @@ export function App() {
         (state.cycles[def.id] ?? 0) === 0,
     ),
     market: false,
-    life: game.pendingMilestones().length > 0,
+    life: game.pendingMilestones().length > 0 || derived.pendingReputation > 0,
+    // Điểm danh là thứ đáng chấm nhất trên thanh tab: nó chỉ có hôm nay.
+    more: derived.daily.available,
   };
 
   return (
@@ -96,6 +100,7 @@ export function App() {
         {tab === 'empire' && <Empire game={game} state={state} derived={derived} />}
         {tab === 'market' && <Market game={game} state={state} />}
         {tab === 'life' && <Life game={game} state={state} derived={derived} now={now} />}
+        {tab === 'more' && <More game={game} state={state} derived={derived} />}
       </main>
 
       <nav class="tabs">

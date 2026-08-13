@@ -23,6 +23,7 @@
  * cannot widen the line that allowed the borrowing — and leaves the line
  * growing only from income actually earned.
  */
+import { achievementMultiplier, newlyEarned, type Metrics } from './achievements';
 import {
   BUSINESSES,
   affordableUnits,
@@ -33,8 +34,10 @@ import {
   unitCost,
 } from './businesses';
 import { t as tr } from '../i18n';
+import { dailyReward, dailyState, type DailyState } from './daily';
 import { CARD_LIFETIME, drawCard, jobById } from './jobs';
 import { bonusesFrom, newlyReached, type LifeBonuses, type LifeMilestone } from './life';
+import { effectsFrom, perkById, perkCost, type PerkEffects } from './perks';
 import { pendingReputation, reputationMultiplier } from './prestige';
 import { Rng, randomSeed } from './rng';
 import { loadSave, saveNow, wipeSave } from './save';
@@ -43,6 +46,8 @@ import {
   createNewSave,
   holdingOf,
   ownedOf,
+  perkLevel,
+  upgradeOf,
   type PlayerState,
 } from './state';
 import {
@@ -57,6 +62,7 @@ import {
   STOCKS,
   unrealised,
 } from './stocks';
+import { nextUpgrade, upgradeMultiplier } from './upgrades';
 
 /** Dollars a single unit of ore is worth at refinery level one. */
 export const ORE_BASE_VALUE = 8_000;
@@ -102,8 +108,16 @@ export interface Derived {
   tapValue: number;
   oreCapacity: number;
   bonuses: LifeBonuses;
+  /** Đặc quyền đã mua bằng uy tín. */
+  perks: PerkEffects;
+  /** Nhân vĩnh viễn từ thành tựu. */
+  achievementMultiplier: number;
   /** Nhân vĩnh viễn từ uy tín, tách riêng để màn Cuộc đời còn hiện được. */
   reputationMultiplier: number;
+  /** Số đo cộng dồn cho thành tựu. */
+  metrics: Metrics;
+  /** Trạng thái điểm danh hôm nay. */
+  daily: DailyState;
   /** Nhân tổng: mốc cuộc đời × uy tín × buff đang chạy. */
   globalMultiplier: number;
   boostMultiplier: number;
@@ -144,8 +158,11 @@ export function portfolioValue(state: PlayerState): number {
 export function derive(state: PlayerState, now = Date.now()): Derived {
   const bonuses = bonusesFrom(state.claimed);
   const boostMultiplier = state.boost && state.boost.endsAt > now ? state.boost.multiplier : 1;
-  const repMultiplier = reputationMultiplier(state.reputation);
-  const globalMultiplier = bonuses.income * repMultiplier * boostMultiplier;
+  const repMultiplier = reputationMultiplier(state.reputationTotal);
+  const achieveMultiplier = achievementMultiplier(state.achievements);
+  const perks = effectsFrom(state.perks);
+  const globalMultiplier =
+    bonuses.income * repMultiplier * achieveMultiplier * boostMultiplier;
 
   const assets = businessAssets(state) + portfolioValue(state);
   const netWorth = state.cash + assets;
@@ -153,15 +170,16 @@ export function derive(state: PlayerState, now = Date.now()): Derived {
   const oreValue =
     ORE_BASE_VALUE * Math.pow(REFINERY_GROWTH, state.refineryLevel - 1) * globalMultiplier;
   const oreRate = REFINERY_BASE_RATE * state.refineryLevel;
-  const tapOre = state.tapLevel * bonuses.tap;
+  const tapOre = state.tapLevel * bonuses.tap * perks.tap;
 
   let income = 0;
   for (const def of BUSINESSES) {
     if (!state.managers.includes(def.id)) continue;
-    income += incomePerSecond(def, ownedOf(state, def.id), globalMultiplier, 1);
+    const perBusiness = globalMultiplier * upgradeMultiplier(upgradeOf(state, def.id));
+    income += incomePerSecond(def, ownedOf(state, def.id), perBusiness, perks.speed);
   }
 
-  const line = creditLine(state.peakNetWorth);
+  const line = creditLine(state.peakNetWorth) * perks.credit;
   const floor = STARTING_BALANCE - line;
 
   return {
@@ -175,13 +193,33 @@ export function derive(state: PlayerState, now = Date.now()): Derived {
     tapValue: tapOre * oreValue,
     oreCapacity: ORE_CAPACITY_PER_LEVEL * state.refineryLevel * state.tapLevel,
     bonuses,
+    perks,
+    achievementMultiplier: achieveMultiplier,
     reputationMultiplier: repMultiplier,
+    metrics: metricsOf(state),
+    daily: dailyState(state.dailyClaimedAt, state.dailyStreak, now),
     globalMultiplier,
     boostMultiplier,
-    pendingReputation: pendingReputation(state.peakNetWorth, state.reputation),
+    pendingReputation: pendingReputation(state.peakNetWorth, state.reputationTotal),
     creditLine: line,
     creditFloor: floor,
     spendable: Math.max(0, state.cash - floor),
+  };
+}
+
+/** Số đo mọi nhánh thành tựu, gộp từ số đếm cộng dồn và trạng thái hiện tại. */
+export function metricsOf(state: PlayerState): Metrics {
+  return {
+    taps: state.stats.taps,
+    cards: state.stats.cards,
+    jobs: state.stats.jobs,
+    trades: state.stats.trades,
+    units: state.stats.units,
+    upgrades: state.stats.upgrades,
+    managers: state.managers.length,
+    best: state.bestNetWorth,
+    runs: state.runs,
+    claimed: state.claimed.length,
   };
 }
 
@@ -311,6 +349,7 @@ export class Store {
     this.runCards(now, d);
     this.runMarket(step, now);
     this.checkMilestones(d);
+    this.checkAchievements();
 
     if (this.state.boost && this.state.boost.endsAt <= now) this.state.boost = null;
 
@@ -338,14 +377,18 @@ export class Store {
       const progress = this.state.cycles[def.id] ?? 0;
       if (!managed && progress <= 0) continue;
 
-      const advanced = progress + dt;
+      const advanced = progress + dt * d.perks.speed;
       if (advanced < def.cycleSeconds) {
         this.state.cycles[def.id] = advanced;
         continue;
       }
 
       const completed = Math.floor(advanced / def.cycleSeconds);
-      const payout = cyclePayout(def, owned, d.globalMultiplier);
+      const payout = cyclePayout(
+        def,
+        owned,
+        d.globalMultiplier * upgradeMultiplier(upgradeOf(this.state, def.id)),
+      );
 
       if (managed) {
         this.earn(payout * completed);
@@ -368,6 +411,7 @@ export class Store {
 
     const payout = def.payout * d.globalMultiplier;
     this.earn(payout);
+    this.state.stats.jobs += 1;
     this.notice({ kind: 'cash', amount: payout, label: tr(`job.${def.id}`) });
   }
 
@@ -386,7 +430,7 @@ export class Store {
   }
 
   private scheduleCard(now: number, d: Derived): void {
-    const interval = (90 / d.bonuses.cardRate) * 1000;
+    const interval = (90 / (d.bonuses.cardRate * d.perks.cardRate)) * 1000;
     this.state.nextCardAt = now + interval;
   }
 
@@ -449,6 +493,21 @@ export class Store {
     this.raisePeak(d.netWorth);
   }
 
+  /**
+   * Thành tựu ghi nhận ngay chứ không đợi người chơi bấm, vì nó không có màn
+   * ăn mừng riêng — nó là một dòng thông báo và một hệ số.
+   */
+  private checkAchievements(): void {
+    const fresh = newlyEarned(metricsOf(this.state), this.state.achievements);
+    if (fresh.length === 0) return;
+
+    for (const achievement of fresh) {
+      this.state.achievements.push(achievement.id);
+      this.notice({ kind: 'info', label: tr(`ach.${achievement.id}`) });
+    }
+    this.persist();
+  }
+
   /** Milestones reached but not yet acknowledged. */
   pendingMilestones(): LifeMilestone[] {
     return newlyReached(this.state.peakNetWorth, this.state.claimed);
@@ -459,6 +518,7 @@ export class Store {
   /** One tap on the refinery. Returns the ore mined, for the floating number. */
   tap(): number {
     const d = derive(this.state);
+    this.state.stats.taps += 1;
     const mined = d.tapOre;
     this.state.ore = Math.min(d.oreCapacity, this.state.ore + mined);
 
@@ -515,9 +575,63 @@ export class Store {
     if (!this.spend(cost)) return 0;
 
     this.state.businesses[id] = owned + units;
+    this.state.stats.units += units;
     this.persist();
     this.emit();
     return units;
+  }
+
+  /** Mua bậc nâng cấp kế tiếp cho một cơ sở. */
+  buyUpgrade(id: string): boolean {
+    const def = businessById(id);
+    if (!def) return false;
+
+    const level = upgradeOf(this.state, id);
+    const next = nextUpgrade(def, ownedOf(this.state, id), level);
+    if (!next || !next.unlocked) return false;
+    if (!this.spend(next.cost)) return false;
+
+    this.state.upgrades[id] = level + 1;
+    this.state.stats.upgrades += 1;
+    this.persist();
+    this.emit();
+    return true;
+  }
+
+  /** Nhận thưởng điểm danh hôm nay. */
+  claimDaily(): number {
+    const now = Date.now();
+    const d = derive(this.state, now);
+    if (!d.daily.available) return 0;
+
+    const reward = dailyReward(d.daily.day, d.income + d.refineryIncome * 0.25, d.tapValue);
+    this.earn(reward);
+
+    this.state.dailyStreak = d.daily.streak + 1;
+    this.state.dailyClaimedAt = now;
+
+    this.notice({ kind: 'cash', amount: reward, label: tr('daily.title') });
+    this.persist();
+    this.emit();
+    return reward;
+  }
+
+  /** Mua một bậc đặc quyền bằng uy tín. */
+  buyPerk(id: string): boolean {
+    const def = perkById(id);
+    if (!def) return false;
+
+    const level = perkLevel(this.state, id);
+    if (level >= def.max) return false;
+
+    const cost = perkCost(def, level);
+    if (this.state.reputation < cost) return false;
+
+    this.state.reputation -= cost;
+    this.state.perks[id] = level + 1;
+    this.persist();
+    this.emit();
+    return true;
   }
 
   hireManager(id: string): boolean {
@@ -552,6 +666,7 @@ export class Store {
     const now = Date.now();
     const d = derive(this.state, now);
     this.state.card = null;
+    this.state.stats.cards += 1;
     this.scheduleCard(now, d);
 
     const title = tr(`card.${card.key}`);
@@ -616,6 +731,7 @@ export class Store {
 
     this.state.cash -= cost;
     this.state.holdings[id] = applyBuy(holdingOf(this.state, id), shares, price);
+    this.state.stats.trades += 1;
     this.persist();
     this.emit();
     return true;
@@ -632,6 +748,7 @@ export class Store {
     const left = applySell(holding, sold);
     if (left.shares <= 0) delete this.state.holdings[id];
     else this.state.holdings[id] = left;
+    this.state.stats.trades += 1;
 
     this.persist();
     this.emit();
@@ -700,13 +817,21 @@ export class Store {
     const kept = {
       createdAt: this.state.createdAt,
       claimed: this.state.claimed,
+      achievements: this.state.achievements,
+      stats: this.state.stats,
+      perks: this.state.perks,
+      dailyClaimedAt: this.state.dailyClaimedAt,
+      dailyStreak: this.state.dailyStreak,
       bestNetWorth: Math.max(this.state.bestNetWorth, this.state.peakNetWorth),
       reputation: this.state.reputation + gain,
+      reputationTotal: this.state.reputationTotal + gain,
       runs: this.state.runs + 1,
       autoTrader: this.state.autoTrader,
     };
 
     this.state = { ...createNewSave(randomSeed()), ...kept };
+    // Tiền mồi từ đặc quyền: lượt sau không phải bắt đầu bằng đúng con số không.
+    this.state.cash += effectsFrom(kept.perks).seedCash;
     this.rng = new Rng(this.state.rngSeed);
     this.marketCarry = 0;
     this.offline = null;
@@ -752,7 +877,7 @@ export class Store {
     }
 
     const d = derive(this.state, now);
-    const capped = Math.min(elapsed, d.bonuses.offlineHours * 3600);
+    const capped = Math.min(elapsed, (d.bonuses.offlineHours + d.perks.offlineHours) * 3600);
     const before = this.state.cash;
 
     this.earn(d.income * capped * OFFLINE_EFFICIENCY);

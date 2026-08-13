@@ -8,6 +8,7 @@ import {
   milestoneMultiplier,
   unitCost,
 } from '../src/game/businesses';
+import { ACHIEVEMENTS } from '../src/game/achievements';
 import { bonusesFrom, newlyReached } from '../src/game/life';
 import { STARTING_BALANCE, createNewSave } from '../src/game/state';
 import { Store, businessAssets, creditLine, derive } from '../src/game/store';
@@ -74,27 +75,32 @@ describe('the credit line', () => {
 
 describe('the tick', () => {
   it('pays a managed business the same over one step as over many', () => {
-    function run(steps: number): number {
+    function run(steps: number): { cash: number; cycle: number } {
       const store = new Store();
       store.state = createNewSave(1);
       store.ready = true;
       store.state.businesses[cans.id] = 5;
       store.state.managers.push(cans.id);
       store.state.cash = 0;
+      // Thành tựu mở khoá giữa chừng sẽ đổi hệ số nhân ngay trong cửa sổ đang
+      // đo, mà cái cần đo ở đây là phép tính trả tiền có phụ thuộc độ dài bước
+      // hay không. Ghi nhận sẵn hết để hệ số đứng yên.
+      store.state.achievements = ACHIEVEMENTS.map((achievement) => achievement.id);
 
+      const cycle = cyclePayout(cans, 5, derive(store.state).globalMultiplier);
       const now = Date.now();
       for (let i = 0; i < steps; i += 1) store.tick(60 / steps, now);
-      return store.state.cash;
+      return { cash: store.state.cash, cycle };
     }
 
     const once = run(1);
     const many = run(600);
 
     // A cycle boundary can land inside the last step either way, so this is
-    // "within one cycle's payout", not "identical".
-    const cycle = cyclePayout(cans, 5, 1);
-    expect(Math.abs(once - many)).toBeLessThanOrEqual(cycle);
-    expect(once).toBeGreaterThan(0);
+    // "within one cycle's payout", not "identical" — and the cycle has to be
+    // priced with the same multiplier the run itself used.
+    expect(Math.abs(once.cash - many.cash)).toBeLessThanOrEqual(once.cycle);
+    expect(once.cash).toBeGreaterThan(0);
   });
 
   it('runs a hand-started business exactly once', () => {

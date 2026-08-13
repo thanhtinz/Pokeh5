@@ -38,10 +38,14 @@ export interface PlayerState {
   /** Đỉnh mọi thời, không bao giờ về — chỉ để khoe và để hiện mốc đã chuộc. */
   bestNetWorth: number;
 
-  /** Uy tín tích được qua các lần làm lại. */
+  /** Uy tín tiêu được. */
   reputation: number;
+  /** Tổng uy tín từng kiếm — không bao giờ giảm, và đây mới là thứ nhân thu nhập. */
+  reputationTotal: number;
   /** Đã làm lại bao nhiêu lần. */
   runs: number;
+  /** Bậc đặc quyền đã mua bằng uy tín, sống qua mọi lần làm lại. */
+  perks: Record<string, number>;
 
   /** Ore mined by tapping, spent by the refinery. */
   ore: number;
@@ -54,6 +58,8 @@ export interface PlayerState {
   managers: string[];
   /** Cycle progress in seconds, keyed by business id. */
   cycles: Record<string, number>;
+  /** Bậc nâng cấp riêng của từng cơ sở. */
+  upgrades: Record<string, number>;
 
   holdings: Record<string, Holding>;
   /** Ticks the market has advanced; prices are derived from this and the seed. */
@@ -70,6 +76,22 @@ export interface PlayerState {
 
   /** Life milestones already acknowledged. */
   claimed: string[];
+  /** Thành tựu đã ghi nhận, sống qua mọi lần làm lại. */
+  achievements: string[];
+
+  /** Điểm danh: lần nhận gần nhất và chuỗi ngày. */
+  dailyClaimedAt: number;
+  dailyStreak: number;
+
+  /** Số đếm cộng dồn cho thành tựu — không reset khi làm lại. */
+  stats: {
+    taps: number;
+    cards: number;
+    jobs: number;
+    trades: number;
+    units: number;
+    upgrades: number;
+  };
   /** Seed for card draws, kept so a reload does not reroll an offer. */
   rngSeed: number;
 }
@@ -87,7 +109,9 @@ export function createNewSave(seed: number): PlayerState {
     bestNetWorth: STARTING_BALANCE,
 
     reputation: 0,
+    reputationTotal: 0,
     runs: 0,
+    perks: {},
 
     ore: 0,
     tapLevel: 1,
@@ -96,6 +120,7 @@ export function createNewSave(seed: number): PlayerState {
     businesses: {},
     managers: [],
     cycles: {},
+    upgrades: {},
 
     holdings: {},
     marketTick: 0,
@@ -110,12 +135,27 @@ export function createNewSave(seed: number): PlayerState {
     boost: null,
 
     claimed: [],
+    achievements: [],
+
+    dailyClaimedAt: 0,
+    dailyStreak: 0,
+
+    stats: { taps: 0, cards: 0, jobs: 0, trades: 0, units: 0, upgrades: 0 },
+
     rngSeed: seed,
   };
 }
 
 export function ownedOf(state: PlayerState, businessId: string): number {
   return state.businesses[businessId] ?? 0;
+}
+
+export function upgradeOf(state: PlayerState, businessId: string): number {
+  return state.upgrades[businessId] ?? 0;
+}
+
+export function perkLevel(state: PlayerState, perkId: string): number {
+  return state.perks[perkId] ?? 0;
 }
 
 export function hasManager(state: PlayerState, businessId: string): boolean {

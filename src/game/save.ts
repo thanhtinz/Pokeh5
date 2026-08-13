@@ -1,8 +1,11 @@
 import { Capacitor } from '@capacitor/core';
 
+import { achievementById } from './achievements';
 import { businessById } from './businesses';
 import { cardTemplate, jobById } from './jobs';
 import { milestoneById } from './life';
+import { perkById } from './perks';
+import { TIERS } from './upgrades';
 import { randomSeed } from './rng';
 import { stockById } from './stocks';
 import { SAVE_VERSION, createNewSave, type PlayerState } from './state';
@@ -62,6 +65,37 @@ export function sanitise(raw: unknown): PlayerState | null {
     }
   }
 
+  const upgrades: Record<string, number> = {};
+  if (typeof data.upgrades === 'object' && data.upgrades !== null) {
+    for (const [id, level] of Object.entries(data.upgrades)) {
+      if (!businessById(id)) continue;
+      const capped = clampInt(level, 0, TIERS.length, 0);
+      if (capped > 0) upgrades[id] = capped;
+    }
+  }
+
+  const perks: Record<string, number> = {};
+  if (typeof data.perks === 'object' && data.perks !== null) {
+    for (const [id, level] of Object.entries(data.perks)) {
+      const def = perkById(id);
+      if (!def) continue;
+      const capped = clampInt(level, 0, def.max, 0);
+      if (capped > 0) perks[id] = capped;
+    }
+  }
+
+  const achievements = Array.isArray(data.achievements)
+    ? [
+        ...new Set(
+          data.achievements.filter(
+            (id): id is string => typeof id === 'string' && achievementById(id) !== null,
+          ),
+        ),
+      ]
+    : [];
+
+  const stats = (data.stats ?? {}) as Record<string, unknown>;
+
   const managers = Array.isArray(data.managers)
     ? [...new Set(data.managers.filter((id): id is string => typeof id === 'string' && businessById(id) !== null))]
     : [];
@@ -112,8 +146,17 @@ export function sanitise(raw: unknown): PlayerState | null {
       clampNum(data.peakNetWorth, -Number.MAX_SAFE_INTEGER, Number.MAX_SAFE_INTEGER, 0),
     ),
 
-    reputation: clampInt(data.reputation, 0, 1e9, 0),
+    reputation: clampInt(data.reputation, 0, 1e12, 0),
+    // Bản lưu trước khi có cửa hàng uy tín không tách hai sổ; số dư của nó
+    // chính là tổng nó từng kiếm.
+    reputationTotal: clampInt(
+      data.reputationTotal,
+      0,
+      1e12,
+      clampInt(data.reputation, 0, 1e12, 0),
+    ),
     runs: clampInt(data.runs, 0, 1e6, 0),
+    perks,
 
     ore: clampNum(data.ore, 0, Number.MAX_SAFE_INTEGER, 0),
     tapLevel: clampInt(data.tapLevel, 1, 100_000, 1),
@@ -122,6 +165,7 @@ export function sanitise(raw: unknown): PlayerState | null {
     businesses,
     managers,
     cycles,
+    upgrades,
 
     holdings,
     marketTick: clampInt(data.marketTick, 0, 100_000_000, 0),
@@ -134,6 +178,20 @@ export function sanitise(raw: unknown): PlayerState | null {
     boost: sanitiseBoost(data.boost, now),
 
     claimed,
+    achievements,
+
+    dailyClaimedAt: clampInt(data.dailyClaimedAt, 0, Number.MAX_SAFE_INTEGER, 0),
+    dailyStreak: clampInt(data.dailyStreak, 0, 1e6, 0),
+
+    stats: {
+      taps: clampInt(stats['taps'], 0, Number.MAX_SAFE_INTEGER, 0),
+      cards: clampInt(stats['cards'], 0, Number.MAX_SAFE_INTEGER, 0),
+      jobs: clampInt(stats['jobs'], 0, Number.MAX_SAFE_INTEGER, 0),
+      trades: clampInt(stats['trades'], 0, Number.MAX_SAFE_INTEGER, 0),
+      units: clampInt(stats['units'], 0, Number.MAX_SAFE_INTEGER, 0),
+      upgrades: clampInt(stats['upgrades'], 0, Number.MAX_SAFE_INTEGER, 0),
+    },
+
     rngSeed: clampInt(data.rngSeed, 0, 0xffffffff, randomSeed()),
   };
 }

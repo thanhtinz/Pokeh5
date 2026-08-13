@@ -3,21 +3,21 @@
 Game nhàn rỗi mở màn ở **âm một tỷ**, kết thúc khi chẳng còn gì để chuộc lại.
 Chạm xưởng luyện, đi làm ca, nhận kèo, mua ba mươi sáu cơ ngơi trải sáu khu,
 chơi mười hai mã cổ phiếu nhại, và lấy lại mười hai mảnh cuộc đời mà món nợ
-đã cuỗm đi.
+đã cuỗm đi. Rồi bán sạch, đổi lấy uy tín, và leo lại từ đầu.
 
 Bối cảnh và tiền tệ là Việt Nam. Chơi bằng **tiếng Việt**, đổi sang English
 được trong màn Cuộc đời.
 
 TypeScript, Preact and Vite, wrapped in Capacitor for Android and iOS.
 No canvas, no engine, no runtime dependencies beyond Preact — the whole bundle
-is **37 kB gzipped**.
+is **41 kB gzipped**.
 
 ## Running it
 
 ```bash
 npm install
 npm run dev        # http://localhost:5173
-npm test           # 50 tests over the rule layer and the dictionaries
+npm test           # 62 tests over the rule layer and the dictionaries
 npm run build      # typecheck, then a production bundle in dist/
 npm run shot       # screenshots every screen at both ends of the palette
 ```
@@ -185,22 +185,69 @@ run's peak happens to clear its threshold.
 `tests/prestige.test.ts` covers the curve, the difference rule, and — the one
 that matters — exactly what a reset takes and what it leaves.
 
+## Four systems that keep a run from ending
+
+An idle game dies the day the player runs out of *next thing*. Buying the
+thirty-sixth business is a wall: there is nothing left on the screen to want.
+Four systems sit under that wall, each answering a different span of time —
+the next minute, the next session, the next week, the next run.
+
+**Per-business upgrades** (`src/game/upgrades.ts`) are the next minute. Every
+business carries five tiers at 25 / 50 / 100 / 200 / 400 owned, worth ×2 ×2 ×3
+×3 ×4 — a factor of 144 on a single line if you take all five. The cost is a
+multiple of the *base* price rather than the current one, so an upgrade on a
+line you have four hundred of is cheap relative to the next unit of it, and the
+choice on the Empire screen stops being "buy more of the best one" and becomes
+"deepen or widen". The button spans the row because it competes with the buy
+button directly above it, and a right-aligned control would read as secondary
+when it usually isn't.
+
+**Daily check-in** (`src/game/daily.ts`) is the next session — the one reason
+to open the app today rather than tomorrow. A seven-day cycle paying 3 minutes
+of income up to a full hour, with a two-day grace before the streak breaks.
+Days are compared by **calendar date, not elapsed hours**, because a player who
+checks in at 9pm and again at 8am the next morning has plainly played on two
+days and any hours-based rule tells them they haven't. The reward is a multiple
+of *current* income, so it stays meaningful at every scale instead of turning
+into a rounding error by the second district; a 20,000đ floor keeps day one from
+paying nothing.
+
+**Achievements** (`src/game/achievements.ts`) are the next week: ten ladders,
+forty-two rungs, each worth a permanent +3%. They are measured against
+**cumulative counters** — taps taken, cards caught, shifts worked, units bought
+— so they survive prestige and a second run keeps filling the same bars a first
+run started. The More screen leads with the one unclaimed rung per ladder rather
+than the forty already earned, because the point of the list is the part that
+isn't finished. `achievementMultiplier` filters ids it doesn't recognise, so an
+edited save cannot inflate the bonus with names the game has never heard of.
+
+**The reputation shop** (`src/game/perks.ts`) is the next run. Six permanent
+perks — offline hours, tap value, cycle speed, card frequency, credit line,
+seed cash — bought with the standing prestige pays out. It runs on two ledgers:
+`reputationTotal` never falls and drives the income multiplier, while
+`reputation` is spendable and does. Without the split, buying a perk would cut
+the multiplier that made the perk affordable, and the shop would be a trap.
+
+All four live in the rule layer with no renderer, and all four are covered in
+`tests/prestige.test.ts` — 62 tests now, from 50.
+
 ## How the money works
 
 This is the one mechanic that is not standard for the genre, and it exists
-because a balance of -$1,000,000 plus a "you must have the money" rule is a game
-with no first move.
+because a balance of **âm một tỷ** plus a "you must have the money" rule is a
+game with no first move.
 
 Purchases are gated on a **credit line**, not on cash:
 
 ```
-line  = 2,000 + 0.4 × (peak net worth − starting balance)
+line  = 2tr + 0.4 × (peak net worth − starting balance)
 floor = starting balance − line
 ```
 
-You may spend down to the floor. The line opens at $2,000 — enough to buy into
-Skid Row on the loan shark's terms — and widens only with progress actually
-made.
+You may spend down to the floor. The line opens at 2tr — enough to buy into Xóm
+Nước Đen on the loan shark's terms — and widens only with progress actually
+made. The `credit` perk multiplies it, which is the one thing in the shop that
+changes how a fresh run *opens* rather than how fast it climbs.
 
 The loop cannot run away, because **net worth counts cash plus what was paid for
 the businesses plus the market value of the holdings**. A purchase moves value
@@ -217,6 +264,11 @@ src/game/     the rules — runs in plain node, no DOM, fully tested
   jobs.ts         timed shifts and opportunity cards
   stocks.ts       twelve random walks derived from (seed, tick)
   life.ts         twelve milestones, each with a permanent bonus
+  prestige.ts     uy tín — the reset curve, paid as a difference
+  upgrades.ts     five tiers per business, priced off the base cost
+  daily.ts        the seven-day cycle, compared by calendar date
+  achievements.ts ten ladders over cumulative counters
+  perks.ts        six permanent perks, two ledgers
   state.ts        the save shape
   save.ts         sanitising, localStorage, native mirror
   store.ts        the mutable world and every action on it
@@ -249,7 +301,10 @@ way back — the same path a fresh launch takes.
 **Saves are never trusted.** `sanitise()` clamps every field, drops ids the game
 no longer knows, and turns an unsalvageable file into a fresh start rather than
 a crash on boot. Cash is the one field allowed to be negative, because that is
-the whole first act.
+the whole first act. Every field the later systems added has a **backward
+default** — `bestNetWorth` falls back to `peakNetWorth`, `reputationTotal` to
+`reputation`, the four new maps to empty — so a save written before any of them
+existed still opens, mid-run, with no reset.
 
 **Saves are written twice.** `localStorage` synchronously on `pagehide` — the
 only storage a mobile WebView reliably flushes — and mirrored asynchronously to

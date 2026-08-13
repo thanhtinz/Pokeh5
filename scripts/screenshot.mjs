@@ -41,12 +41,19 @@ function richSave(now) {
     claimed: ['phone', 'dog', 'car', 'room', 'mother', 'zero', 'friends', 'kids'],
     bestNetWorth: 6.1e12,
     reputation: 40,
+    reputationTotal: 60,
     runs: 2,
+    perks: { offline: 2, tap: 3 },
+    upgrades: { cans: 3, cart: 2, wash: 1 },
+    achievements: ['tap1', 'tap2', 'card1', 'job1', 'unit1', 'unit2', 'mgr1', 'mgr2', 'up1', 'rich1'],
+    dailyClaimedAt: 0,
+    dailyStreak: 3,
+    stats: { taps: 4200, cards: 18, jobs: 26, trades: 12, units: 1240, upgrades: 6 },
     rngSeed: 777,
   };
 }
 
-const TABS = ['grind', 'empire', 'market', 'life'];
+const TABS = ['grind', 'empire', 'market', 'life', 'more'];
 
 const server = await createServer({ server: { port: 5199 }, logLevel: 'warn' });
 await server.listen();
@@ -201,4 +208,4 @@ for (const stage of ['broke', 'rich']) {
 
 await browser.close();
 await server.close();
-console.log(`Wrote ${TABS.length * 2} screenshots to ${OUT}/`);
+console.log(`Wrote ${TABS.length * 2 + 3} screenshots to ${OUT}/`);
