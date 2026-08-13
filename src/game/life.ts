@@ -36,7 +36,7 @@ export const MILESTONES: readonly LifeMilestone[] = [
     at: -950_000,
     title: 'Phone reconnected',
     line: 'The number works again. Nobody has called yet.',
-    icon: '📱',
+    icon: 'smartphone',
     bonus: { kind: 'cardRate', multiplier: 1.15 },
   },
   {
@@ -44,7 +44,7 @@ export const MILESTONES: readonly LifeMilestone[] = [
     at: -880_000,
     title: 'The dog comes home',
     line: 'The shelter held her longer than they had to.',
-    icon: '🐕',
+    icon: 'paw',
     bonus: { kind: 'tap', multiplier: 1.5 },
   },
   {
@@ -52,7 +52,7 @@ export const MILESTONES: readonly LifeMilestone[] = [
     at: -700_000,
     title: 'Car out of impound',
     line: 'Eleven months of storage fees, paid in cash.',
-    icon: '🚗',
+    icon: 'car',
     bonus: { kind: 'jobSpeed', multiplier: 1.25 },
   },
   {
@@ -60,7 +60,7 @@ export const MILESTONES: readonly LifeMilestone[] = [
     at: -400_000,
     title: 'A room with a door',
     line: 'First month, last month, deposit. A key of your own.',
-    icon: '🚪',
+    icon: 'door',
     bonus: { kind: 'offlineHours', hours: 4 },
   },
   {
@@ -68,7 +68,7 @@ export const MILESTONES: readonly LifeMilestone[] = [
     at: -150_000,
     title: 'Your mother calls',
     line: 'She asks how work is going. You tell her the truth.',
-    icon: '☎️',
+    icon: 'call',
     bonus: { kind: 'income', multiplier: 1.5 },
   },
   {
@@ -76,7 +76,7 @@ export const MILESTONES: readonly LifeMilestone[] = [
     at: 0,
     title: 'The debt is gone',
     line: 'Zero. It took everything, and it is only zero.',
-    icon: '🧾',
+    icon: 'receipt',
     bonus: { kind: 'income', multiplier: 3 },
   },
   {
@@ -84,7 +84,7 @@ export const MILESTONES: readonly LifeMilestone[] = [
     at: 250_000,
     title: 'Friends return calls',
     line: 'Two of them. The ones who mattered.',
-    icon: '🍻',
+    icon: 'cheers',
     bonus: { kind: 'cardRate', multiplier: 1.4 },
   },
   {
@@ -92,7 +92,7 @@ export const MILESTONES: readonly LifeMilestone[] = [
     at: 5_000_000,
     title: 'Weekends with the kids',
     line: 'Every other Saturday. You are never late.',
-    icon: '🧒',
+    icon: 'child',
     bonus: { kind: 'income', multiplier: 2.5 },
   },
   {
@@ -100,7 +100,7 @@ export const MILESTONES: readonly LifeMilestone[] = [
     at: 250_000_000,
     title: 'The house, bought back',
     line: 'The new owners named their price. You paid it.',
-    icon: '🏡',
+    icon: 'house',
     bonus: { kind: 'offlineHours', hours: 8 },
   },
   {
@@ -108,7 +108,7 @@ export const MILESTONES: readonly LifeMilestone[] = [
     at: 10_000_000_000,
     title: 'She moves back in',
     line: 'Slowly. One box at a time. It counts.',
-    icon: '💍',
+    icon: 'ring',
     bonus: { kind: 'income', multiplier: 4 },
   },
   {
@@ -116,7 +116,7 @@ export const MILESTONES: readonly LifeMilestone[] = [
     at: 5e12,
     title: "Your parents' care, paid for life",
     line: 'The good place. The one with the garden.',
-    icon: '🌷',
+    icon: 'flower',
     bonus: { kind: 'income', multiplier: 6 },
   },
   {
@@ -124,7 +124,7 @@ export const MILESTONES: readonly LifeMilestone[] = [
     at: 1e18,
     title: 'Broke to boss',
     line: 'Nobody who knew you then would recognise this.',
-    icon: '👑',
+    icon: 'crown',
     bonus: { kind: 'income', multiplier: 10 },
   },
 ];

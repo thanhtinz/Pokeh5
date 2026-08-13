@@ -4,6 +4,7 @@ import { BUSINESSES } from '../game/businesses';
 import type { LifeMilestone } from '../game/life';
 import { money } from '../game/money';
 import { hasManager, ownedOf } from '../game/state';
+import { Icon } from './Icon';
 import { derive } from '../game/store';
 import { Hud } from './Hud';
 import { CardSheet, MilestoneSheet, OfflineSheet } from './Overlays';
@@ -16,10 +17,10 @@ import { useGame } from './useStore';
 type Tab = 'grind' | 'empire' | 'market' | 'life';
 
 const TABS: readonly { id: Tab; label: string; icon: string }[] = [
-  { id: 'grind', label: 'Grind', icon: '⛏️' },
-  { id: 'empire', label: 'Empire', icon: '🏙️' },
-  { id: 'market', label: 'Market', icon: '📈' },
-  { id: 'life', label: 'Life', icon: '🫀' },
+  { id: 'grind', label: 'Grind', icon: 'ore' },
+  { id: 'empire', label: 'Empire', icon: 'skyline' },
+  { id: 'market', label: 'Market', icon: 'chart' },
+  { id: 'life', label: 'Life', icon: 'heart' },
 ];
 
 interface Toast {
@@ -100,7 +101,7 @@ export function App() {
             aria-current={tab === entry.id ? 'page' : undefined}
             onClick={() => setTab(entry.id)}
           >
-            <span class="tab__icon">{entry.icon}</span>
+            <Icon class="tab__icon" name={entry.icon} />
             <span>{entry.label}</span>
             {pips[entry.id] && tab !== entry.id && <span class="tab__pip" />}
           </button>

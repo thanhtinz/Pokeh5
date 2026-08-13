@@ -45,52 +45,52 @@ export type District = (typeof DISTRICTS)[number];
  */
 export const BUSINESSES: readonly BusinessDef[] = [
   // --- Skid Row: cents and hustle -----------------------------------------
-  b('cans', 'Can Collecting', 'Skid Row', 4, 1, 1.0, 1_000, '🥫'),
-  b('cart', 'Shopping Cart Haul', 'Skid Row', 60, 12, 3.0, 8_000, '🛒'),
-  b('wash', 'Windshield Washing', 'Skid Row', 720, 90, 6.0, 60_000, '🧽'),
-  b('busk', 'Subway Busking', 'Skid Row', 8_640, 720, 12.0, 480_000, '🎸'),
-  b('scrap', 'Scrap Metal Run', 'Skid Row', 103_680, 5_760, 24.0, 4_000_000, '⚙️'),
-  b('flip', 'Pawn Shop Flipping', 'Skid Row', 1_244_160, 46_080, 48.0, 32_000_000, '💍'),
+  b('cans', 'Can Collecting', 'Skid Row', 4, 1, 1.0, 1_000, 'can'),
+  b('cart', 'Shopping Cart Haul', 'Skid Row', 60, 12, 3.0, 8_000, 'cart'),
+  b('wash', 'Windshield Washing', 'Skid Row', 720, 90, 6.0, 60_000, 'spray'),
+  b('busk', 'Subway Busking', 'Skid Row', 8_640, 720, 12.0, 480_000, 'mic'),
+  b('scrap', 'Scrap Metal Run', 'Skid Row', 103_680, 5_760, 24.0, 4_000_000, 'gear'),
+  b('flip', 'Pawn Shop Flipping', 'Skid Row', 1_244_160, 46_080, 48.0, 32_000_000, 'gem'),
 
   // --- The Docks ----------------------------------------------------------
-  b('forklift', 'Forklift Contracts', 'The Docks', 14_929_920, 368_640, 60.0, 260_000_000, '🏗️'),
-  b('crate', 'Crate Unloading', 'The Docks', 179_159_040, 2_949_120, 90.0, 2_100_000_000, '📦'),
-  b('fish', 'Fishing Trawler', 'The Docks', 2_149_908_480, 23_592_960, 120.0, 17_000_000_000, '🎣'),
-  b('tug', 'Tugboat Service', 'The Docks', 25_798_901_760, 188_743_680, 180.0, 136_000_000_000, '🚢'),
-  b('customs', 'Customs Brokerage', 'The Docks', 309_586_821_120, 1_509_949_440, 240.0, 1.09e12, '🛃'),
-  b('yard', 'Container Yard', 'The Docks', 3.7e12, 1.2e10, 300.0, 8.7e12, '🏭'),
+  b('forklift', 'Forklift Contracts', 'The Docks', 14_929_920, 368_640, 60.0, 260_000_000, 'forklift'),
+  b('crate', 'Crate Unloading', 'The Docks', 179_159_040, 2_949_120, 90.0, 2_100_000_000, 'crate'),
+  b('fish', 'Fishing Trawler', 'The Docks', 2_149_908_480, 23_592_960, 120.0, 17_000_000_000, 'fish'),
+  b('tug', 'Tugboat Service', 'The Docks', 25_798_901_760, 188_743_680, 180.0, 136_000_000_000, 'anchor'),
+  b('customs', 'Customs Brokerage', 'The Docks', 309_586_821_120, 1_509_949_440, 240.0, 1.09e12, 'stamp'),
+  b('yard', 'Container Yard', 'The Docks', 3.7e12, 1.2e10, 300.0, 8.7e12, 'containers'),
 
   // --- Midtown ------------------------------------------------------------
-  b('food', 'Food Truck Fleet', 'Midtown', 4.5e13, 9.7e10, 45.0, 7.0e13, '🌮'),
-  b('laundry', 'Laundromat Chain', 'Midtown', 5.4e14, 7.7e11, 75.0, 5.6e14, '🧺'),
-  b('gym', 'Budget Gym Franchise', 'Midtown', 6.4e15, 6.2e12, 110.0, 4.5e15, '🏋️'),
-  b('cafe', 'Coffee Chain', 'Midtown', 7.7e16, 4.9e13, 150.0, 3.6e16, '☕'),
-  b('cinema', 'Cinema Complex', 'Midtown', 9.3e17, 4.0e14, 200.0, 2.9e17, '🎬'),
-  b('hotel', 'Boutique Hotel', 'Midtown', 1.1e19, 3.2e15, 280.0, 2.3e18, '🏨'),
+  b('food', 'Food Truck Fleet', 'Midtown', 4.5e13, 9.7e10, 45.0, 7.0e13, 'truck'),
+  b('laundry', 'Laundromat Chain', 'Midtown', 5.4e14, 7.7e11, 75.0, 5.6e14, 'washer'),
+  b('gym', 'Budget Gym Franchise', 'Midtown', 6.4e15, 6.2e12, 110.0, 4.5e15, 'dumbbell'),
+  b('cafe', 'Coffee Chain', 'Midtown', 7.7e16, 4.9e13, 150.0, 3.6e16, 'coffee'),
+  b('cinema', 'Cinema Complex', 'Midtown', 9.3e17, 4.0e14, 200.0, 2.9e17, 'film'),
+  b('hotel', 'Boutique Hotel', 'Midtown', 1.1e19, 3.2e15, 280.0, 2.3e18, 'bed'),
 
   // --- Financial District -------------------------------------------------
-  b('fund', 'Hedge Fund', 'Financial District', 1.3e20, 2.5e16, 90.0, 1.8e19, '📈'),
-  b('bank', 'Regional Bank', 'Financial District', 1.6e21, 2.0e17, 130.0, 1.5e20, '🏦'),
-  b('insure', 'Insurance Arm', 'Financial District', 1.9e22, 1.6e18, 180.0, 1.2e21, '📋'),
-  b('broker', 'Brokerage House', 'Financial District', 2.3e23, 1.3e19, 240.0, 9.4e21, '💼'),
-  b('ratings', 'Ratings Agency', 'Financial District', 2.7e24, 1.0e20, 320.0, 7.5e22, '⭐'),
-  b('exchange', 'Private Exchange', 'Financial District', 3.3e25, 8.2e20, 420.0, 6.0e23, '🏛️'),
+  b('fund', 'Hedge Fund', 'Financial District', 1.3e20, 2.5e16, 90.0, 1.8e19, 'chart'),
+  b('bank', 'Regional Bank', 'Financial District', 1.6e21, 2.0e17, 130.0, 1.5e20, 'bank'),
+  b('insure', 'Insurance Arm', 'Financial District', 1.9e22, 1.6e18, 180.0, 1.2e21, 'shield'),
+  b('broker', 'Brokerage House', 'Financial District', 2.3e23, 1.3e19, 240.0, 9.4e21, 'briefcase'),
+  b('ratings', 'Ratings Agency', 'Financial District', 2.7e24, 1.0e20, 320.0, 7.5e22, 'star'),
+  b('exchange', 'Private Exchange', 'Financial District', 3.3e25, 8.2e20, 420.0, 6.0e23, 'scales'),
 
   // --- Uptown -------------------------------------------------------------
-  b('gallery', 'Art Gallery', 'Uptown', 3.9e26, 6.6e21, 120.0, 4.8e24, '🖼️'),
-  b('auction', 'Auction House', 'Uptown', 4.7e27, 5.3e22, 170.0, 3.9e25, '🔨'),
-  b('yacht', 'Yacht Brokerage', 'Uptown', 5.7e28, 4.2e23, 230.0, 3.1e26, '🛥️'),
-  b('jet', 'Private Jet Charter', 'Uptown', 6.8e29, 3.4e24, 310.0, 2.5e27, '✈️'),
-  b('vineyard', 'Vineyard Estate', 'Uptown', 8.2e30, 2.7e25, 400.0, 2.0e28, '🍷'),
-  b('island', 'Private Island', 'Uptown', 9.8e31, 2.2e26, 520.0, 1.6e29, '🏝️'),
+  b('gallery', 'Art Gallery', 'Uptown', 3.9e26, 6.6e21, 120.0, 4.8e24, 'frame'),
+  b('auction', 'Auction House', 'Uptown', 4.7e27, 5.3e22, 170.0, 3.9e25, 'gavel'),
+  b('yacht', 'Yacht Brokerage', 'Uptown', 5.7e28, 4.2e23, 230.0, 3.1e26, 'yacht'),
+  b('jet', 'Private Jet Charter', 'Uptown', 6.8e29, 3.4e24, 310.0, 2.5e27, 'plane'),
+  b('vineyard', 'Vineyard Estate', 'Uptown', 8.2e30, 2.7e25, 400.0, 2.0e28, 'wine'),
+  b('island', 'Private Island', 'Uptown', 9.8e31, 2.2e26, 520.0, 1.6e29, 'island'),
 
   // --- The Heights --------------------------------------------------------
-  b('tower', 'Tower Development', 'The Heights', 1.2e33, 1.7e27, 150.0, 1.3e30, '🏙️'),
-  b('media', 'Media Conglomerate', 'The Heights', 1.4e34, 1.4e28, 210.0, 1.0e31, '📺'),
-  b('space', 'Orbital Logistics', 'The Heights', 1.7e35, 1.1e29, 290.0, 8.2e31, '🛰️'),
-  b('fusion', 'Fusion Utility', 'The Heights', 2.0e36, 8.8e29, 380.0, 6.6e32, '⚛️'),
-  b('bank2', 'Central Reserve Seat', 'The Heights', 2.4e37, 7.1e30, 500.0, 5.3e33, '🪙'),
-  b('empire', 'The Empire', 'The Heights', 2.9e38, 5.7e31, 650.0, 4.2e34, '👑'),
+  b('tower', 'Tower Development', 'The Heights', 1.2e33, 1.7e27, 150.0, 1.3e30, 'skyline'),
+  b('media', 'Media Conglomerate', 'The Heights', 1.4e34, 1.4e28, 210.0, 1.0e31, 'tv'),
+  b('space', 'Orbital Logistics', 'The Heights', 1.7e35, 1.1e29, 290.0, 8.2e31, 'rocket'),
+  b('fusion', 'Fusion Utility', 'The Heights', 2.0e36, 8.8e29, 380.0, 6.6e32, 'atom'),
+  b('bank2', 'Central Reserve Seat', 'The Heights', 2.4e37, 7.1e30, 500.0, 5.3e33, 'vault'),
+  b('empire', 'The Empire', 'The Heights', 2.9e38, 5.7e31, 650.0, 4.2e34, 'crown'),
 ];
 
 function b(

@@ -90,6 +90,43 @@ for (const stage of ['broke', 'rich']) {
   await context.close();
 }
 
+// Every business at once, so all thirty-six drawn icons can be reviewed
+// together rather than one district per session.
+{
+  const now = Date.now();
+  const save = richSave(now);
+  save.lastSeenAt = now;
+  save.job = null;
+  save.boost = null;
+  save.businesses = Object.fromEntries(
+    ['cans','cart','wash','busk','scrap','flip','forklift','crate','fish','tug','customs','yard',
+     'food','laundry','gym','cafe','cinema','hotel','fund','bank','insure','broker','ratings',
+     'exchange','gallery','auction','yacht','jet','vineyard','island','tower','media','space',
+     'fusion','bank2','empire'].map((id) => [id, 1]),
+  );
+
+  const context = await browser.newContext({ viewport: VIEWPORT, deviceScaleFactor: 1.5 });
+  const page = await context.newPage();
+  await page.addInitScript(
+    ([key, value]) => window.localStorage.setItem(key, JSON.stringify(value)),
+    [SAVE_KEY, save],
+  );
+
+  await page.goto(base, { waitUntil: 'networkidle' });
+  await page.waitForSelector('.shell', { timeout: 15_000 });
+  const sheet = page.locator('.sheet .btn--primary');
+  if (await sheet.count()) await sheet.first().click();
+  await page.locator('.tab').nth(1).click();
+
+  // Let the page grow to its content so one capture covers every row.
+  await page.addStyleTag({
+    content: 'html,body,#app,.shell{height:auto!important}.screen{overflow:visible!important}',
+  });
+  await page.waitForTimeout(600);
+  await page.screenshot({ path: `${OUT}/icons.png`, fullPage: true });
+  await context.close();
+}
+
 // The opportunity card, which only ever exists for twenty-five seconds.
 {
   const now = Date.now();
@@ -108,7 +145,7 @@ for (const stage of ['broke', 'rich']) {
     flavour: 'A friend from before it all went wrong.',
     value: 86_400,
     seconds: 0,
-    icon: '🤝',
+    icon: 'coins',
     expiresAt: now + 19_000,
   };
 

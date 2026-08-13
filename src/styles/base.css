@@ -115,6 +115,23 @@ button:disabled {
   cursor: default;
 }
 
+/*
+ * Every icon in the game is a line drawing on a 24×24 grid. Geometry lives in
+ * the markup; weight, caps and colour live here, so one rule restyles the whole
+ * set and `currentColor` ties every icon to whatever contains it.
+ */
+.icon {
+  display: block;
+  width: 22px;
+  height: 22px;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
 /* Money is read as a column, so the digits have to hold their width. */
 .num {
   font-variant-numeric: tabular-nums;

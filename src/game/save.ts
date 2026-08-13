@@ -153,7 +153,7 @@ function sanitiseCard(raw: unknown, now: number): PlayerState['card'] {
     flavour: typeof card['flavour'] === 'string' ? card['flavour'] : '',
     value: clampNum(card['value'], 0, Number.MAX_SAFE_INTEGER, 0),
     seconds: clampNum(card['seconds'], 0, 3600, 0),
-    icon: typeof card['icon'] === 'string' ? card['icon'] : '❓',
+    icon: typeof card['icon'] === 'string' ? card['icon'] : 'coin',
     expiresAt,
   };
 }

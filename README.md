@@ -46,6 +46,25 @@ The climb out of debt is deliberately given *half* the whole scale, even though
 it is a rounding error in absolute terms, because it is most of the emotional
 distance and all of the first session.
 
+### The art is drawn, not typed
+
+There is not a single emoji in the game, and that follows from the palette
+rather than from taste. An emoji is a small picture with its own fixed colours;
+put sixty of them on a screen whose entire hue is a function of net worth and
+they are the only thing that refuses to move with it.
+
+So every icon in `src/ui/Icon.tsx` is a line drawing on a shared 24×24 grid,
+carrying geometry and nothing else. Stroke weight, caps and joins live in one
+CSS rule and are inherited; both `stroke` and `fill` resolve to `currentColor`,
+so an icon is whatever colour the thing containing it happens to be at that
+point on the climb. The refinery's ore is the one real illustration — a cut gem
+whose six facets are flat fills at four opacities of the accent.
+
+They are rendered inline rather than through an SVG sprite. A `<use>` reference
+builds a shadow tree that ordinary CSS selectors cannot reach, which would make
+the accents inside the drawings unstylable; inline costs some DOM and buys back
+the whole cascade.
+
 ## How the money works
 
 This is the one mechanic that is not standard for the genre, and it exists

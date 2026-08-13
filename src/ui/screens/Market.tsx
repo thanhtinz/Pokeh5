@@ -2,6 +2,7 @@ import { useState } from 'preact/hooks';
 
 import { count, money, signedPercent } from '../../game/money';
 import { holdingOf, type PlayerState } from '../../game/state';
+import { Icon } from '../Icon';
 import { portfolioValue, type Store } from '../../game/store';
 import { STOCKS, changeOver, priceOf, seriesFor, unrealised } from '../../game/stocks';
 
@@ -66,7 +67,9 @@ export function Market({ game, state }: Props) {
       </section>
 
       <div class="row">
-        <span class="row__icon">🤖</span>
+        <span class="row__icon">
+          <Icon name="robot" />
+        </span>
         <span class="row__body">
           <span class="row__name">Trading Manager</span>
           <span class="row__meta">Buys the dips, takes profit at +25%</span>

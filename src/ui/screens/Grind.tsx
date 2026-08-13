@@ -3,6 +3,7 @@ import { useRef, useState } from 'preact/hooks';
 import { JOBS, unlockedJobs } from '../../game/jobs';
 import { clock, count, money, rate } from '../../game/money';
 import type { PlayerState } from '../../game/state';
+import { Icon, OreArt } from '../Icon';
 import {
   refineryUpgradeCost,
   tapUpgradeCost,
@@ -55,7 +56,7 @@ export function Grind({ game, state, derived, now }: Props) {
       <section class="panel refinery">
         <button class="refinery__tap" onPointerDown={onTap} aria-label="Mine ore">
           <span class="refinery__face">
-            <span class="refinery__icon">⛏️</span>
+            <OreArt />
             <span class="refinery__value num">{money(derived.tapValue)}</span>
             <span class="refinery__hint">per tap</span>
           </span>
@@ -124,7 +125,9 @@ export function Grind({ game, state, derived, now }: Props) {
           if (!unlocked) {
             return (
               <div key={job.id} class="row" style={{ opacity: 0.4 }}>
-                <span class="row__icon">🔒</span>
+                <span class="row__icon">
+                  <Icon name="lock" />
+                </span>
                 <span class="row__body">
                   <span class="row__name">{job.name}</span>
                   <span class="row__meta">Unlocks at {money(job.unlockAt)} net worth</span>
@@ -136,7 +139,9 @@ export function Grind({ game, state, derived, now }: Props) {
 
           return (
             <div key={job.id} class={`row${active ? ' row--lit' : ''}`}>
-              <span class="row__icon">{job.icon}</span>
+              <span class="row__icon">
+                <Icon name={job.icon} />
+              </span>
               <span class="row__body">
                 <span class="row__name">{job.name}</span>
                 <span class="row__meta">

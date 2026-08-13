@@ -3,6 +3,7 @@ import { describeBonus, type LifeMilestone } from '../game/life';
 import { count, duration, money } from '../game/money';
 import type { PendingCard } from '../game/state';
 import type { OfflineReport, Store } from '../game/store';
+import { Icon } from './Icon';
 
 /**
  * An offer with a clock on it. The bar is the point — a card the player watches
@@ -16,7 +17,9 @@ export function CardSheet({ game, card, now }: { game: Store; card: PendingCard;
     <div class="scrim" onClick={() => game.dismissCard()}>
       <div class="sheet" onClick={(event) => event.stopPropagation()}>
         <div class="sheet__head">
-          <span class="sheet__icon">{card.icon}</span>
+          <span class="sheet__icon">
+            <Icon name={card.icon} />
+          </span>
           <span class="sheet__head-text">
             <span class="sheet__title">{card.title}</span>
             <span class="sheet__sub">Opportunity · {Math.ceil(left)}s left</span>
@@ -68,7 +71,9 @@ export function MilestoneSheet({
     <div class="scrim scrim--centre" onClick={onClose}>
       <div class="sheet" onClick={(event) => event.stopPropagation()}>
         <div class="sheet__head">
-          <span class="sheet__icon">{milestone.icon}</span>
+          <span class="sheet__icon">
+            <Icon name={milestone.icon} />
+          </span>
           <span class="sheet__head-text">
             <span class="sheet__title">{milestone.title}</span>
             <span class="sheet__sub">{describeBonus(milestone.bonus)}</span>
@@ -92,7 +97,9 @@ export function OfflineSheet({ report, onClose }: { report: OfflineReport; onClo
     <div class="scrim scrim--centre" onClick={onClose}>
       <div class="sheet" onClick={(event) => event.stopPropagation()}>
         <div class="sheet__head">
-          <span class="sheet__icon">🌙</span>
+          <span class="sheet__icon">
+            <Icon name="moon" />
+          </span>
           <span class="sheet__head-text">
             <span class="sheet__title">While you were gone</span>
             <span class="sheet__sub">{duration(report.seconds)} away</span>
