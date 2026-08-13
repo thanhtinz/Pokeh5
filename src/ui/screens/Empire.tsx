@@ -13,7 +13,7 @@ import {
 import { clock, count, money, rate } from '../../game/money';
 import { hasManager, ownedOf, type PlayerState } from '../../game/state';
 import type { Derived, Store } from '../../game/store';
-import { Icon } from '../Icon';
+import { Art } from '../Art';
 import { DistrictArt } from '../Scene';
 
 interface Props {
@@ -100,7 +100,7 @@ export function Empire({ game, state, derived }: Props) {
                     onClick={() => game.runBusiness(def.id)}
                     aria-label={`Run ${def.name}`}
                   >
-                    <Icon name={def.icon} />
+                    <Art name={def.icon} />
                   </button>
 
                   <span class="row__body">

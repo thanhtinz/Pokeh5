@@ -44,7 +44,7 @@ export const MILESTONES: readonly LifeMilestone[] = [
     at: -880_000,
     title: 'The dog comes home',
     line: 'The shelter held her longer than they had to.',
-    icon: 'paw',
+    icon: 'dog',
     bonus: { kind: 'tap', multiplier: 1.5 },
   },
   {

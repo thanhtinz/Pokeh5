@@ -29,6 +29,19 @@
   --ink-dim: hsl(var(--hue) 10% 70%);
   --ink-faint: hsl(var(--hue) 8% 50%);
 
+  /*
+   * The asset ramp. Four tones, an ink and a highlight, all derived from the
+   * same hue the palette runs on — so a business drawn once warms from
+   * debt-red to gold along with everything else, and no asset ever names a
+   * colour of its own.
+   */
+  --art-1: hsl(var(--hue) calc(var(--sat) * 0.9) 74%);
+  --art-2: hsl(var(--hue) calc(var(--sat) * 0.85) 57%);
+  --art-3: hsl(var(--hue) calc(var(--sat) * 0.75) 40%);
+  --art-4: hsl(var(--hue) 42% 24%);
+  --art-ink: hsl(var(--hue) 55% 11%);
+  --art-lite: hsl(var(--hue) 45% 93%);
+
   --up: hsl(146 62% 52%);
   --down: hsl(4 78% 62%);
 
@@ -130,6 +143,54 @@ button:disabled {
   stroke-width: 1.6;
   stroke-linecap: round;
   stroke-linejoin: round;
+}
+
+/*
+ * Drawn assets. Flat shapes on a 48×48 stage, lit from the upper left, using
+ * the ramp above. Geometry lives in the markup; every tone is named here, so
+ * one rule restyles sixty pieces of artwork.
+ */
+.art {
+  display: block;
+  width: 40px;
+  height: 40px;
+  flex: none;
+}
+
+.art .t1 {
+  fill: var(--art-1);
+}
+
+.art .t2 {
+  fill: var(--art-2);
+}
+
+.art .t3 {
+  fill: var(--art-3);
+}
+
+.art .t4 {
+  fill: var(--art-4);
+}
+
+.art .ink {
+  fill: var(--art-ink);
+}
+
+.art .lite {
+  fill: var(--art-lite);
+}
+
+/* Contact shadow: what stops a flat drawing reading as a sticker. */
+.art .shade {
+  fill: var(--art-ink);
+  opacity: 0.34;
+}
+
+.art .orbit ellipse {
+  fill: none;
+  stroke: var(--art-3);
+  stroke-width: 2.4;
 }
 
 /* Money is read as a column, so the digits have to hold their width. */

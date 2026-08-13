@@ -3,7 +3,7 @@ import { describeBonus, type LifeMilestone } from '../game/life';
 import { count, duration, money } from '../game/money';
 import type { PendingCard } from '../game/state';
 import type { OfflineReport, Store } from '../game/store';
-import { Icon } from './Icon';
+import { Art } from './Art';
 import { Sunburst } from './Scene';
 
 /**
@@ -19,7 +19,7 @@ export function CardSheet({ game, card, now }: { game: Store; card: PendingCard;
       <div class="sheet" onClick={(event) => event.stopPropagation()}>
         <div class="sheet__head">
           <span class="sheet__icon">
-            <Icon name={card.icon} />
+            <Art name={card.icon} />
           </span>
           <span class="sheet__head-text">
             <span class="sheet__title">{card.title}</span>
@@ -75,7 +75,7 @@ export function MilestoneSheet({
         <div class="sheet__art">
           <Sunburst />
           <span class="sheet__art-icon">
-            <Icon name={milestone.icon} />
+            <Art name={milestone.icon} />
           </span>
         </div>
 
@@ -99,7 +99,7 @@ export function OfflineSheet({ report, onClose }: { report: OfflineReport; onClo
       <div class="sheet" onClick={(event) => event.stopPropagation()}>
         <div class="sheet__head">
           <span class="sheet__icon">
-            <Icon name="moon" />
+            <Art name="moon" />
           </span>
           <span class="sheet__head-text">
             <span class="sheet__title">While you were gone</span>

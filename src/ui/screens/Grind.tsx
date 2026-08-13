@@ -3,7 +3,8 @@ import { useRef, useState } from 'preact/hooks';
 import { JOBS, unlockedJobs } from '../../game/jobs';
 import { clock, count, money, rate } from '../../game/money';
 import type { PlayerState } from '../../game/state';
-import { Icon, OreArt } from '../Icon';
+import { Art, OreArt } from '../Art';
+import { Icon } from '../Icon';
 import {
   refineryUpgradeCost,
   tapUpgradeCost,
@@ -140,7 +141,7 @@ export function Grind({ game, state, derived, now }: Props) {
           return (
             <div key={job.id} class={`row${active ? ' row--lit' : ''}`}>
               <span class="row__icon">
-                <Icon name={job.icon} />
+                <Art name={job.icon} />
               </span>
               <span class="row__body">
                 <span class="row__name">{job.name}</span>

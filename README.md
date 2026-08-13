@@ -7,7 +7,7 @@ pieces of the life the debt took.
 
 TypeScript, Preact and Vite, wrapped in Capacitor for Android and iOS.
 No canvas, no engine, no runtime dependencies beyond Preact — the whole bundle
-is **23 kB gzipped**.
+is **31 kB gzipped**.
 
 ## Running it
 
@@ -46,23 +46,36 @@ The climb out of debt is deliberately given *half* the whole scale, even though
 it is a rounding error in absolute terms, because it is most of the emotional
 distance and all of the first session.
 
-### The art is drawn, not typed
+### Two visual systems, and the line between them
 
 There is not a single emoji in the game, and that follows from the palette
 rather than from taste. An emoji is a small picture with its own fixed colours;
 put sixty of them on a screen whose entire hue is a function of net worth and
 they are the only thing that refuses to move with it.
 
-So every icon in `src/ui/Icon.tsx` is a line drawing on a shared 24×24 grid,
-carrying geometry and nothing else. Stroke weight, caps and joins live in one
-CSS rule and are inherited; both `stroke` and `fill` resolve to `currentColor`,
-so an icon is whatever colour the thing containing it happens to be at that
-point on the climb. The refinery's ore is the one real illustration — a cut gem
-whose six facets are flat fills at four opacities of the accent.
+What replaced them is two systems, split by what a thing *is*:
 
-They are rendered inline rather than through an SVG sprite. A `<use>` reference
-builds a shadow tree that ordinary CSS selectors cannot reach, which would make
-the accents inside the drawings unstylable; inline costs some DOM and buys back
+**Icons** (`src/ui/Icon.tsx`) are for the interface, and only for the
+interface — a tab, a lock, a state. Five of them. Line drawings on a 24×24 grid
+carrying geometry and nothing else; stroke weight, caps and joins live in one
+CSS rule and are inherited, and `currentColor` ties each one to whatever
+contains it.
+
+**Assets** (`src/ui/Art.tsx`) are for content: sixty flat vector illustrations
+on a 48×48 stage, lit from the upper left, built from four tones plus an ink and
+a highlight. A business the player has bought two hundred of, the shift they
+chose, the dog that came home — those are things in the world, and a 1.6px
+outline is a label for them rather than a picture of them.
+
+The tones are `--art-1` … `--art-4`, all derived from the same hue the palette
+runs on, so every asset warms from debt-red to gold along with everything else.
+Because custom properties inherit, a tile with a bright accent background —
+a milestone disc, a card header — redeclares the ramp dark on the asset itself
+and flips the whole drawing without touching a single shape.
+
+Both are rendered inline rather than through an SVG sprite. A `<use>` reference
+builds a shadow tree that ordinary CSS selectors cannot reach, which would leave
+the tones inside the drawings unstylable; inline costs some DOM and buys back
 the whole cascade.
 
 ### Three places wanted a picture, not an icon
@@ -125,7 +138,7 @@ src/game/     the rules — runs in plain node, no DOM, fully tested
   save.ts         sanitising, localStorage, native mirror
   store.ts        the mutable world and every action on it
   rng.ts          mulberry32 + Box–Muller
-src/ui/       Preact components and the theme engine
+src/ui/       Preact components, the theme engine, icons, assets and scenes
 src/styles/   two stylesheets: tokens, then components
 tests/        vitest over src/game/
 scripts/      playwright screenshots of every screen

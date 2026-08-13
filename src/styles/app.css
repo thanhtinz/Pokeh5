@@ -370,7 +370,7 @@
 
 .row {
   display: grid;
-  grid-template-columns: 42px 1fr auto;
+  grid-template-columns: 46px 1fr auto;
   align-items: center;
   gap: 12px;
   padding: 12px 13px;
@@ -391,9 +391,9 @@
 .row__icon {
   display: grid;
   place-items: center;
-  width: 42px;
-  height: 42px;
-  border-radius: 12px;
+  width: 46px;
+  height: 46px;
+  border-radius: 13px;
   font-size: 20px;
   color: var(--accent-bright);
   background: hsl(var(--hue) 22% 100% / 0.05);
@@ -631,9 +631,9 @@ button.row__icon:not(:disabled):active {
   border: 1px solid var(--panel-edge);
 }
 
-.life__dot .icon {
-  width: 21px;
-  height: 21px;
+.life__dot .art {
+  width: 34px;
+  height: 34px;
 }
 
 /* A milestone still ahead: a bead on the thread, not a blank hole. */
@@ -801,19 +801,18 @@ button.row__icon:not(:disabled):active {
 .sheet__icon {
   display: grid;
   place-items: center;
-  width: 52px;
-  height: 52px;
+  width: 56px;
+  height: 56px;
   flex: none;
-  border-radius: 16px;
+  border-radius: 17px;
   color: var(--accent-ink);
   background: linear-gradient(135deg, var(--accent-bright), var(--accent-deep));
   box-shadow: 0 0 30px var(--glow);
 }
 
-.sheet__icon .icon {
-  width: 27px;
-  height: 27px;
-  stroke-width: 1.8;
+.sheet__icon .art {
+  width: 46px;
+  height: 46px;
 }
 
 .sheet__head-text {
@@ -1110,10 +1109,9 @@ button.row__icon:not(:disabled):active {
   box-shadow: 0 0 40px var(--glow);
 }
 
-.sheet__art-icon .icon {
-  width: 32px;
-  height: 32px;
-  stroke-width: 1.8;
+.sheet__art-icon .art {
+  width: 54px;
+  height: 54px;
 }
 
 .sheet__body--art {
@@ -1129,4 +1127,23 @@ button.row__icon:not(:disabled):active {
   font-weight: 700;
   letter-spacing: 0.04em;
   color: var(--accent-bright);
+}
+
+/*
+ * Assets on a lit tile.
+ *
+ * The ramp and the tile gradient are both derived from the accent, so on a
+ * bright disc a light-toned asset all but disappears into it. Custom properties
+ * inherit, so redeclaring the ramp on the asset itself flips it dark without
+ * touching a single shape.
+ */
+.life__dot .art,
+.sheet__icon .art,
+.sheet__art-icon .art {
+  --art-1: hsl(var(--hue) 45% 38%);
+  --art-2: hsl(var(--hue) 50% 28%);
+  --art-3: hsl(var(--hue) 55% 19%);
+  --art-4: hsl(var(--hue) 60% 12%);
+  --art-ink: hsl(var(--hue) 60% 8%);
+  --art-lite: hsl(var(--hue) 30% 88%);
 }

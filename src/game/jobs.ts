@@ -60,7 +60,7 @@ export const JOBS: readonly JobDef[] = [
     seconds: 900,
     payout: 7_200,
     unlockAt: -800_000,
-    icon: 'eye',
+    icon: 'camera',
   },
   {
     id: 'rig',

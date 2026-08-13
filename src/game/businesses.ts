@@ -85,8 +85,8 @@ export const BUSINESSES: readonly BusinessDef[] = [
   b('island', 'Private Island', 'Uptown', 9.8e31, 2.2e26, 520.0, 1.6e29, 'island'),
 
   // --- The Heights --------------------------------------------------------
-  b('tower', 'Tower Development', 'The Heights', 1.2e33, 1.7e27, 150.0, 1.3e30, 'skyline'),
-  b('media', 'Media Conglomerate', 'The Heights', 1.4e34, 1.4e28, 210.0, 1.0e31, 'tv'),
+  b('tower', 'Tower Development', 'The Heights', 1.2e33, 1.7e27, 150.0, 1.3e30, 'tower'),
+  b('media', 'Media Conglomerate', 'The Heights', 1.4e34, 1.4e28, 210.0, 1.0e31, 'media'),
   b('space', 'Orbital Logistics', 'The Heights', 1.7e35, 1.1e29, 290.0, 8.2e31, 'rocket'),
   b('fusion', 'Fusion Utility', 'The Heights', 2.0e36, 8.8e29, 380.0, 6.6e32, 'atom'),
   b('bank2', 'Central Reserve Seat', 'The Heights', 2.4e37, 7.1e30, 500.0, 5.3e33, 'vault'),

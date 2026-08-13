@@ -2,7 +2,7 @@ import { MILESTONES, describeBonus } from '../../game/life';
 import { duration, money } from '../../game/money';
 import type { PlayerState } from '../../game/state';
 import type { Derived, Store } from '../../game/store';
-import { Icon } from '../Icon';
+import { Art } from '../Art';
 
 interface Props {
   game: Store;
@@ -48,7 +48,7 @@ export function Life({ game, state, derived, now }: Props) {
           return (
             <div key={milestone.id} class={`life__item life__item--${status}`}>
               <span class="life__dot">
-                {reached ? <Icon name={milestone.icon} /> : <span class="life__pending" />}
+                {reached ? <Art name={milestone.icon} /> : <span class="life__pending" />}
               </span>
 
               <span class="life__body">
