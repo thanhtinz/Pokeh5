@@ -1,19 +1,24 @@
 /**
  * Tiếng Việt — ngôn ngữ chính của game.
  *
- * Viết như người Việt nói, không phải dịch từng chữ từ tiếng Anh. Cụ thể:
+ * Không dịch câu tiếng Anh. Đọc tình huống rồi viết lại bằng tiếng Việt.
+ * Khác nhau ở chỗ: dịch thì giữ cấu trúc câu gốc và thay từ, viết lại thì bỏ
+ * hẳn câu gốc đi và hỏi "người Việt ở hoàn cảnh này nói thế nào".
  *
- *  - Chọn từ thuần Việt khi có, thay vì từ Hán Việt cho sang. "Sạch nợ" chứ
- *    không phải "Thanh toán hết nợ". "Tổng tài sản" chứ không phải "Tài sản
- *    ròng" — đây là màn hình game, không phải báo cáo tài chính.
- *  - Bỏ đại từ khi câu vẫn rõ. Tiếng Việt kể chuyện thường không cần "bạn" ở
- *    mỗi câu, nhét vào là ra giọng sách dịch ngay.
- *  - Không bê nguyên thành ngữ tiếng Anh. "Your back will remember this one"
- *    thành "Xong ca này lưng nhớ đời", không phải "Lưng bạn sẽ nhớ ca này".
- *  - Câu ở mốc cuộc đời giữ nhịp bản gốc: ngắn, thì hiện tại, không chấm than.
+ *  - Nhãn giao diện càng ngắn càng tốt. Tiếng Anh thích danh từ đầy đủ
+ *    ("Start", "On shift"), tiếng Việt trong game nói cộc: "Làm", "Đang làm".
+ *  - Bỏ đại từ khi câu vẫn rõ. Nhét "bạn" vào mỗi câu là ra giọng sách dịch.
+ *  - Không bê cấu trúc so sánh của tiếng Anh. "longer than they had to" mà
+ *    dịch thành "lâu hơn phần họ phải giữ" thì đúng nghĩa nhưng không ai nói;
+ *    viết lại là "giữ nó thêm mấy tháng, chẳng ai bắt họ làm vậy".
+ *  - Chi tiết nào là thói quen Mỹ thì đổi sang thói quen Việt. "First month,
+ *    last month, deposit" là cách thuê nhà bên Mỹ; bên mình là "cọc ba tháng,
+ *    tiền nhà trả trước". Bố mẹ về già thì lo thuốc men viện phí, không phải
+ *    lo viện dưỡng lão có vườn.
+ *  - Câu ở mốc cuộc đời giữ nhịp bản gốc: ngắn, hiện tại, không chấm than.
  *
- * Bối cảnh vẫn là một thành phố Mỹ và tiền là đô la, nên tên khu và tên cổ
- * phiếu dịch lấy nghĩa và lấy giọng châm biếm, không Việt hoá bối cảnh.
+ * Bối cảnh vẫn là thành phố Mỹ, tiền vẫn là đô la, nên tên khu và tên cổ phiếu
+ * lấy nghĩa và lấy giọng châm biếm chứ không dời bối cảnh về Việt Nam.
  */
 export const vi: Record<string, string> = {
   // ------------------------------------------------------------------ chung --
@@ -22,7 +27,7 @@ export const vi: Record<string, string> = {
   'ui.netWorth': 'Tổng tài sản',
   'ui.automated': 'Tự động',
   'ui.credit': 'Hạn mức',
-  'ui.nothingLeft': 'Chẳng còn gì để lấy lại nữa',
+  'ui.nothingLeft': 'Hết thứ để chuộc rồi',
 
   'tab.grind': 'Cày',
   'tab.empire': 'Cơ ngơi',
@@ -37,19 +42,19 @@ export const vi: Record<string, string> = {
   'grind.each': '{value}/quặng',
   'grind.pickaxe': 'Nâng cấp cuốc',
   'grind.pickaxeDetail': 'Cấp {level} · {ore} quặng/chạm',
-  'grind.refinery': 'Nâng cấp xưởng luyện',
+  'grind.refinery': 'Nâng cấp xưởng',
   'grind.refineryDetail': 'Cấp {level} · {value}/quặng',
   'grind.oreSpark': '+{amount} quặng',
   'grind.work': 'Đi làm',
-  'grind.onShift': 'Đang trong ca',
-  'grind.pickShift': 'Chọn ca làm',
-  'grind.locked': 'Mở khi tài sản lên {amount}',
-  'grind.start': 'Nhận ca',
+  'grind.onShift': 'Đang làm',
+  'grind.pickShift': 'Chọn việc',
+  'grind.locked': 'Mở ở mốc {amount}',
+  'grind.start': 'Làm',
 
   // ----------------------------------------------------------- màn Cơ ngơi --
   'empire.max': 'TỐI ĐA',
-  'empire.automated': 'Có quản lý',
-  'empire.manager': 'Thuê quản lý {cost}',
+  'empire.automated': 'Đã thuê',
+  'empire.manager': 'Quản lý {cost}',
   'empire.milestone': '×2 ở {count}',
   'empire.run': 'Chạy {name}',
   'empire.cycle': '{payout} / {seconds}',
@@ -60,13 +65,13 @@ export const vi: Record<string, string> = {
   'market.portfolio': 'Danh mục',
   'market.profit': 'Lãi lỗ',
   'market.bot': 'Quản lý giao dịch',
-  'market.botDetail': 'Thấy giá giảm thì mua, lên 25% thì chốt',
+  'market.botDetail': 'Giá xuống thì gom, lên 25% thì chốt',
   'market.on': 'Bật',
   'market.off': 'Tắt',
   'market.title': 'Sàn',
   'market.open': 'Đang mở',
-  'market.cashOnly': 'Phải có tiền mặt',
-  'market.holding': 'Giữ {shares} cổ · {value}',
+  'market.cashOnly': 'Hết tiền mặt',
+  'market.holding': '{shares} cổ · {value}',
   'market.average': 'Giá vốn {price}',
   'market.buyMax': 'Mua hết',
   'market.buyPart': 'Mua {percent}%',
@@ -74,35 +79,35 @@ export const vi: Record<string, string> = {
   'market.sellAll': 'Bán sạch',
 
   // ------------------------------------------------------- màn Cuộc đời ----
-  'life.peak': 'Cao nhất',
-  'life.reclaimed': 'Đã lấy lại',
+  'life.peak': 'Đỉnh',
+  'life.reclaimed': 'Đã chuộc',
   'life.climbing': 'Đã cày',
-  'life.locked': 'Khi tài sản lên {amount}',
-  'life.claim': 'Lấy lại',
+  'life.locked': 'Mốc {amount}',
+  'life.claim': 'Chuộc lại',
   'life.offlineNote':
-    'Không chơi thì vẫn ăn tiền, tối đa {hours} giờ. Bản lưu nằm trong máy này, không ở đâu khác.',
+    'Tắt game vẫn ăn tiền, tối đa {hours} tiếng. Bản lưu nằm trong máy, mất máy là mất.',
   'life.language': 'Ngôn ngữ',
   'life.reset': 'Chơi lại từ đầu',
-  'life.resetConfirm': 'Xoá sạch bản lưu, quay về âm một triệu?',
+  'life.resetConfirm': 'Xoá sạch, quay lại vạch âm một triệu?',
 
   // ------------------------------------------------------------ hộp thoại --
-  'card.header': 'Cơ hội · còn {seconds}s',
+  'card.header': 'Cơ hội · {seconds}s',
   'card.pass': 'Bỏ qua',
   'card.take': 'Lấy',
   'card.boost': '×{multiplier} trong {seconds}s',
-  'card.oreGift': 'Quặng bằng {amount} lần chạm',
-  'card.gamble': '{amount} hoặc mất trắng',
+  'card.oreGift': 'Thêm {amount} lượt quặng',
+  'card.gamble': 'Ăn {amount} hoặc mất trắng',
 
   'milestone.keepGoing': 'Đi tiếp',
 
   'offline.title': 'Lúc bạn đi vắng',
   'offline.away': 'Vắng {duration}',
-  'offline.body': 'Mấy chỗ làm ăn vẫn chạy, có điều chậm hơn.',
-  'offline.bodyJob': 'Mấy chỗ làm ăn vẫn chạy, chậm hơn một chút. Ca làm cũng xong rồi.',
-  'offline.back': 'Vào làm tiếp',
+  'offline.body': 'Cửa hàng vẫn chạy, có điều ì ạch hơn.',
+  'offline.bodyJob': 'Cửa hàng vẫn chạy, ì ạch hơn tí. Ca làm cũng xong rồi.',
+  'offline.back': 'Làm tiếp',
 
   // -------------------------------------------------------------- thông báo --
-  'notice.automated': 'Thuê xong quản lý cho {name}',
+  'notice.automated': 'Đã thuê quản lý cho {name}',
   'notice.sold': 'Quản lý vừa bán {ticker}',
   'notice.gambleWin': 'Ăn rồi',
   'notice.gambleLose': 'Trượt rồi',
@@ -111,10 +116,10 @@ export const vi: Record<string, string> = {
 
   // ----------------------------------------------------------- phần thưởng --
   'bonus.tap': 'Mỗi chạm ×{multiplier}',
-  'bonus.income': 'Mọi khoản thu ×{multiplier}',
-  'bonus.jobSpeed': 'Làm việc nhanh hơn {percent}%',
-  'bonus.cardRate': 'Cơ hội tới dày hơn {percent}%',
-  'bonus.offlineHours': 'Ăn tiền offline thêm {hours} giờ',
+  'bonus.income': 'Thu nhập ×{multiplier}',
+  'bonus.jobSpeed': 'Làm nhanh hơn {percent}%',
+  'bonus.cardRate': 'Cơ hội nhiều hơn {percent}%',
+  'bonus.offlineHours': 'Offline thêm {hours} tiếng',
 
   // ------------------------------------------------------------- thời gian --
   'time.hoursMinutes': '{hours} tiếng {minutes} phút',
@@ -125,41 +130,41 @@ export const vi: Record<string, string> = {
   // ------------------------------------------------------------------ khu --
   'district.skidrow': 'Khu Ổ Chuột',
   'district.docks': 'Bến Cảng',
-  'district.midtown': 'Phố Trung Tâm',
+  'district.midtown': 'Trung Tâm',
   'district.financial': 'Phố Tài Chính',
   'district.uptown': 'Khu Nhà Giàu',
   'district.heights': 'Tầng Mây',
 
   // ------------------------------------------------------------- cơ sở ----
   'biz.cans': 'Nhặt lon',
-  'biz.cart': 'Đẩy xe gom ve chai',
+  'biz.cart': 'Đẩy xe ve chai',
   'biz.wash': 'Lau kính xe',
-  'biz.busk': 'Hát rong ở ga tàu',
+  'biz.busk': 'Hát rong ở ga',
   'biz.scrap': 'Gom sắt vụn',
   'biz.flip': 'Lướt hàng cầm đồ',
-  'biz.forklift': 'Nhận thầu xe nâng',
-  'biz.crate': 'Bốc vác thùng hàng',
+  'biz.forklift': 'Chạy xe nâng thuê',
+  'biz.crate': 'Bốc hàng ở cảng',
   'biz.fish': 'Tàu đánh cá',
-  'biz.tug': 'Dịch vụ tàu kéo',
-  'biz.customs': 'Môi giới hải quan',
+  'biz.tug': 'Tàu kéo',
+  'biz.customs': 'Dịch vụ thông quan',
   'biz.yard': 'Bãi container',
-  'biz.food': 'Chuỗi xe bán đồ ăn',
-  'biz.laundry': 'Chuỗi tiệm giặt là',
-  'biz.gym': 'Chuỗi phòng gym bình dân',
+  'biz.food': 'Đội xe bán đồ ăn',
+  'biz.laundry': 'Chuỗi tiệm giặt',
+  'biz.gym': 'Chuỗi gym bình dân',
   'biz.cafe': 'Chuỗi cà phê',
-  'biz.cinema': 'Cụm rạp phim',
+  'biz.cinema': 'Cụm rạp chiếu phim',
   'biz.hotel': 'Khách sạn boutique',
   'biz.fund': 'Quỹ đầu cơ',
   'biz.bank': 'Ngân hàng khu vực',
   'biz.insure': 'Công ty bảo hiểm',
   'biz.broker': 'Công ty chứng khoán',
   'biz.ratings': 'Hãng xếp hạng tín nhiệm',
-  'biz.exchange': 'Sàn giao dịch riêng',
+  'biz.exchange': 'Sàn riêng',
   'biz.gallery': 'Phòng tranh',
   'biz.auction': 'Nhà đấu giá',
   'biz.yacht': 'Môi giới du thuyền',
   'biz.jet': 'Cho thuê chuyên cơ',
-  'biz.vineyard': 'Trang trại nho',
+  'biz.vineyard': 'Vườn nho',
   'biz.island': 'Đảo riêng',
   'biz.tower': 'Dự án cao ốc',
   'biz.media': 'Tập đoàn truyền thông',
@@ -170,57 +175,57 @@ export const vi: Record<string, string> = {
 
   // ------------------------------------------------------------ công việc --
   'job.flyers': 'Phát tờ rơi',
-  'job.flyers.desc': 'Hai tiếng đứng đầu đường, trời thì lạnh.',
+  'job.flyers.desc': 'Hai tiếng đứng đầu đường, trời rét.',
   'job.dishes': 'Rửa bát thuê',
-  'job.dishes.desc': 'Hết ca đưa tiền mặt, không hỏi han gì.',
+  'job.dishes.desc': 'Hết ca đưa tiền mặt, không hỏi gì.',
   'job.moving': 'Bốc vác chuyển nhà',
   'job.moving.desc': 'Xong ca này lưng nhớ đời.',
   'job.night': 'Trực bảo vệ đêm',
-  'job.night.desc': 'Mười hai tiếng chẳng có gì xảy ra.',
+  'job.night.desc': 'Mười hai tiếng, chẳng có gì xảy ra.',
   'job.rig': 'Ra giàn khoan',
-  'job.rig.desc': 'Ba tuần ngoài khơi. Bù lại tiền thật.',
+  'job.rig.desc': 'Ba tuần ngoài khơi. Bù lại tiền tươi.',
 
   // ------------------------------------------------------------- thẻ cơ hội --
   'card.wallet': 'Nhặt được ví',
-  'card.wallet.flavour': 'Chẳng ai quay lại tìm nữa.',
+  'card.wallet.flavour': 'Chẳng ai quay lại tìm đâu.',
   'card.debt': 'Đòi được nợ cũ',
-  'card.debt.flavour': 'Một thằng bạn từ hồi mọi thứ chưa đổ.',
+  'card.debt.flavour': 'Thằng bạn từ hồi mọi thứ chưa đổ.',
   'card.scrap': 'Trúng mẻ phế liệu',
-  'card.scrap.flavour': 'Giá đồng vừa nhích đúng lúc.',
+  'card.scrap.flavour': 'Giá đồng nhích đúng lúc.',
   'card.streak': 'Đang lên tay',
-  'card.streak.flavour': 'Sờ vào gì cũng ra tiền gấp đôi.',
+  'card.streak.flavour': 'Sờ vào đâu cũng ra tiền gấp đôi.',
   'card.investor': 'Có người để mắt',
   'card.investor.flavour': 'Cuối cùng cũng có người gọi lại.',
   'card.seam': 'Trúng vỉa quặng',
   'card.seam.flavour': 'Xưởng luyện sắp bận rồi.',
   'card.sure': 'Kèo thơm',
-  'card.sure.flavour': 'Ăn gấp đôi, hoặc mất trắng. Tuỳ bạn.',
+  'card.sure.flavour': 'Ăn gấp đôi hoặc mất trắng. Tuỳ.',
 
   // ------------------------------------------------------- mốc cuộc đời ----
   'life.phone': 'Có lại số điện thoại',
-  'life.phone.line': 'Số cũ dùng lại được. Vẫn chưa ai gọi tới.',
+  'life.phone.line': 'Số cũ chạy lại rồi. Chưa ai gọi.',
   'life.dog': 'Con chó về nhà',
-  'life.dog.line': 'Trại cứu hộ giữ nó lâu hơn phần họ phải giữ.',
+  'life.dog.line': 'Bên cứu hộ giữ nó thêm mấy tháng, chẳng ai bắt họ làm vậy.',
   'life.car': 'Lấy xe khỏi bãi giữ',
-  'life.car.line': 'Mười một tháng tiền bãi, trả một cục bằng tiền mặt.',
+  'life.car.line': 'Mười một tháng tiền bãi. Trả một cục, tiền mặt.',
   'life.room': 'Một căn phòng có cửa',
-  'life.room.line': 'Tiền tháng đầu, tháng cuối, tiền cọc. Một cái chìa khoá của riêng mình.',
+  'life.room.line': 'Cọc ba tháng, tiền nhà trả trước. Chìa khoá của riêng mình.',
   'life.mother': 'Mẹ gọi điện',
   'life.mother.line': 'Mẹ hỏi dạo này làm ăn sao. Lần này nói thật.',
   'life.zero': 'Sạch nợ',
-  'life.zero.line': 'Số không. Đánh đổi tất cả, cuối cùng chỉ để về số không.',
+  'life.zero.line': 'Số không. Đánh đổi cả đời để về số không.',
   'life.friends': 'Bạn bè gọi lại',
-  'life.friends.line': 'Hai đứa. Đúng hai đứa đáng giữ.',
+  'life.friends.line': 'Hai đứa. Đúng hai đứa còn đáng.',
   'life.kids': 'Cuối tuần với các con',
   'life.kids.line': 'Thứ Bảy cách tuần. Chưa lần nào tới muộn.',
   'life.house': 'Chuộc lại căn nhà',
-  'life.house.line': 'Chủ mới ra giá. Trả đúng con số đó, không mặc cả.',
+  'life.house.line': 'Chủ mới hét giá. Trả đúng số đó, không mặc cả.',
   'life.partner': 'Cô ấy dọn về',
-  'life.partner.line': 'Từ từ thôi. Mỗi lần một thùng đồ. Vẫn là về.',
+  'life.partner.line': 'Từ từ thôi. Mỗi lần một thùng đồ. Nhưng là về thật.',
   'life.parents': 'Lo được cho bố mẹ',
-  'life.parents.line': 'Chỗ tử tế. Chỗ có vườn.',
+  'life.parents.line': 'Thuốc men, viện phí, người chăm. Bố mẹ khỏi phải nghĩ.',
   'life.boss': 'Từ trắng tay thành ông chủ',
-  'life.boss.line': 'Người quen hồi đó chẳng ai nhận ra nổi.',
+  'life.boss.line': 'Người quen hồi đó nhìn chắc không ra.',
 
   // ------------------------------------------------------------ cổ phiếu ---
   'stock.grnd': 'Vận tải Cày Cuốc',
