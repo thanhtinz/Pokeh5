@@ -78,6 +78,8 @@ export interface PlayerState {
   claimed: string[];
   /** Thành tựu đã ghi nhận, sống qua mọi lần làm lại. */
   achievements: string[];
+  /** Người trên bảng đã từng vượt — để tiền vượt mặt chỉ trả một lần trong đời. */
+  beaten: string[];
 
   /** Điểm danh: lần nhận gần nhất và chuỗi ngày. */
   dailyClaimedAt: number;
@@ -149,6 +151,7 @@ export function createNewSave(seed: number): PlayerState {
 
     claimed: [],
     achievements: [],
+    beaten: [],
 
     dailyClaimedAt: 0,
     dailyStreak: 0,

@@ -1,6 +1,7 @@
 import { MILESTONES, describeBonus } from '../../game/life';
 import { count, duration, money } from '../../game/money';
 import { PRESTIGE_UNLOCK } from '../../game/prestige';
+import { RIVALS, type RivalDef } from '../../game/rivals';
 import type { PlayerState } from '../../game/state';
 import type { Derived, Store } from '../../game/store';
 import { locale, setLocale, t, type Locale } from '../../i18n';
@@ -17,6 +18,28 @@ const LANGUAGES: readonly { id: Locale; label: string }[] = [
   { id: 'vi', label: 'Tiếng Việt' },
   { id: 'en', label: 'English' },
 ];
+
+/** Bao nhiêu người hiện ở mỗi phía của mình. */
+const AROUND = 3;
+
+/**
+ * Khúc bảng quanh chỗ mình đứng, xếp từ trên xuống, `null` là chính mình.
+ *
+ * Ở chót bảng thì phía dưới rỗng và phía trên tự dài ra, nên khung luôn đầy —
+ * một danh sách bốn dòng ở lượt đầu rồi bảy dòng về sau trông như đang hỏng.
+ */
+function nearby(rank: number): (RivalDef | null)[] {
+  const above = RIVALS.slice(rank, rank + AROUND);
+  const below = RIVALS.slice(Math.max(0, rank - AROUND), rank);
+  const pad = AROUND - below.length;
+
+  return [
+    ...RIVALS.slice(rank + AROUND, rank + AROUND + pad).reverse(),
+    ...above.reverse(),
+    null,
+    ...below.reverse(),
+  ];
+}
 
 /**
  * What the debt cost, listed in order, with the ones already bought back lit.
@@ -44,6 +67,63 @@ export function Life({ game, state, derived, now }: Props) {
             <b class="stat__value num">{duration((now - state.createdAt) / 1000)}</b>
           </span>
         </div>
+      </section>
+
+      {/* ---------------------------------------------------- bảng người ta -- */}
+      <section class="panel board">
+        <div class="prestige__head">
+          <span class="section__title" style={{ margin: 0 }}>
+            {t('rival.title')}
+          </span>
+          <span class="prestige__bonus num">
+            {t('rival.rank', { rank: derived.rivals.rank, total: RIVALS.length })}
+          </span>
+        </div>
+
+        {/* Ba người trên đầu, mình, rồi ba người vừa qua mặt. Cả bảng hai mươi
+            bốn dòng thì thành một danh sách phải cuộn, mà thứ người chơi cần
+            biết chỉ là mình đang kẹp giữa những ai. */}
+        <div class="board__list">
+          {nearby(derived.rivals.rank).map((rival) =>
+            rival === null ? (
+              <div key="you" class="board__row board__row--you">
+                {/* Cột số là chỗ đứng của người ta trên bảng, mà mình thì nằm
+                    *giữa* hai chỗ đứng. Hạng của mình đã có ở đầu khung rồi. */}
+                <span class="board__rank" />
+
+                <span class="board__body">
+                  <span class="board__name">{t('rival.you')}</span>
+                  <span class="board__job num">{money(state.peakNetWorth)}</span>
+                </span>
+              </div>
+            ) : (
+              <div
+                key={rival.id}
+                class={`board__row${
+                  state.peakNetWorth >= rival.at ? ' board__row--under' : ''
+                }`}
+              >
+                <span class="board__rank num">{RIVALS.indexOf(rival) + 1}</span>
+                <span class="board__body">
+                  <span class="board__name">{t(`rival.${rival.id}`)}</span>
+                  <span class="board__job">{t(`rival.${rival.id}.job`)}</span>
+                </span>
+                <span class="board__worth num">{money(rival.at)}</span>
+              </div>
+            ),
+          )}
+        </div>
+
+        <span class="bar">
+          <span class="bar__fill" style={{ width: `${derived.rivals.progress * 100}%` }} />
+        </span>
+        <span class="row__meta" style={{ whiteSpace: 'normal' }}>
+          {derived.rivals.next === null
+            ? t('rival.top')
+            : t('rival.next', {
+                amount: money(Math.max(0, derived.rivals.next.at - state.peakNetWorth)),
+              })}
+        </span>
       </section>
 
       <section class="life">

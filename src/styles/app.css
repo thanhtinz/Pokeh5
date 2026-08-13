@@ -1049,6 +1049,81 @@ button.row__icon:not(:disabled):active {
   margin-bottom: 0;
 }
 
+/* -------------------------------------------------------- bảng người ta -- */
+
+.board {
+  display: grid;
+  gap: 10px;
+}
+
+.board__list {
+  display: grid;
+  gap: 2px;
+}
+
+.board__row {
+  display: grid;
+  grid-template-columns: 24px 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 8px;
+  border-radius: 9px;
+  /* Người còn ở trên mình thì mờ đi: bảng này đọc từ dưới lên. */
+  opacity: 0.5;
+  transition: opacity 0.2s var(--ease);
+}
+
+.board__row--under {
+  opacity: 0.78;
+}
+
+/* The only row that is the player. Reads as a marker in a list, not a card. */
+.board__row--you {
+  opacity: 1;
+  background: hsl(var(--hue) var(--sat) 60% / 0.11);
+  box-shadow: inset 0 0 0 1px hsl(var(--hue) var(--sat) 62% / 0.3);
+}
+
+.board__rank {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--ink-dim);
+  text-align: right;
+}
+
+.board__row--you .board__rank {
+  color: var(--accent);
+}
+
+.board__body {
+  display: grid;
+  min-width: 0;
+}
+
+.board__name {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.board__job {
+  display: block;
+  font-size: 10.5px;
+  line-height: 1.35;
+  color: var(--ink-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.board__worth {
+  font-size: 11.5px;
+  color: var(--ink-dim);
+}
+
 /* ------------------------------------------------------------- cắm rễ ---- */
 
 /* Sits under the district title, above the rows it summarises. Quiet by

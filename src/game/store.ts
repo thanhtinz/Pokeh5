@@ -51,6 +51,7 @@ import {
   type QuestState,
 } from './quests';
 import { Rng, randomSeed } from './rng';
+import { newlyPassed, rivalReward, rivalState, RIVALS, type RivalState } from './rivals';
 import { rootMultiplier, rootsOf, totalRootTiers, type RootState } from './roots';
 import { loadSave, saveNow, wipeSave } from './save';
 import {
@@ -136,6 +137,8 @@ export interface Derived {
   metrics: Metrics;
   /** Trạng thái điểm danh hôm nay. */
   daily: DailyState;
+  /** Chỗ đứng trên bảng người ta, theo đỉnh của lượt này. */
+  rivals: RivalState;
   /** Ba việc của hôm nay. */
   quests: QuestState;
   /** Nhân tổng: mốc cuộc đời × uy tín × buff đang chạy. */
@@ -224,6 +227,7 @@ export function derive(state: PlayerState, now = Date.now()): Derived {
     rootTiers: totalRootTiers(state.businesses),
     metrics,
     daily: dailyState(state.dailyClaimedAt, state.dailyStreak, now),
+    rivals: rivalState(state.peakNetWorth),
     quests: questState(state.questIds, state.questBase, state.questDone, metrics),
     globalMultiplier,
     boostMultiplier,
@@ -379,6 +383,7 @@ export class Store {
     this.runMarket(step, now);
     this.checkMilestones(d);
     this.checkAchievements();
+    this.checkRivals(d);
     this.rollQuests(now);
 
     if (this.state.boost && this.state.boost.endsAt <= now) this.state.boost = null;
@@ -534,6 +539,31 @@ export class Store {
     for (const achievement of fresh) {
       this.state.achievements.push(achievement.id);
       this.notice({ kind: 'info', label: tr(`ach.${achievement.id}`) });
+    }
+    this.persist();
+  }
+
+  /**
+   * Vượt được ai thì trả tiền ngay, và chỉ trả một lần trong đời.
+   *
+   * Đọc `peakNetWorth` chứ không đọc số dư, để một lần mua sắm lớn không đẩy
+   * người chơi tụt lại rồi bắt leo lên vượt lại chính người vừa vượt.
+   */
+  private checkRivals(d: Derived): void {
+    const fresh = newlyPassed(this.state.peakNetWorth, this.state.beaten);
+    if (fresh.length === 0) return;
+
+    for (const rival of fresh) {
+      this.state.beaten.push(rival.id);
+      const reward = rivalReward(
+        RIVALS.indexOf(rival),
+        d.income + d.refineryIncome * 0.25,
+        d.tapValue,
+      );
+      this.earn(reward);
+      this.notice({ kind: 'cash', amount: reward, label: tr('rival.passed', {
+        name: tr(`rival.${rival.id}`),
+      }) });
     }
     this.persist();
   }
@@ -922,6 +952,8 @@ export class Store {
       createdAt: this.state.createdAt,
       claimed: this.state.claimed,
       achievements: this.state.achievements,
+      // Bảng thì leo lại từ đầu, nhưng tiền vượt mặt thì không trả lại lần nữa.
+      beaten: this.state.beaten,
       stats: this.state.stats,
       perks: this.state.perks,
       dailyClaimedAt: this.state.dailyClaimedAt,

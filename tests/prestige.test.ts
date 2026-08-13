@@ -18,6 +18,8 @@ import {
   questState,
   questsFor,
 } from '../src/game/quests';
+import { RIVALS, passedRivals, rankOf, rivalState } from '../src/game/rivals';
+import { sanitise } from '../src/game/save';
 import {
   ROOT_BONUS,
   ROOT_TIERS,
@@ -406,5 +408,78 @@ describe('uy tín không đúc lại được', () => {
     expect(derive(store.state).pendingReputation).toBe(0);
     expect(store.prestige()).toBe(0);
     expect(store.state.reputationTotal).toBe(gain);
+  });
+});
+
+describe('bảng người ta', () => {
+  it('xếp theo tài sản tăng dần, không có hai người cùng một mốc', () => {
+    const rungs = RIVALS.map((rival) => rival.at);
+    for (let i = 1; i < rungs.length; i += 1) expect(rungs[i]!).toBeGreaterThan(rungs[i - 1]!);
+  });
+
+  // Ông cà phê cóc đứng đúng vạch không: qua được ông ấy là hết nợ, và đó là
+  // cột mốc duy nhất trong game đáng có một cái tên đứng cạnh.
+  it('có đúng một người đứng ở mốc sạch nợ', () => {
+    expect(RIVALS.filter((rival) => rival.at === 0)).toHaveLength(1);
+    expect(rankOf(-1)).toBe(rankOf(0) - 1);
+  });
+
+  it('vượt ai thì trả tiền ngay, và không bao giờ trả người đó lần nữa', () => {
+    const store = ready(0);
+    store.state.cash = 0;
+    store.state.peakNetWorth = 0;
+
+    const before = store.state.cash;
+    store.tick(0.1);
+
+    // Số dư bằng không là trên đầu sáu người đầu bảng.
+    expect(store.state.beaten).toHaveLength(6);
+    expect(store.state.cash).toBeGreaterThan(before);
+
+    const paid = store.state.cash;
+    store.tick(0.1);
+    expect(store.state.cash).toBe(paid);
+  });
+
+  it('làm lại thì tụt về chót bảng nhưng không trả tiền vượt mặt lần nữa', () => {
+    const store = ready(1e13);
+    store.tick(0.1);
+    const beaten = [...store.state.beaten];
+    expect(beaten.length).toBeGreaterThan(6);
+
+    store.prestige();
+    // Bảng đọc đỉnh của lượt đang chơi, nên hạng về không.
+    expect(derive(store.state).rivals.rank).toBe(0);
+    // Nhưng sổ nợ ân tình thì không xoá.
+    expect(store.state.beaten).toEqual(beaten);
+
+    store.state.peakNetWorth = 1e13;
+    const cash = store.state.cash;
+    store.tick(0.1);
+    expect(store.state.cash).toBe(cash);
+  });
+
+  it('thanh tiến độ chạy trên thang nhân, không đứng im rồi nhảy', () => {
+    // Giữa hai mốc cách nhau gấp mười, đi hết một nửa quãng *nhân* là quá nửa
+    // thanh; đo tuyến tính thì chỗ đó mới được 3%.
+    const middle = rivalState(Math.sqrt(2e12 * 2e13));
+    expect(middle.progress).toBeGreaterThan(0.4);
+    expect(middle.progress).toBeLessThan(0.6);
+  });
+
+  it('hết bảng thì thanh đầy và không còn ai ở trên', () => {
+    const top = rivalState(1e43);
+    expect(top.rank).toBe(RIVALS.length);
+    expect(top.next).toBeNull();
+    expect(top.progress).toBe(1);
+  });
+
+  it('bản lưu cũ được điền sẵn sổ chứ không lĩnh một cục', () => {
+    const old = { ...createNewSave(1), peakNetWorth: 1e13 } as Record<string, unknown>;
+    delete old['beaten'];
+
+    const loaded = sanitise(old)!;
+    expect(loaded.beaten).toEqual(passedRivals(1e13));
+    expect(loaded.beaten.length).toBeGreaterThan(6);
   });
 });

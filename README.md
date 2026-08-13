@@ -10,14 +10,14 @@ Bối cảnh và tiền tệ là Việt Nam. Chơi bằng **tiếng Việt**, đ
 
 TypeScript, Preact and Vite, wrapped in Capacitor for Android and iOS.
 No canvas, no engine, no runtime dependencies beyond Preact — the whole bundle
-is **43 kB gzipped**.
+is **46 kB gzipped**.
 
 ## Running it
 
 ```bash
 npm install
 npm run dev        # http://localhost:5173
-npm test           # 76 tests over the rule layer and the dictionaries
+npm test           # 83 tests over the rule layer and the dictionaries
 npm run build      # typecheck, then a production bundle in dist/
 npm run shot       # screenshots every screen at both ends of the palette
 ```
@@ -268,7 +268,38 @@ thirds of a screen the player learns to ignore. The rolled ids are stored rather
 than recomputed from the day, so unlocking the market at noon doesn't swap the
 goals out from under whoever is working on them.
 
-76 tests now, from 50.
+### And one that gives the number a shape
+
+`src/game/rivals.ts`. Everything above is a number going up, and a number going
+up has no *shape* — how much better is 4,2 tỷ than 3,1 tỷ is a sum you have to
+sit down and do. Twenty-four names have a shape: you are behind Chị Năm the
+fishmonger and ahead of Chú Bảy the motorbike taxi, and two rungs from passing
+Ông Chín, who runs four plastic stools on a pavement and owes nobody a đồng.
+
+Ông Chín sits at exactly zero. That is the point of him: he is the only place in
+the game that says out loud what clearing the debt *means*, and a name beside
+that threshold makes it an afternoon you remember instead of a `0`.
+
+Three decisions:
+
+**Rank reads this run's peak, not the lifetime record.** Starting again drops you
+to the bottom of the board and you climb the whole thing back in a fraction of
+the time — which is the actual pleasure of a prestige reset, and the board is
+what says so.
+
+**The passing bonus is paid once in a lifetime**, tracked in `beaten`, or
+resetting would be a money printer. The board resets; the ledger does not.
+
+**The bar is logarithmic.** From 2 nghìn tỷ to 20 nghìn tỷ is one rung and a
+factor of ten; measured linearly the bar sits at zero for nine tenths of it and
+then jumps. The whole game runs on a multiplicative scale, so the bar has to as
+well.
+
+A save written before any of this existed has its `beaten` list **backfilled
+from its peak rather than paid out** — opening the game to fourteen lump sums and
+fourteen toasts is a bug, not a present.
+
+83 tests now, from 50.
 
 ## How the money works
 
@@ -308,6 +339,7 @@ src/game/     the rules — runs in plain node, no DOM, fully tested
   daily.ts        the seven-day cycle, compared by calendar date
   quests.ts       three daily goals, rolled inside what the player can reach
   roots.ts        district tiers that pay a global bonus
+  rivals.ts       twenty-four names to climb past, zero among them
   achievements.ts ten ladders over cumulative counters
   perks.ts        six permanent perks, two ledgers
   state.ts        the save shape

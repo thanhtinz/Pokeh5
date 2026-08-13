@@ -6,6 +6,7 @@ import { cardTemplate, jobById } from './jobs';
 import { milestoneById } from './life';
 import { perkById } from './perks';
 import { QUEST_POOL, questById } from './quests';
+import { passedRivals, rivalById } from './rivals';
 import { TIERS } from './upgrades';
 import { randomSeed } from './rng';
 import { stockById } from './stocks';
@@ -97,6 +98,20 @@ export function sanitise(raw: unknown): PlayerState | null {
         ),
       ]
     : [];
+
+  // Bản lưu ghi trước khi có bảng xếp hạng chưa có trường này. Điền sẵn tất cả
+  // những người mà đỉnh của nó đã vượt qua, chứ không trả tiền: người chơi leo
+  // qua họ từ đời nào rồi, mở game lên mà lĩnh một cục mười mấy khoản kèm mười
+  // mấy dòng thông báo thì đó là lỗi chứ không phải quà.
+  const beaten = Array.isArray(data.beaten)
+    ? [
+        ...new Set(
+          data.beaten.filter(
+            (id): id is string => typeof id === 'string' && rivalById(id) !== null,
+          ),
+        ),
+      ]
+    : passedRivals(clampNum(data.peakNetWorth, -Number.MAX_SAFE_INTEGER, Number.MAX_SAFE_INTEGER, 0));
 
   const stats = (data.stats ?? {}) as Record<string, unknown>;
 
@@ -201,6 +216,7 @@ export function sanitise(raw: unknown): PlayerState | null {
 
     claimed,
     achievements,
+    beaten,
 
     dailyClaimedAt: clampInt(data.dailyClaimedAt, 0, Number.MAX_SAFE_INTEGER, 0),
     dailyStreak: clampInt(data.dailyStreak, 0, 1e6, 0),

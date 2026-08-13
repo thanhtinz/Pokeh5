@@ -10,6 +10,7 @@ import {
 } from '../src/game/businesses';
 import { ACHIEVEMENTS } from '../src/game/achievements';
 import { bonusesFrom, newlyReached } from '../src/game/life';
+import { RIVALS } from '../src/game/rivals';
 import { STARTING_BALANCE, createNewSave } from '../src/game/state';
 import { Store, businessAssets, creditLine, derive } from '../src/game/store';
 
@@ -109,6 +110,9 @@ describe('the tick', () => {
     store.ready = true;
     store.state.businesses[cans.id] = 1;
     store.state.cash = 0;
+    // Số dư bằng không là đã trên đầu sáu người đầu bảng, và tiền vượt mặt sẽ
+    // rơi vào đúng cái tick đang đo. Bài này không nói về bảng xếp hạng.
+    store.state.beaten = RIVALS.map((rival) => rival.id);
 
     store.tick(10, Date.now());
     expect(store.state.cash).toBe(0);
