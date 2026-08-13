@@ -34,9 +34,13 @@ export function reputationFrom(peakNetWorth: number): number {
 /**
  * Uy tín nhận thêm nếu làm lại ngay bây giờ — phần chênh, nên bằng không khi
  * lượt này chưa vượt được lượt trước.
+ *
+ * Tham số là **tổng đã từng kiếm**, không phải số dư. Lấy số dư thì tiêu uy tín
+ * xong làm lại ở đúng cái đỉnh cũ là đúc lại được chỗ vừa tiêu, và cửa hàng
+ * thành ra miễn phí.
  */
-export function pendingReputation(peakNetWorth: number, reputation: number): number {
-  return Math.max(0, reputationFrom(peakNetWorth) - reputation);
+export function pendingReputation(peakNetWorth: number, reputationTotal: number): number {
+  return Math.max(0, reputationFrom(peakNetWorth) - reputationTotal);
 }
 
 /** Hệ số nhân vĩnh viễn từ uy tín đang có. */
@@ -45,6 +49,6 @@ export function reputationMultiplier(reputation: number): number {
 }
 
 /** Đã đủ điều kiện làm lại chưa. */
-export function canPrestige(peakNetWorth: number, reputation: number): boolean {
-  return pendingReputation(peakNetWorth, reputation) > 0;
+export function canPrestige(peakNetWorth: number, reputationTotal: number): boolean {
+  return pendingReputation(peakNetWorth, reputationTotal) > 0;
 }

@@ -83,6 +83,19 @@ export interface PlayerState {
   dailyClaimedAt: number;
   dailyStreak: number;
 
+  /**
+   * Việc trong ngày: ngày đang chạy, đề đã rút, mốc số đếm lúc sang ngày, và
+   * việc đã nhận.
+   *
+   * Đề được **lưu** chứ không tính lại từ ngày, vì bộ rút phụ thuộc vào chỗ
+   * người chơi đang đứng — tính lại giữa ngày là đề tự đổi dưới tay người chơi
+   * đúng lúc họ vừa mở được sàn.
+   */
+  questDay: number;
+  questIds: string[];
+  questBase: Record<string, number>;
+  questDone: string[];
+
   /** Số đếm cộng dồn cho thành tựu — không reset khi làm lại. */
   stats: {
     taps: number;
@@ -139,6 +152,13 @@ export function createNewSave(seed: number): PlayerState {
 
     dailyClaimedAt: 0,
     dailyStreak: 0,
+
+    // Ngày 0 không phải một ngày thật, nên lần tick đầu tiên sẽ tự đổi bộ việc
+    // và chụp mốc số đếm — khỏi phải gọi Date.now() thêm một lần ở đây.
+    questDay: 0,
+    questIds: [],
+    questBase: {},
+    questDone: [],
 
     stats: { taps: 0, cards: 0, jobs: 0, trades: 0, units: 0, upgrades: 0 },
 

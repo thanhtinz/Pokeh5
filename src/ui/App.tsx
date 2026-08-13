@@ -84,8 +84,9 @@ export function App() {
     ),
     market: false,
     life: game.pendingMilestones().length > 0 || derived.pendingReputation > 0,
-    // Điểm danh là thứ đáng chấm nhất trên thanh tab: nó chỉ có hôm nay.
-    more: derived.daily.available,
+    // Điểm danh và việc trong ngày là hai thứ đáng chấm nhất trên thanh tab:
+    // cả hai đều chỉ có hôm nay.
+    more: derived.daily.available || derived.quests.claimable,
   };
 
   return (

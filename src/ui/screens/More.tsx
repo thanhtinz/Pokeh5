@@ -2,6 +2,7 @@ import { ACHIEVEMENTS, nextInLadder } from '../../game/achievements';
 import { CYCLE, REWARD_SECONDS } from '../../game/daily';
 import { count, money } from '../../game/money';
 import { PERKS, describePerk, perkCost } from '../../game/perks';
+import { QUEST_BONUS_REPUTATION } from '../../game/quests';
 import { perkLevel, type PlayerState } from '../../game/state';
 import type { Derived, Store } from '../../game/store';
 import { t } from '../../i18n';
@@ -26,8 +27,56 @@ export function More({ game, state, derived }: Props) {
   const done = ACHIEVEMENTS.filter((achievement) => state.achievements.includes(achievement.id));
   const upNext = nextInLadder(derived.metrics, state.achievements);
 
+  const left = derived.quests.quests.filter((quest) => !quest.claimed).length;
+
   return (
     <>
+      {/* ---------------------------------------------------- việc hôm nay -- */}
+      <section class="panel">
+        <div class="prestige__head">
+          <span class="section__title" style={{ margin: 0 }}>
+            {t('quest.title')}
+          </span>
+          <span class="prestige__bonus num">
+            {left > 0 ? t('quest.left', { count: left }) : t('quest.allDone')}
+          </span>
+        </div>
+
+        {derived.quests.quests.map(({ def, done, complete, claimed }) => (
+          <div key={def.id} class={`row${complete && !claimed ? ' row--lit' : ''}`}>
+            <span class="row__icon">
+              <Art name={QUEST_ART[def.metric] ?? 'coin'} />
+            </span>
+            <span class="row__body">
+              <span class="row__name">{t(`goal.${def.metric}`, { target: count(def.target) })}</span>
+              <span class="row__meta">
+                {t('ach.progress', { current: count(done), target: count(def.target) })}
+              </span>
+            </span>
+            <span class="row__side">
+              {claimed ? (
+                <span class="row__meta">{t('quest.claimed')}</span>
+              ) : (
+                <button
+                  class={`btn btn--sm${complete ? ' btn--primary' : ''}`}
+                  disabled={!complete}
+                  onClick={() => game.claimQuest(def.id)}
+                >
+                  {t('quest.claim')}
+                </button>
+              )}
+            </span>
+            <span class="row__bar bar">
+              <span class="bar__fill" style={{ width: `${(done / def.target) * 100}%` }} />
+            </span>
+          </div>
+        ))}
+
+        <span class="row__meta" style={{ whiteSpace: 'normal' }}>
+          {t('quest.bonus', { amount: QUEST_BONUS_REPUTATION })}
+        </span>
+      </section>
+
       {/* ------------------------------------------------------- điểm danh -- */}
       <section class="panel daily">
         <div class="prestige__head">
@@ -178,6 +227,16 @@ export function More({ game, state, derived }: Props) {
     </>
   );
 }
+
+/** Việc trong ngày cũng mượn asset của thứ nó bắt người chơi đi làm. */
+const QUEST_ART: Record<string, string> = {
+  taps: 'ore',
+  cards: 'coins',
+  jobs: 'flyer',
+  trades: 'chart',
+  units: 'boxes',
+  upgrades: 'gear',
+};
 
 /** Đặc quyền mượn asset của thứ nó tác động, khỏi phải vẽ thêm sáu cái. */
 const PERK_ART: Record<string, string> = {

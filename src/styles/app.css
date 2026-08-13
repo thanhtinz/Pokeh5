@@ -1049,6 +1049,43 @@ button.row__icon:not(:disabled):active {
   margin-bottom: 0;
 }
 
+/* ------------------------------------------------------------- cắm rễ ---- */
+
+/* Sits under the district title, above the rows it summarises. Quiet by
+   default — it is a background ambition, not the thing to buy right now. */
+.roots {
+  position: relative;
+  display: grid;
+  gap: 4px;
+  margin-top: 7px;
+}
+
+.roots__head {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+}
+
+/* The count is the part that changes, so it keeps its digits unshouted. */
+.roots__head .num {
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--accent);
+}
+
+.roots__total {
+  display: block;
+  margin: -2px 0 4px;
+  font-size: 11.5px;
+  line-height: 1.45;
+  color: var(--ink-dim);
+}
+
 /* ------------------------------------------------------- milestone payoff -- */
 
 .sheet--art {

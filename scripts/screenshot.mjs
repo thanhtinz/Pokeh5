@@ -16,6 +16,13 @@ const VIEWPORT = { width: 393, height: 852 };
 
 const SAVE_KEY = 'broketoboss.save.v1';
 
+/** Cùng phép tính với `dayIndex` trong `src/game/daily.ts`. */
+function dayIndex(at) {
+  const date = new Date(at);
+  date.setHours(0, 0, 0, 0);
+  return Math.floor(date.getTime() / 86_400_000);
+}
+
 /** A save far enough along that every screen has something on it. */
 function richSave(now) {
   return {
@@ -48,6 +55,12 @@ function richSave(now) {
     achievements: ['tap1', 'tap2', 'card1', 'job1', 'unit1', 'unit2', 'mgr1', 'mgr2', 'up1', 'rich1'],
     dailyClaimedAt: 0,
     dailyStreak: 3,
+    // Hôm nay, với mốc thấp hơn số đếm một chút, để ba việc hiện ra đang dở —
+    // và "mở thêm 40 suất" thì vừa đủ xong, cho thấy nút nhận lúc sáng lên.
+    questDay: dayIndex(now),
+    questIds: ['tapB', 'tradeA', 'unitA'],
+    questBase: { taps: 4190, cards: 17, jobs: 25, trades: 10, units: 1200, upgrades: 5 },
+    questDone: [],
     stats: { taps: 4200, cards: 18, jobs: 26, trades: 12, units: 1240, upgrades: 6 },
     rngSeed: 777,
   };

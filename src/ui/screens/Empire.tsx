@@ -11,6 +11,7 @@ import {
   unitCost,
 } from '../../game/businesses';
 import { clock, count, money, rate } from '../../game/money';
+import { ROOT_TIERS } from '../../game/roots';
 import { hasManager, ownedOf, upgradeOf, type PlayerState } from '../../game/state';
 import { TIERS, isMaxed, nextUpgrade, upgradeMultiplier } from '../../game/upgrades';
 import type { Derived, Store } from '../../game/store';
@@ -58,12 +59,24 @@ export function Empire({ game, state, derived }: Props) {
         ))}
       </div>
 
+      {/* Tổng cắm rễ đứng một mình trên đầu danh sách: sáu thanh ở dưới là sáu
+          khu riêng lẻ, còn con số này mới là thứ chúng nó cộng lại thành. */}
+      <span class="roots__total num">
+        {derived.rootTiers > 0
+          ? t('root.total', {
+              tiers: count(derived.rootTiers),
+              multiplier: derived.rootMultiplier.toFixed(2),
+            })
+          : t('root.note')}
+      </span>
+
       {DISTRICTS.map((district) => {
         const defs = BUSINESSES.filter(
           (def, index) => def.district === district && index < visibleCount,
         );
         if (defs.length === 0) return null;
 
+        const root = derived.roots.find((entry) => entry.district === district)!;
         const districtIncome = defs.reduce(
           (sum, def) =>
             sum +
@@ -81,6 +94,29 @@ export function Empire({ game, state, derived }: Props) {
                 <span>{t(`district.${district}`)}</span>
                 <span class="num">{rate(districtIncome)}</span>
               </h2>
+
+              {/* Cắm rễ nằm ngay dưới tên khu, vì nó là chỉ số *của khu* —
+                  và vì đó là chỗ duy nhất người chơi nhìn thấy lý do quay lại
+                  một khu đã bỏ lại phía sau từ lâu. */}
+              <div class="roots">
+                <span class="roots__head">
+                  <span>{t('root.title')}</span>
+                  {/* Bậc và số suất đứng chung một dòng: tách ra thì cái thanh
+                      phụ này cao bằng một hàng cơ ngơi thật, mà nó không phải
+                      thứ để bấm. Số ở đây luôn dưới hai nghìn nên viết thẳng,
+                      khỏi rút gọn thành "1,2k" cạnh một số chưa rút gọn. */}
+                  <span class="num">
+                    {root.tier > 0 && t('root.tier', { tier: root.tier, max: ROOT_TIERS.length })}
+                    {root.tier > 0 && root.next !== null && ' · '}
+                    {root.next === null
+                      ? root.tier > 0 && t('root.full')
+                      : t('root.progress', { current: root.units, target: root.next })}
+                  </span>
+                </span>
+                <span class="bar">
+                  <span class="bar__fill" style={{ width: `${root.progress * 100}%` }} />
+                </span>
+              </div>
             </div>
 
             {defs.map((def) => {

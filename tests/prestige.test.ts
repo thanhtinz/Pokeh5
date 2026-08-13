@@ -11,8 +11,23 @@ import {
   reputationFrom,
   reputationMultiplier,
 } from '../src/game/prestige';
+import {
+  ALWAYS_AVAILABLE,
+  QUESTS_PER_DAY,
+  QUEST_BONUS_REPUTATION,
+  questState,
+  questsFor,
+} from '../src/game/quests';
+import {
+  ROOT_BONUS,
+  ROOT_TIERS,
+  districtUnits,
+  rootMultiplier,
+  rootTier,
+  totalRootTiers,
+} from '../src/game/roots';
 import { STARTING_BALANCE, createNewSave } from '../src/game/state';
-import { Store, derive } from '../src/game/store';
+import { Store, derive, metricsOf } from '../src/game/store';
 
 const cans = BUSINESSES[0]!;
 
@@ -58,7 +73,7 @@ describe('uy tín', () => {
 describe('làm lại', () => {
   it('không cho bấm khi chưa đủ', () => {
     const store = ready(1e10);
-    expect(canPrestige(store.state.peakNetWorth, store.state.reputation)).toBe(false);
+    expect(canPrestige(store.state.peakNetWorth, store.state.reputationTotal)).toBe(false);
     expect(store.prestige()).toBe(0);
     expect(store.state.runs).toBe(0);
   });
@@ -233,5 +248,163 @@ describe('thành tựu', () => {
   it('bỏ qua id lạ, bản lưu cũ không thổi phồng được hệ số', () => {
     expect(achievementMultiplier(['tap1'])).toBeGreaterThan(1);
     expect(achievementMultiplier(['khong-co-that'])).toBe(1);
+  });
+});
+
+describe('cắm rễ', () => {
+  it('đếm suất của cả khu, không phải của một cơ sở', () => {
+    const skidrow = BUSINESSES.filter((def) => def.district === 'skidrow');
+    const spread = Object.fromEntries(skidrow.slice(0, 3).map((def) => [def.id, 20]));
+    expect(districtUnits(spread, 'skidrow')).toBe(60);
+    expect(rootTier(districtUnits(spread, 'skidrow'))).toBe(1);
+
+    // Cùng sáu chục suất, dồn hết vào một cơ sở thì vẫn đúng một bậc.
+    expect(rootTier(districtUnits({ [skidrow[0]!.id]: 60 }, 'skidrow'))).toBe(1);
+  });
+
+  it('bậc của khu cũ vẫn cộng vào thu nhập toàn cục', () => {
+    const store = ready(0);
+    const before = derive(store.state).globalMultiplier;
+
+    // Gom đủ mốc đầu ở đúng cái khu rẻ nhất, nơi thu nhập gần như bằng không.
+    store.state.businesses[cans.id] = ROOT_TIERS[0]!;
+    const after = derive(store.state);
+
+    expect(after.rootTiers).toBe(1);
+    expect(after.globalMultiplier).toBeCloseTo(before * (1 + ROOT_BONUS), 9);
+  });
+
+  it('sáu khu kín bậc thì cộng đúng ba mươi sáu lần', () => {
+    const full: Record<string, number> = {};
+    for (const def of BUSINESSES) full[def.id] = ROOT_TIERS[ROOT_TIERS.length - 1]!;
+
+    expect(totalRootTiers(full)).toBe(6 * ROOT_TIERS.length);
+    expect(rootMultiplier(full)).toBeCloseTo(1 + ROOT_BONUS * 6 * ROOT_TIERS.length, 9);
+  });
+
+  it('bán sạch cơ ngơi là mất luôn bậc — nó bám vào suất đang có', () => {
+    const store = ready(1e13);
+    store.state.businesses[cans.id] = ROOT_TIERS[1]!;
+    expect(derive(store.state).rootTiers).toBe(2);
+
+    store.prestige();
+    expect(derive(store.state).rootTiers).toBe(0);
+  });
+});
+
+const EVERY_METRIC = ['taps', 'cards', 'jobs', 'trades', 'units', 'upgrades'] as const;
+
+describe('việc trong ngày', () => {
+  it('cùng một ngày, cùng phạm vi thì ra cùng một bộ; ngày khác thì khác', () => {
+    const ids = (day: number) => questsFor(day, EVERY_METRIC).map((quest) => quest.id);
+    expect(ids(19_000)).toEqual(ids(19_000));
+
+    const days = new Set(
+      Array.from({ length: 30 }, (_, index) => ids(19_000 + index).join(',')),
+    );
+    expect(days.size).toBeGreaterThan(1);
+  });
+
+  it('ba việc, và không việc nào trùng số đếm với việc nào', () => {
+    for (let day = 19_000; day < 19_100; day += 1) {
+      const quests = questsFor(day, EVERY_METRIC);
+      expect(quests).toHaveLength(QUESTS_PER_DAY);
+      expect(new Set(quests.map((quest) => quest.metric)).size).toBe(QUESTS_PER_DAY);
+    }
+  });
+
+  // Ván mới còn âm một tỷ: chưa có tiền mặt để đặt lệnh, chưa cơ sở nào đủ suất
+  // để nâng cấp. Giao hai đề đó vào ngày đầu là giao việc không làm được.
+  it('không giao đề mà ván mới chưa với tới', () => {
+    for (let day = 19_000; day < 19_100; day += 1) {
+      const metrics = questsFor(day, ALWAYS_AVAILABLE).map((quest) => quest.metric);
+      expect(metrics).not.toContain('trades');
+      expect(metrics).not.toContain('upgrades');
+    }
+  });
+
+  it('bộ của ván mới không dính đề sàn hay đề nâng cấp', () => {
+    const store = ready(0);
+    store.tick(0.1);
+
+    for (const quest of derive(store.state).quests.quests) {
+      expect(['trades', 'upgrades']).not.toContain(quest.def.metric);
+    }
+  });
+
+  it('đề đã rút thì giữ nguyên, kể cả khi giữa ngày mở thêm được sàn', () => {
+    const store = ready(0);
+    store.tick(0.1);
+    const rolled = [...store.state.questIds];
+
+    store.state.cash = 1e12;
+    store.tick(0.1);
+    expect(store.state.questIds).toEqual(rolled);
+  });
+
+  it('tiến độ tính từ mốc lúc sang ngày, không phải từ đầu ván', () => {
+    const store = ready(0);
+    store.state.stats.taps = 10_000;
+    store.tick(0.1);
+
+    // Mốc vừa chụp bằng số đếm hiện tại, nên hôm nay vẫn bắt đầu từ con số không.
+    for (const quest of derive(store.state).quests.quests) expect(quest.done).toBe(0);
+    expect(store.state.questBase['taps']).toBe(10_000);
+  });
+
+  it('thiếu mốc thì coi như bắt đầu từ không, chứ không xong sẵn', () => {
+    const metrics = metricsOf(createNewSave(1));
+    metrics.taps = 9_999;
+    const ids = questsFor(19_000, EVERY_METRIC).map((quest) => quest.id);
+    const state = questState(ids, {}, [], metrics);
+
+    expect(state.quests).toHaveLength(QUESTS_PER_DAY);
+    for (const quest of state.quests) expect(quest.complete).toBe(false);
+  });
+
+  it('nhận việc cuối thì được thêm uy tín, và chỉ một lần', () => {
+    const store = ready(0);
+    store.tick(0.1);
+
+    // Ép cả ba việc xong bằng cách kéo số đếm vượt mọi mục tiêu.
+    for (const quest of derive(store.state).quests.quests) {
+      store.state.stats[quest.def.metric] = (store.state.questBase[quest.def.metric] ?? 0) +
+        quest.def.target;
+    }
+
+    const before = store.state.reputationTotal;
+    const quests = derive(store.state).quests.quests;
+    for (const quest of quests) expect(store.claimQuest(quest.def.id)).toBeGreaterThan(0);
+
+    expect(store.state.reputationTotal).toBe(before + QUEST_BONUS_REPUTATION);
+    // Bấm lại không ra thêm gì.
+    expect(store.claimQuest(quests[0]!.def.id)).toBe(0);
+    expect(store.state.reputationTotal).toBe(before + QUEST_BONUS_REPUTATION);
+  });
+
+  it('bán sạch đế chế giữa ngày không xoá việc đang làm dở', () => {
+    const store = ready(1e13);
+    store.tick(0.1);
+    const base = { ...store.state.questBase };
+    const day = store.state.questDay;
+
+    store.prestige();
+    expect(store.state.questDay).toBe(day);
+    expect(store.state.questBase).toEqual(base);
+  });
+});
+
+describe('uy tín không đúc lại được', () => {
+  it('tiêu hết rồi làm lại ở đúng đỉnh cũ thì không ra thêm', () => {
+    const store = ready(1e13);
+    const gain = store.prestige();
+    expect(gain).toBeGreaterThan(0);
+
+    // Tiêu sạch số dư, rồi leo lại đúng cái đỉnh vừa rồi.
+    store.state.reputation = 0;
+    store.state.peakNetWorth = 1e13;
+    expect(derive(store.state).pendingReputation).toBe(0);
+    expect(store.prestige()).toBe(0);
+    expect(store.state.reputationTotal).toBe(gain);
   });
 });

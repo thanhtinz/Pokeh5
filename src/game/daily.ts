@@ -40,6 +40,17 @@ function startOfDay(at: number): number {
 }
 
 /**
+ * Số thứ tự của ngày lịch, để những thứ đổi theo ngày có một con số mà bám vào.
+ *
+ * Không phải ngày trong lịch thật, chỉ cần **tăng đúng một đơn vị mỗi nửa đêm**
+ * và giống nhau ở mọi lần gọi trong cùng một ngày — đủ để gieo hạt cho bộ nhiệm
+ * vụ hôm nay và để biết hôm nay đã đổi bộ chưa.
+ */
+export function dayIndex(now: number): number {
+  return Math.floor(startOfDay(now) / DAY);
+}
+
+/**
  * Trạng thái điểm danh lúc `now`.
  *
  * So theo ngày lịch chứ không phải "đủ 24 tiếng kể từ lần trước", vì người chơi

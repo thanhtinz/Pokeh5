@@ -34,12 +34,24 @@ import {
   unitCost,
 } from './businesses';
 import { t as tr } from '../i18n';
-import { dailyReward, dailyState, type DailyState } from './daily';
+import { dailyReward, dailyState, dayIndex, type DailyState } from './daily';
 import { CARD_LIFETIME, drawCard, jobById } from './jobs';
 import { bonusesFrom, newlyReached, type LifeBonuses, type LifeMilestone } from './life';
 import { effectsFrom, perkById, perkCost, type PerkEffects } from './perks';
 import { pendingReputation, reputationMultiplier } from './prestige';
+import {
+  ALWAYS_AVAILABLE,
+  QUEST_BONUS_REPUTATION,
+  questById,
+  questReward,
+  questState,
+  questsFor,
+  snapshot,
+  type QuestMetric,
+  type QuestState,
+} from './quests';
 import { Rng, randomSeed } from './rng';
+import { rootMultiplier, rootsOf, totalRootTiers, type RootState } from './roots';
 import { loadSave, saveNow, wipeSave } from './save';
 import {
   STARTING_BALANCE,
@@ -62,7 +74,7 @@ import {
   STOCKS,
   unrealised,
 } from './stocks';
-import { nextUpgrade, upgradeMultiplier } from './upgrades';
+import { TIERS, nextUpgrade, upgradeMultiplier } from './upgrades';
 
 /** Dollars a single unit of ore is worth at refinery level one. */
 export const ORE_BASE_VALUE = 8_000;
@@ -114,10 +126,18 @@ export interface Derived {
   achievementMultiplier: number;
   /** Nhân vĩnh viễn từ uy tín, tách riêng để màn Cuộc đời còn hiện được. */
   reputationMultiplier: number;
+  /** Nhân vĩnh viễn từ cắm rễ, cộng dồn theo bậc của cả sáu khu. */
+  rootMultiplier: number;
+  /** Bậc cắm rễ của từng khu, cho màn Cơ ngơi. */
+  roots: RootState[];
+  /** Tổng bậc cắm rễ đã có. */
+  rootTiers: number;
   /** Số đo cộng dồn cho thành tựu. */
   metrics: Metrics;
   /** Trạng thái điểm danh hôm nay. */
   daily: DailyState;
+  /** Ba việc của hôm nay. */
+  quests: QuestState;
   /** Nhân tổng: mốc cuộc đời × uy tín × buff đang chạy. */
   globalMultiplier: number;
   boostMultiplier: number;
@@ -161,8 +181,11 @@ export function derive(state: PlayerState, now = Date.now()): Derived {
   const repMultiplier = reputationMultiplier(state.reputationTotal);
   const achieveMultiplier = achievementMultiplier(state.achievements);
   const perks = effectsFrom(state.perks);
+  const roots = rootMultiplier(state.businesses);
   const globalMultiplier =
-    bonuses.income * repMultiplier * achieveMultiplier * boostMultiplier;
+    bonuses.income * repMultiplier * achieveMultiplier * roots * boostMultiplier;
+
+  const metrics = metricsOf(state);
 
   const assets = businessAssets(state) + portfolioValue(state);
   const netWorth = state.cash + assets;
@@ -196,8 +219,12 @@ export function derive(state: PlayerState, now = Date.now()): Derived {
     perks,
     achievementMultiplier: achieveMultiplier,
     reputationMultiplier: repMultiplier,
-    metrics: metricsOf(state),
+    rootMultiplier: roots,
+    roots: rootsOf(state.businesses),
+    rootTiers: totalRootTiers(state.businesses),
+    metrics,
     daily: dailyState(state.dailyClaimedAt, state.dailyStreak, now),
+    quests: questState(state.questIds, state.questBase, state.questDone, metrics),
     globalMultiplier,
     boostMultiplier,
     pendingReputation: pendingReputation(state.peakNetWorth, state.reputationTotal),
@@ -268,6 +295,8 @@ export class Store {
     this.rng = new Rng(state.rngSeed);
     if (!isNew) this.offline = this.catchUp();
     this.ready = true;
+    // Trước khi người chơi kịp chạm cái gì, để mốc số đếm của hôm nay là thật.
+    this.rollQuests(Date.now());
     this.emit();
   }
 
@@ -350,6 +379,7 @@ export class Store {
     this.runMarket(step, now);
     this.checkMilestones(d);
     this.checkAchievements();
+    this.rollQuests(now);
 
     if (this.state.boost && this.state.boost.endsAt <= now) this.state.boost = null;
 
@@ -508,6 +538,45 @@ export class Store {
     this.persist();
   }
 
+  /**
+   * Sang ngày thì đổi bộ việc và chụp lại mốc số đếm.
+   *
+   * Chụp mốc là chỗ dễ sai nhất: nếu chụp *sau* khi người chơi đã chạm vài cái
+   * thì hôm nay tự dưng mất mấy lần chạm đó, còn nếu không chụp thì tiến độ tính
+   * từ đầu ván và ngày đầu tiên xong sẵn cả ba việc. Nên nó chạy trong tick,
+   * trước khi bất kỳ hành động nào của ngày mới kịp cộng vào số đếm.
+   *
+   * Bộ rỗng cũng là lý do rút lại, không riêng gì sang ngày: bản lưu cũ chưa có
+   * đề nào, và một bản lưu hỏng có thể bị vứt sạch id lúc làm sạch.
+   */
+  private rollQuests(now: number): void {
+    const today = dayIndex(now);
+    if (this.state.questDay === today && this.state.questIds.length > 0) return;
+
+    this.state.questDay = today;
+    this.state.questIds = questsFor(today, this.availableQuestMetrics()).map((quest) => quest.id);
+    this.state.questBase = snapshot(metricsOf(this.state));
+    this.state.questDone = [];
+    this.persist();
+  }
+
+  /**
+   * Số đếm nào người chơi đang thật sự với tới được.
+   *
+   * Đặt lệnh cần tiền mặt dương — cả nửa đầu ván số dư còn âm. Nâng cấp cần một
+   * cơ sở đủ 25 suất. Giao mấy đề đó cho ván mới là ba việc thì hai việc không
+   * có đường nào làm, và người chơi học ngay được rằng mục này không dành cho
+   * mình.
+   */
+  private availableQuestMetrics(): QuestMetric[] {
+    const metrics = [...ALWAYS_AVAILABLE];
+    if (this.state.cash > 0) metrics.push('trades');
+    if (BUSINESSES.some((def) => ownedOf(this.state, def.id) >= TIERS[0]!.at)) {
+      metrics.push('upgrades');
+    }
+    return metrics;
+  }
+
   /** Milestones reached but not yet acknowledged. */
   pendingMilestones(): LifeMilestone[] {
     return newlyReached(this.state.peakNetWorth, this.state.claimed);
@@ -611,6 +680,41 @@ export class Store {
     this.state.dailyClaimedAt = now;
 
     this.notice({ kind: 'cash', amount: reward, label: tr('daily.title') });
+    this.persist();
+    this.emit();
+    return reward;
+  }
+
+  /**
+   * Nhận một việc đã xong.
+   *
+   * Việc cuối cùng của ngày trả thêm uy tín, và nó cố tình là **một đồng duy
+   * nhất mỗi ngày**: đủ để làm cho xong cả ba thay vì nhặt mỗi cái dễ, chưa đủ
+   * để thay được đường kiếm uy tín thật là bán sạch đế chế đi làm lại.
+   */
+  claimQuest(id: string): number {
+    const def = questById(id);
+    if (!def) return 0;
+
+    const now = Date.now();
+    const d = derive(this.state, now);
+    const quest = d.quests.quests.find((entry) => entry.def.id === id);
+    if (!quest || !quest.complete || quest.claimed) return 0;
+
+    const reward = questReward(def, d.income + d.refineryIncome * 0.25, d.tapValue);
+    this.earn(reward);
+    this.state.questDone.push(id);
+    this.notice({ kind: 'cash', amount: reward, label: tr(`quest.${def.metric}`) });
+
+    if (d.quests.bonusPending) {
+      this.state.reputation += QUEST_BONUS_REPUTATION;
+      this.state.reputationTotal += QUEST_BONUS_REPUTATION;
+      this.notice({
+        kind: 'info',
+        label: tr('quest.bonusEarned', { amount: QUEST_BONUS_REPUTATION }),
+      });
+    }
+
     this.persist();
     this.emit();
     return reward;
@@ -811,7 +915,7 @@ export class Store {
    * được gieo hạt mới, vì lượt sau là một thị trường khác.
    */
   prestige(): number {
-    const gain = pendingReputation(this.state.peakNetWorth, this.state.reputation);
+    const gain = pendingReputation(this.state.peakNetWorth, this.state.reputationTotal);
     if (gain <= 0) return 0;
 
     const kept = {
@@ -822,6 +926,11 @@ export class Store {
       perks: this.state.perks,
       dailyClaimedAt: this.state.dailyClaimedAt,
       dailyStreak: this.state.dailyStreak,
+      // Số đếm sống qua làm lại, nên mốc của việc hôm nay cũng phải sống theo.
+      // Bỏ nó lại thì bán đế chế lúc giữa trưa là ba việc đang làm dở tự xong.
+      questDay: this.state.questDay,
+      questBase: this.state.questBase,
+      questDone: this.state.questDone,
       bestNetWorth: Math.max(this.state.bestNetWorth, this.state.peakNetWorth),
       reputation: this.state.reputation + gain,
       reputationTotal: this.state.reputationTotal + gain,

@@ -5,12 +5,16 @@ import { businessById } from './businesses';
 import { cardTemplate, jobById } from './jobs';
 import { milestoneById } from './life';
 import { perkById } from './perks';
+import { QUEST_POOL, questById } from './quests';
 import { TIERS } from './upgrades';
 import { randomSeed } from './rng';
 import { stockById } from './stocks';
 import { SAVE_VERSION, createNewSave, type PlayerState } from './state';
 
 const KEY = 'broketoboss.save.v1';
+
+/** Số đếm mà việc trong ngày có thể bám vào; khoá ngoài danh sách này bị bỏ. */
+const QUEST_METRICS = new Set<string>(QUEST_POOL.map((quest) => quest.metric));
 
 /**
  * Saves go to localStorage synchronously — the only storage a mobile WebView
@@ -95,6 +99,24 @@ export function sanitise(raw: unknown): PlayerState | null {
     : [];
 
   const stats = (data.stats ?? {}) as Record<string, unknown>;
+
+  // Mốc số đếm lúc sang ngày. Khoá lạ bị bỏ, và thiếu khoá nào thì `questState`
+  // tự coi hôm nay bắt đầu từ không — an toàn hơn là đoán một con số.
+  const questBase: Record<string, number> = {};
+  if (typeof data.questBase === 'object' && data.questBase !== null) {
+    for (const [metric, value] of Object.entries(data.questBase)) {
+      if (!QUEST_METRICS.has(metric)) continue;
+      questBase[metric] = clampInt(value, 0, Number.MAX_SAFE_INTEGER, 0);
+    }
+  }
+
+  const knownQuests = (value: unknown): string[] =>
+    Array.isArray(value)
+      ? [...new Set(value.filter((id): id is string => typeof id === 'string' && questById(id) !== null))]
+      : [];
+
+  const questIds = knownQuests(data.questIds);
+  const questDone = knownQuests(data.questDone).filter((id) => questIds.includes(id));
 
   const managers = Array.isArray(data.managers)
     ? [...new Set(data.managers.filter((id): id is string => typeof id === 'string' && businessById(id) !== null))]
@@ -182,6 +204,11 @@ export function sanitise(raw: unknown): PlayerState | null {
 
     dailyClaimedAt: clampInt(data.dailyClaimedAt, 0, Number.MAX_SAFE_INTEGER, 0),
     dailyStreak: clampInt(data.dailyStreak, 0, 1e6, 0),
+
+    questDay: clampInt(data.questDay, 0, Number.MAX_SAFE_INTEGER, 0),
+    questIds,
+    questBase,
+    questDone,
 
     stats: {
       taps: clampInt(stats['taps'], 0, Number.MAX_SAFE_INTEGER, 0),

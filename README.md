@@ -10,14 +10,14 @@ Bối cảnh và tiền tệ là Việt Nam. Chơi bằng **tiếng Việt**, đ
 
 TypeScript, Preact and Vite, wrapped in Capacitor for Android and iOS.
 No canvas, no engine, no runtime dependencies beyond Preact — the whole bundle
-is **41 kB gzipped**.
+is **43 kB gzipped**.
 
 ## Running it
 
 ```bash
 npm install
 npm run dev        # http://localhost:5173
-npm test           # 62 tests over the rule layer and the dictionaries
+npm test           # 76 tests over the rule layer and the dictionaries
 npm run build      # typecheck, then a production bundle in dist/
 npm run shot       # screenshots every screen at both ends of the palette
 ```
@@ -172,8 +172,11 @@ point adds 2% to all income, permanently.
 Two decisions are load-bearing:
 
 **Standing is the difference, not a sum.** A run pays `reputationFrom(peak)`
-minus what you already hold, so resetting repeatedly at a low peak earns
-nothing; the only way to more standing is a higher peak than last time.
+minus what you have already *earned*, so resetting repeatedly at a low peak
+earns nothing; the only way to more standing is a higher peak than last time.
+The subtrahend has to be the lifetime total rather than the spendable balance —
+against the balance, spending standing and resetting at the same old peak mints
+the spend straight back and the shop is free.
 
 **Claimed milestones survive.** The businesses are things money bought, so money
 can take them back. The dog, the motorbike, the call from your mother are not
@@ -229,7 +232,43 @@ seed cash — bought with the standing prestige pays out. It runs on two ledgers
 the multiplier that made the perk affordable, and the shop would be a trap.
 
 All four live in the rule layer with no renderer, and all four are covered in
-`tests/prestige.test.ts` — 62 tests now, from 50.
+`tests/prestige.test.ts`.
+
+### Two more, aimed at the parts that go dead
+
+**Roots** (`src/game/roots.ts`) answer the genre's oldest failure: unlock the
+third district and the first two become dead numbers. They are still there, still
+cheap, and nobody will ever buy them again, because a district-scoped reward is
+worthless in a district whose whole income is a rounding error.
+
+So the reward is not district-scoped. Each district has six tiers on total units
+held — 50 / 150 / 350 / 700 / 1,200 / 2,000 — and every tier adds **6% to all
+income, everywhere**. Filling out Xóm Nước Đen late in a run does not buy you
+more scrap money; it buys a few percent of the whole empire. Because those units
+cost nothing relative to income by then, this is the tail that never runs out:
+when there is nothing left to do, there is always a district to go back and fill.
+
+The bonus is additive, not multiplicative. Thirty-six compounding tiers would
+swallow every other multiplier and stop being legible; "14 tiers, +84%" is a
+sentence a player can do in their head, and the ×3.16 ceiling sits next to
+standing and achievements rather than on top of them.
+
+**Daily jobs** (`src/game/quests.ts`) are the ten minutes after the check-in.
+Three goals, rolled at midnight, measured as a delta against a **counter
+snapshot** taken when the day turned; clearing all three pays one point of
+standing — enough to make the third one worth finishing, not enough to replace
+selling the empire as the way standing is actually earned.
+
+Two details are load-bearing. The three goals never share a counter, or "tap 60
+times" lands next to "tap 250 times" and finishing the hard one finishes the easy
+one for free. And the roll is **restricted to what the player can reach**: a new
+save at âm một tỷ has no cash to place a trade with and no business at 25 units
+to upgrade, so a day-one set of "place 4 trades" and "buy 2 upgrades" is two
+thirds of a screen the player learns to ignore. The rolled ids are stored rather
+than recomputed from the day, so unlocking the market at noon doesn't swap the
+goals out from under whoever is working on them.
+
+76 tests now, from 50.
 
 ## How the money works
 
@@ -267,6 +306,8 @@ src/game/     the rules — runs in plain node, no DOM, fully tested
   prestige.ts     uy tín — the reset curve, paid as a difference
   upgrades.ts     five tiers per business, priced off the base cost
   daily.ts        the seven-day cycle, compared by calendar date
+  quests.ts       three daily goals, rolled inside what the player can reach
+  roots.ts        district tiers that pay a global bonus
   achievements.ts ten ladders over cumulative counters
   perks.ts        six permanent perks, two ledgers
   state.ts        the save shape
