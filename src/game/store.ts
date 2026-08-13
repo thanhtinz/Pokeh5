@@ -961,6 +961,14 @@ export class Store {
     this.emit();
   }
 
+  /** Xem xong tấm mở màn. Ghi xuống đĩa ngay, không đợi nhịp lưu định kỳ. */
+  dismissIntro(): void {
+    if (this.state.introSeen) return;
+    this.state.introSeen = true;
+    this.persist();
+    this.emit();
+  }
+
   /** Forces a redraw when something outside the save changed, like language. */
   refresh(): void {
     this.emit();
@@ -1004,6 +1012,7 @@ export class Store {
       createdAt: this.state.createdAt,
       claimed: this.state.claimed,
       achievements: this.state.achievements,
+      introSeen: this.state.introSeen,
       // Bảng thì leo lại từ đầu, nhưng tiền vượt mặt thì không trả lại lần nữa.
       beaten: this.state.beaten,
       stats: this.state.stats,

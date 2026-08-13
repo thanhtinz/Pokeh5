@@ -84,6 +84,14 @@ export interface PlayerState {
   nextCardAt: number;
   boost: ActiveBoost | null;
 
+  /**
+   * Đã xem tấm mở màn chưa.
+   *
+   * Một lần trong đời tài khoản, không phải một lần mỗi lượt chơi — người làm
+   * lại lần thứ tư không cần ai giải thích hạn mức là gì nữa.
+   */
+  introSeen: boolean;
+
   /** Life milestones already acknowledged. */
   claimed: string[];
   /** Thành tựu đã ghi nhận, sống qua mọi lần làm lại. */
@@ -160,6 +168,7 @@ export function createNewSave(seed: number): PlayerState {
     nextCardAt: now + 45_000,
     boost: null,
 
+    introSeen: false,
     claimed: [],
     achievements: [],
     beaten: [],

@@ -103,7 +103,6 @@ export const en: Record<string, string> = {
   'prestige.runs': 'Runs',
   'prestige.record': 'Record',
   'prestige.bonus': 'Income ×{multiplier}',
-  'prestige.gain': 'Starting again now earns **+{amount} standing**',
   'prestige.locked': 'Unlocks at {amount}',
   'prestige.wait': 'Climb past your last run to earn more standing',
   'prestige.note': 'Sell everything and go back to Black Water Hamlet. Your standing, and what you have already bought back, stay.',
@@ -163,6 +162,11 @@ export const en: Record<string, string> = {
   'ui.loading': 'Opening the books',
   'gate.pitch': 'Minus one billion đồng. Collect scrap, work shifts, build it back, and buy your life out of the hole one piece at a time.',
   'gate.start': 'Start at minus a billion',
+
+  'intro.title': 'The book',
+  'intro.debt': 'A business went under, papers were signed, and this morning you woke up to this number. Nobody is at the door yet — but it is there, and it does not leave on its own.',
+  'intro.credit': 'You can buy while you are under: what you spend against is a credit line, not a balance. It opens at two million and widens with the ground you have actually gained — so how far you climb is how big you get to trade.',
+  'intro.start': 'Start collecting scrap',
 
   'auth.register': 'Sign up',
   'auth.login': 'Sign in',

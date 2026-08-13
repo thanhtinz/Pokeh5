@@ -164,6 +164,7 @@ function richSave(now, ownerId) {
     perks: { offline: 2, tap: 3 },
     upgrades: { cans: 3, cart: 2, wash: 1 },
     achievements: ['tap1', 'tap2', 'card1', 'job1', 'unit1', 'unit2', 'mgr1', 'mgr2', 'up1', 'rich1'],
+    introSeen: true,
     dailyClaimedAt: 0,
     dailyStreak: 3,
     // Hôm nay, với mốc thấp hơn số đếm một chút, để ba việc hiện ra đang dở —
@@ -205,6 +206,20 @@ async function signedIn(page, save, who = players.rich) {
     },
     [SAVE_KEY, save, TOKEN_KEY, who.token, USER_KEY, who.user],
   );
+}
+
+// Tấm mở màn: câu đầu tiên một người chơi mới đọc, và nó chỉ hiện đúng một lần
+// nên không lần chụp nào theo tab bắt được.
+{
+  const context = await browser.newContext({ viewport: VIEWPORT, deviceScaleFactor: 2 });
+  const page = await context.newPage();
+  await signedIn(page, null, players.rookie);
+
+  await page.goto(base, { waitUntil: 'networkidle' });
+  await page.waitForSelector('.sheet', { timeout: 15_000 });
+  await page.waitForTimeout(400);
+  await page.screenshot({ path: `${OUT}/intro.png` });
+  await context.close();
 }
 
 // Cái cổng: chưa đăng nhập thì đây là toàn bộ game.
@@ -374,4 +389,4 @@ await rm(API_DB, { force: true });
 await rm(`${API_DB}-wal`, { force: true });
 await rm(`${API_DB}-shm`, { force: true });
 
-console.log(`Wrote ${TABS.length * 2 + 5} screenshots to ${OUT}/`);
+console.log(`Wrote ${TABS.length * 2 + 6} screenshots to ${OUT}/`);

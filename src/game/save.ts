@@ -220,6 +220,10 @@ export function sanitise(raw: unknown): PlayerState | null {
     nextCardAt: clampInt(data.nextCardAt, 0, Number.MAX_SAFE_INTEGER, now + 45_000),
     boost: sanitiseBoost(data.boost, now),
 
+    // Bản lưu ghi trước khi có tấm mở màn thuộc về người đã chơi rồi; đừng
+    // giảng cho họ về hạn mức lúc họ đang có ba mươi sáu cơ ngơi.
+    introSeen: data.introSeen !== false,
+
     claimed,
     achievements,
     beaten,

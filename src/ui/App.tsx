@@ -9,7 +9,7 @@ import { Icon } from './Icon';
 import { CityScene } from './Scene';
 import { derive } from '../game/store';
 import { Hud } from './Hud';
-import { CardSheet, MilestoneSheet, OfflineSheet } from './Overlays';
+import { CardSheet, IntroSheet, MilestoneSheet, OfflineSheet } from './Overlays';
 import { Board } from './screens/Board';
 import { Gate } from './screens/Gate';
 import { Empire } from './screens/Empire';
@@ -148,7 +148,11 @@ export function App() {
         </div>
       )}
 
-      {game.offline && (
+      {/* Trước mọi tấm khác: đây là câu đầu tiên người chơi đọc, và một ván
+          mới thì chưa có báo cáo offline hay mốc nào để tranh chỗ. */}
+      {!state.introSeen && <IntroSheet onClose={() => game.dismissIntro()} />}
+
+      {state.introSeen && game.offline && (
         <OfflineSheet report={game.offline} onClose={() => game.dismissOffline()} />
       )}
 
@@ -156,7 +160,7 @@ export function App() {
         <MilestoneSheet milestone={celebrated} onClose={() => setCelebrated(null)} />
       )}
 
-      {!game.offline && !celebrated && state.card && (
+      {state.introSeen && !game.offline && !celebrated && state.card && (
         <CardSheet game={game} card={state.card} now={now} />
       )}
     </div>

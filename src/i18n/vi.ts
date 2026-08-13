@@ -127,7 +127,6 @@ export const vi: Record<string, string> = {
   'prestige.runs': 'Số lần',
   'prestige.record': 'Kỷ lục',
   'prestige.bonus': 'Thu nhập ×{multiplier}',
-  'prestige.gain': 'Làm lại lúc này được **+{amount} uy tín**',
   'prestige.locked': 'Mở khi tài sản lên {amount}',
   'prestige.wait': 'Leo cao hơn lượt trước thì mới có thêm uy tín',
   'prestige.note': 'Bán sạch cơ ngơi, quay lại Xóm Nước Đen. Uy tín và những gì đã chuộc thì ở lại.',
@@ -187,6 +186,11 @@ export const vi: Record<string, string> = {
   'ui.loading': 'Đang mở sổ sách',
   'gate.pitch': 'Âm một tỷ. Nhặt ve chai, đi làm ca, gây dựng lại từ đầu, và chuộc về từng thứ mà món nợ đã lấy đi.',
   'gate.start': 'Bắt đầu từ âm một tỷ',
+
+  'intro.title': 'Sổ nợ',
+  'intro.debt': 'Làm ăn thua, ký giấy, và sáng nay tỉnh dậy với con số này. Không ai đến đòi ngay — nhưng nó ở đó, và nó không tự đi.',
+  'intro.credit': 'Đang âm mà vẫn mua được: người ta cho vay theo hạn mức, không theo số dư. Hạn mức mở ở hai triệu, và nới ra theo đúng chỗ đã leo được — nên leo được bao nhiêu thì làm ăn to được bấy nhiêu.',
+  'intro.start': 'Bắt đầu nhặt ve chai',
 
   // ------------------------------------------------------------ tài khoản --
   'auth.register': 'Đăng ký',

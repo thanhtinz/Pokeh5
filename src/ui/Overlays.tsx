@@ -1,7 +1,7 @@
 import { CARD_LIFETIME } from '../game/jobs';
 import { describeBonus, type LifeMilestone } from '../game/life';
 import { count, duration, money } from '../game/money';
-import type { PendingCard } from '../game/state';
+import { STARTING_BALANCE, type PendingCard } from '../game/state';
 import type { OfflineReport, Store } from '../game/store';
 import { t } from '../i18n';
 import { Art } from './Art';
@@ -87,6 +87,45 @@ export function MilestoneSheet({
         <div class="sheet__actions">
           <button class="btn btn--primary" onClick={onClose}>
             {t('milestone.keepGoing')}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Tấm mở màn, hiện đúng một lần trong đời một tài khoản.
+ *
+ * Cả game có một luật lạ, và người chơi gặp nó ngay ở giây thứ nhất: đang âm
+ * một tỷ mà vẫn mua được cái xe hàng rong. Không phải lỗi — mua bằng **hạn
+ * mức**, và hạn mức nới ra theo chỗ đã leo được. Nhưng trên màn hình nó chỉ là
+ * chữ "HẠN MỨC" với một con số, và không ai đoán ra từ đó.
+ *
+ * Nên nói một lần, bằng ba câu, rồi biến. Không có bước hai, không có mũi tên
+ * chỉ vào từng nút: phần còn lại của game tự dạy được, chỉ mỗi chỗ này là
+ * không.
+ */
+export function IntroSheet({ onClose }: { onClose: () => void }) {
+  return (
+    <div class="scrim scrim--centre">
+      <div class="sheet" onClick={(event) => event.stopPropagation()}>
+        <div class="sheet__head">
+          <span class="sheet__icon">
+            <Art name="receipt" />
+          </span>
+          <span class="sheet__head-text">
+            <span class="sheet__title">{t('intro.title')}</span>
+            <span class="sheet__sub">{money(STARTING_BALANCE)}</span>
+          </span>
+        </div>
+
+        <p class="sheet__body">{t('intro.debt')}</p>
+        <p class="sheet__body">{t('intro.credit')}</p>
+
+        <div class="sheet__actions">
+          <button class="btn btn--primary" onClick={onClose}>
+            {t('intro.start')}
           </button>
         </div>
       </div>
