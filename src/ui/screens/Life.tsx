@@ -2,6 +2,7 @@ import { MILESTONES, describeBonus } from '../../game/life';
 import { duration, money } from '../../game/money';
 import type { PlayerState } from '../../game/state';
 import type { Derived, Store } from '../../game/store';
+import { locale, setLocale, t, type Locale } from '../../i18n';
 import { Art } from '../Art';
 
 interface Props {
@@ -10,6 +11,11 @@ interface Props {
   derived: Derived;
   now: number;
 }
+
+const LANGUAGES: readonly { id: Locale; label: string }[] = [
+  { id: 'vi', label: 'Tiếng Việt' },
+  { id: 'en', label: 'English' },
+];
 
 /**
  * What the debt cost, listed in order, with the ones already bought back lit.
@@ -23,17 +29,17 @@ export function Life({ game, state, derived, now }: Props) {
       <section class="panel" style={{ padding: '14px' }}>
         <div class="market__summary" style={{ padding: 0 }}>
           <span class="stat">
-            <span class="stat__label">Peak</span>
+            <span class="stat__label">{t('life.peak')}</span>
             <b class="stat__value num">{money(state.peakNetWorth)}</b>
           </span>
           <span class="stat">
-            <span class="stat__label">Reclaimed</span>
+            <span class="stat__label">{t('life.reclaimed')}</span>
             <b class="stat__value num">
               {state.claimed.length}/{MILESTONES.length}
             </b>
           </span>
           <span class="stat">
-            <span class="stat__label">Climbing for</span>
+            <span class="stat__label">{t('life.climbing')}</span>
             <b class="stat__value num">{duration((now - state.createdAt) / 1000)}</b>
           </span>
         </div>
@@ -52,9 +58,11 @@ export function Life({ game, state, derived, now }: Props) {
               </span>
 
               <span class="life__body">
-                <span class="life__title">{milestone.title}</span>
+                <span class="life__title">{t(`life.${milestone.id}`)}</span>
                 <span class="life__line">
-                  {reached ? milestone.line : `At ${money(milestone.at)} net worth`}
+                  {reached
+                    ? t(`life.${milestone.id}.line`)
+                    : t('life.locked', { amount: money(milestone.at) })}
                 </span>
                 <span class="life__bonus">{describeBonus(milestone.bonus)}</span>
 
@@ -64,7 +72,7 @@ export function Life({ game, state, derived, now }: Props) {
                     style={{ marginTop: '8px' }}
                     onClick={() => game.claimMilestone(milestone.id)}
                   >
-                    Take it back
+                    {t('life.claim')}
                   </button>
                 )}
               </span>
@@ -73,18 +81,37 @@ export function Life({ game, state, derived, now }: Props) {
         })}
       </section>
 
-      <section class="panel" style={{ padding: '14px', display: 'grid', gap: '10px' }}>
-        <span class="row__meta">
-          Offline earnings are capped at {derived.bonuses.offlineHours} hours. The save lives on
-          this device and nowhere else.
+      <section class="panel" style={{ padding: '14px', display: 'grid', gap: '12px' }}>
+        <span class="section__title" style={{ margin: 0 }}>
+          {t('life.language')}
+        </span>
+        <div class="segments">
+          {LANGUAGES.map((language) => (
+            <button
+              key={language.id}
+              aria-pressed={locale() === language.id}
+              onClick={() => {
+                setLocale(language.id);
+                // The store owns the only render loop, so a language change is
+                // published the same way a game event is.
+                game.refresh();
+              }}
+            >
+              {language.label}
+            </button>
+          ))}
+        </div>
+
+        <span class="row__meta" style={{ whiteSpace: 'normal' }}>
+          {t('life.offlineNote', { hours: derived.bonuses.offlineHours })}
         </span>
         <button
           class="btn btn--wide btn--ghost"
           onClick={() => {
-            if (window.confirm('Wipe the save and start again at minus one million?')) game.reset();
+            if (window.confirm(t('life.resetConfirm'))) game.reset();
           }}
         >
-          Start over
+          {t('life.reset')}
         </button>
       </section>
     </>

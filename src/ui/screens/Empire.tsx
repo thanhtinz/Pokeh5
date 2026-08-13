@@ -13,6 +13,7 @@ import {
 import { clock, count, money, rate } from '../../game/money';
 import { hasManager, ownedOf, type PlayerState } from '../../game/state';
 import type { Derived, Store } from '../../game/store';
+import { t } from '../../i18n';
 import { Art } from '../Art';
 import { DistrictArt } from '../Scene';
 
@@ -51,7 +52,7 @@ export function Empire({ game, state, derived }: Props) {
             aria-pressed={amount === option}
             onClick={() => setAmount(option)}
           >
-            {option === 'max' ? 'MAX' : `×${option}`}
+            {option === 'max' ? t('empire.max') : `×${option}`}
           </button>
         ))}
       </div>
@@ -76,7 +77,7 @@ export function Empire({ game, state, derived }: Props) {
             <div class="district">
               <DistrictArt district={district} />
               <h2 class="section__title district__title">
-                <span>{district}</span>
+                <span>{t(`district.${district}`)}</span>
                 <span class="num">{rate(districtIncome)}</span>
               </h2>
             </div>
@@ -98,7 +99,7 @@ export function Empire({ game, state, derived }: Props) {
                     class="row__icon"
                     disabled={owned <= 0 || managed || progress > 0}
                     onClick={() => game.runBusiness(def.id)}
-                    aria-label={`Run ${def.name}`}
+                    aria-label={t('empire.run', { name: t(`biz.${def.id}`) })}
                   >
                     <Art name={def.icon} />
                   </button>
@@ -106,11 +107,18 @@ export function Empire({ game, state, derived }: Props) {
                   <span class="row__body">
                     {/* The name gets its own line: an owned count appended to it
                         is the first thing an ellipsis eats. */}
-                    <span class="row__name">{def.name}</span>
+                    <span class="row__name">{t(`biz.${def.id}`)}</span>
                     <span class="row__meta">
                       {owned > 0
-                        ? `×${count(owned)} · ${money(cyclePayout(def, owned, derived.globalMultiplier))} / ${clock(def.cycleSeconds)}${target ? ` · ×2 at ${target}` : ''}`
-                        : `${money(def.basePayout * derived.globalMultiplier)} / ${clock(def.cycleSeconds)}`}
+                        ? t('empire.owned', {
+                            count: count(owned),
+                            payout: money(cyclePayout(def, owned, derived.globalMultiplier)),
+                            seconds: clock(def.cycleSeconds),
+                          }) + (target ? ` · ${t('empire.milestone', { count: target })}` : '')
+                        : t('empire.cycle', {
+                            payout: money(def.basePayout * derived.globalMultiplier),
+                            seconds: clock(def.cycleSeconds),
+                          })}
                     </span>
                   </span>
 
@@ -126,14 +134,14 @@ export function Empire({ game, state, derived }: Props) {
 
                     {owned > 0 &&
                       (managed ? (
-                        <span class="row__meta">Automated</span>
+                        <span class="row__meta">{t('empire.automated')}</span>
                       ) : (
                         <button
                           class="btn btn--sm btn--ghost"
                           disabled={!game.canAfford(def.managerCost)}
                           onClick={() => game.hireManager(def.id)}
                         >
-                          Manager {money(def.managerCost)}
+                          {t('empire.manager', { cost: money(def.managerCost) })}
                         </button>
                       ))}
                   </span>

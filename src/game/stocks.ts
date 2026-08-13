@@ -12,7 +12,6 @@ import { Rng } from './rng';
 export interface StockDef {
   id: string;
   ticker: string;
-  name: string;
   /** Opening price the walk starts from. */
   basePrice: number;
   /** Standard deviation of a single tick's return. */
@@ -23,30 +22,29 @@ export interface StockDef {
 }
 
 export const STOCKS: readonly StockDef[] = [
-  s('grnd', 'GRND', 'Grindr Logistics', 42, 0.018, 0.0006, 'Transport'),
-  s('bzzt', 'BZZT', 'Bzzt Energy Drinks', 18, 0.032, 0.0009, 'Consumer'),
-  s('cldy', 'CLDY', 'Cloudy Software', 130, 0.024, 0.0011, 'Tech'),
-  s('mnch', 'MNCH', 'Munchie Foods', 27, 0.014, 0.0004, 'Consumer'),
-  s('drll', 'DRLL', 'Drill Baby Petroleum', 88, 0.028, 0.0002, 'Energy'),
-  s('bnkr', 'BNKR', 'Bunker Savings', 64, 0.010, 0.0003, 'Finance'),
-  s('hype', 'HYPE', 'Hype Media Group', 9, 0.055, 0.0012, 'Media'),
-  s('rustc', 'RUST', 'Rust Belt Steel', 51, 0.020, -0.0001, 'Industrial'),
-  s('zoom2', 'ZMBI', 'Zombie Pharma', 210, 0.026, 0.0008, 'Health'),
-  s('gigl', 'GIGL', 'Giggle Search', 340, 0.019, 0.0010, 'Tech'),
-  s('moon', 'MOON', 'Moonshot Mining', 3, 0.075, 0.0015, 'Speculative'),
-  s('slug', 'SLUG', 'Sluggish Rail', 76, 0.012, 0.0001, 'Transport'),
+  s('grnd', 'GRND', 42, 0.018, 0.0006, 'transport'),
+  s('bzzt', 'BZZT', 18, 0.032, 0.0009, 'consumer'),
+  s('cldy', 'CLDY', 130, 0.024, 0.0011, 'tech'),
+  s('mnch', 'MNCH', 27, 0.014, 0.0004, 'consumer'),
+  s('drll', 'DRLL', 88, 0.028, 0.0002, 'energy'),
+  s('bnkr', 'BNKR', 64, 0.010, 0.0003, 'finance'),
+  s('hype', 'HYPE', 9, 0.055, 0.0012, 'media'),
+  s('rustc', 'RUST', 51, 0.020, -0.0001, 'industrial'),
+  s('zoom2', 'ZMBI', 210, 0.026, 0.0008, 'health'),
+  s('gigl', 'GIGL', 340, 0.019, 0.0010, 'tech'),
+  s('moon', 'MOON', 3, 0.075, 0.0015, 'speculative'),
+  s('slug', 'SLUG', 76, 0.012, 0.0001, 'transport'),
 ];
 
 function s(
   id: string,
   ticker: string,
-  name: string,
   basePrice: number,
   volatility: number,
   drift: number,
   sector: string,
 ): StockDef {
-  return { id, ticker, name, basePrice, volatility, drift, sector };
+  return { id, ticker, basePrice, volatility, drift, sector };
 }
 
 export function stockById(id: string): StockDef | null {

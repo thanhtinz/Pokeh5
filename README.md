@@ -5,16 +5,18 @@ to buy back. Tap a refinery, work shifts, take contracts, buy thirty-six
 businesses across six districts, trade twelve parody tickers, and reclaim twelve
 pieces of the life the debt took.
 
+Chơi bằng **tiếng Việt**, đổi sang English được trong màn Cuộc đời.
+
 TypeScript, Preact and Vite, wrapped in Capacitor for Android and iOS.
 No canvas, no engine, no runtime dependencies beyond Preact — the whole bundle
-is **31 kB gzipped**.
+is **36 kB gzipped**.
 
 ## Running it
 
 ```bash
 npm install
 npm run dev        # http://localhost:5173
-npm test           # 36 tests over the rule layer
+npm test           # 42 tests over the rule layer and the dictionaries
 npm run build      # typecheck, then a production bundle in dist/
 npm run shot       # screenshots every screen at both ends of the palette
 ```
@@ -102,6 +104,29 @@ rather than reading like a heading.
 **The milestone payoff.** A sun clearing a horizon behind the thing you just won
 back. It is the only screen in the game allowed to be mostly picture.
 
+### Language
+
+The game is Vietnamese by default, with English as a second locale rather than
+the source one. That split is enforced by the file layout: **the rule layer
+holds ids, never prose.** A business is `cans`, a shift is `night`, a milestone
+is `zero`; `src/i18n/` maps those to sentences.
+
+Two consequences worth having. Changing language touches no game logic, so it
+cannot break the economy. And a save written in one language opens in the other
+— the save stores `cans`, not "Nhặt lon" — which is also why an opportunity card
+now persists its template id instead of the title it was showing.
+
+`tests/i18n.test.ts` asserts the two dictionaries carry identical keys and
+identical `{placeholders}`, and that every id the game can put on screen — every
+district, business, job, milestone, stock and sector — has a string in both. A
+missing key is a Vietnamese sentence appearing mid-English screen, and nothing
+is louder than that.
+
+Text length is a layout constraint, not a translation detail: Vietnamese with
+diacritics runs wider than the English it replaced, which is what pushed
+"MỖI LẦN CHẠM" out of the tap target until the label was sized for the longest
+language rather than the shortest.
+
 ## How the money works
 
 This is the one mechanic that is not standard for the genre, and it exists
@@ -138,6 +163,7 @@ src/game/     the rules — runs in plain node, no DOM, fully tested
   save.ts         sanitising, localStorage, native mirror
   store.ts        the mutable world and every action on it
   rng.ts          mulberry32 + Box–Muller
+src/i18n/     every string the player reads, in vi and en
 src/ui/       Preact components, the theme engine, icons, assets and scenes
 src/styles/   two stylesheets: tokens, then components
 tests/        vitest over src/game/

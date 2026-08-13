@@ -2,6 +2,7 @@ import { useState } from 'preact/hooks';
 
 import { count, money, signedPercent } from '../../game/money';
 import { holdingOf, type PlayerState } from '../../game/state';
+import { t } from '../../i18n';
 import { Art } from '../Art';
 import { portfolioValue, type Store } from '../../game/store';
 import { STOCKS, changeOver, priceOf, seriesFor, unrealised } from '../../game/stocks';
@@ -53,15 +54,15 @@ export function Market({ game, state }: Props) {
     <>
       <section class="panel market__summary">
         <span class="stat">
-          <span class="stat__label">Cash</span>
+          <span class="stat__label">{t('market.cash')}</span>
           <b class="stat__value num">{money(Math.max(0, state.cash))}</b>
         </span>
         <span class="stat">
-          <span class="stat__label">Portfolio</span>
+          <span class="stat__label">{t('market.portfolio')}</span>
           <b class="stat__value num">{money(value)}</b>
         </span>
         <span class="stat">
-          <span class="stat__label">Profit</span>
+          <span class="stat__label">{t('market.profit')}</span>
           <b class={`stat__value num ${profit >= 0 ? 'up' : 'down'}`}>{money(profit)}</b>
         </span>
       </section>
@@ -71,23 +72,23 @@ export function Market({ game, state }: Props) {
           <Art name="robot" />
         </span>
         <span class="row__body">
-          <span class="row__name">Trading Manager</span>
-          <span class="row__meta">Buys the dips, takes profit at +25%</span>
+          <span class="row__name">{t('market.bot')}</span>
+          <span class="row__meta">{t('market.botDetail')}</span>
         </span>
         <span class="row__side">
           <button
             class={`btn btn--sm ${state.autoTrader ? 'btn--primary' : ''}`}
             onClick={() => game.toggleAutoTrader()}
           >
-            {state.autoTrader ? 'On' : 'Off'}
+            {state.autoTrader ? t('market.on') : t('market.off')}
           </button>
         </span>
       </div>
 
       <section>
         <h2 class="section__title">
-          <span>Market</span>
-          <span>{state.cash > 0 ? 'Open' : 'Cash only'}</span>
+          <span>{t('market.title')}</span>
+          <span>{state.cash > 0 ? t('market.open') : t('market.cashOnly')}</span>
         </h2>
 
         {STOCKS.map((stock) => {
@@ -109,11 +110,14 @@ export function Market({ game, state }: Props) {
               </button>
 
               <span class="row__body" onClick={() => setOpen(expanded ? null : stock.id)}>
-                <span class="row__name">{stock.name}</span>
+                <span class="row__name">{t(`stock.${stock.id}`)}</span>
                 <span class="row__meta">
                   {holding.shares > 0
-                    ? `${count(holding.shares)} shares · ${money(holding.shares * price)}`
-                    : stock.sector}
+                    ? t('market.holding', {
+                        shares: count(holding.shares),
+                        value: money(holding.shares * price),
+                      })
+                    : t(`sector.${stock.sector}`)}
                 </span>
               </span>
 
@@ -132,7 +136,7 @@ export function Market({ game, state }: Props) {
                 <span class="trade">
                   {holding.shares > 0 && (
                     <span class="row__meta">
-                      Average {money(holding.avgCost)} ·{' '}
+                      {t('market.average', { price: money(holding.avgCost) })} ·{' '}
                       <b class={gain >= 0 ? 'up' : 'down'}>{signedPercent(gain)}</b>
                     </span>
                   )}
@@ -147,7 +151,9 @@ export function Market({ game, state }: Props) {
                           disabled={shares <= 0}
                           onClick={() => game.buyStock(stock.id, shares)}
                         >
-                          Buy {fraction === 1 ? 'max' : `${fraction * 100}%`}
+                          {fraction === 1
+                            ? t('market.buyMax')
+                            : t('market.buyPart', { percent: fraction * 100 })}
                         </button>
                       );
                     })}
@@ -159,14 +165,14 @@ export function Market({ game, state }: Props) {
                       disabled={holding.shares <= 0}
                       onClick={() => game.sellStock(stock.id, holding.shares / 2)}
                     >
-                      Sell half
+                      {t('market.sellHalf')}
                     </button>
                     <button
                       class="btn btn--sm"
                       disabled={holding.shares <= 0}
                       onClick={() => game.sellStock(stock.id, holding.shares)}
                     >
-                      Sell all
+                      {t('market.sellAll')}
                     </button>
                   </span>
                 </span>

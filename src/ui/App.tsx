@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'preact/hooks';
 import { BUSINESSES } from '../game/businesses';
 import type { LifeMilestone } from '../game/life';
 import { money } from '../game/money';
+import { t } from '../i18n';
 import { hasManager, ownedOf } from '../game/state';
 import { Icon } from './Icon';
 import { CityScene } from './Scene';
@@ -17,11 +18,11 @@ import { useGame } from './useStore';
 
 type Tab = 'grind' | 'empire' | 'market' | 'life';
 
-const TABS: readonly { id: Tab; label: string; icon: string }[] = [
-  { id: 'grind', label: 'Grind', icon: 'ore' },
-  { id: 'empire', label: 'Empire', icon: 'skyline' },
-  { id: 'market', label: 'Market', icon: 'chart' },
-  { id: 'life', label: 'Life', icon: 'heart' },
+const TABS: readonly { id: Tab; icon: string }[] = [
+  { id: 'grind', icon: 'ore' },
+  { id: 'empire', icon: 'skyline' },
+  { id: 'market', icon: 'chart' },
+  { id: 'life', icon: 'heart' },
 ];
 
 interface Toast {
@@ -64,7 +65,7 @@ export function App() {
   });
 
   if (!game.ready) {
-    return <div class="boot">Counting the damage</div>;
+    return <div class="boot">{t('ui.boot')}</div>;
   }
 
   const now = Date.now();
@@ -106,7 +107,7 @@ export function App() {
             onClick={() => setTab(entry.id)}
           >
             <Icon class="tab__icon" name={entry.icon} />
-            <span>{entry.label}</span>
+            <span>{t(`tab.${entry.id}`)}</span>
             {pips[entry.id] && tab !== entry.id && <span class="tab__pip" />}
           </button>
         ))}

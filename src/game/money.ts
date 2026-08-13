@@ -1,3 +1,5 @@
+import { t as tr } from '../i18n';
+
 /**
  * Money formatting.
  *
@@ -97,9 +99,11 @@ export function duration(totalSeconds: number): string {
   const hours = Math.floor(s / 3600);
   const minutes = Math.floor((s % 3600) / 60);
 
-  if (hours > 0) return minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`;
-  if (minutes > 0) return `${minutes}m`;
-  return `${s}s`;
+  if (hours > 0) {
+    return minutes > 0 ? tr('time.hoursMinutes', { hours, minutes }) : tr('time.hours', { hours });
+  }
+  if (minutes > 0) return tr('time.minutes', { minutes });
+  return tr('time.seconds', { seconds: s });
 }
 
 export function percent(fraction: number): string {

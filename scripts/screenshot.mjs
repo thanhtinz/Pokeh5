@@ -139,10 +139,8 @@ for (const stage of ['broke', 'rich']) {
   save.claimed = ['phone', 'dog', 'car', 'room'];
   save.boost = null;
   save.card = {
-    id: 'shot',
+    key: 'debt',
     kind: 'cash',
-    title: 'Old Debt Repaid',
-    flavour: 'A friend from before it all went wrong.',
     value: 86_400,
     seconds: 0,
     icon: 'coins',

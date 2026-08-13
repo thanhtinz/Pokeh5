@@ -1,7 +1,7 @@
 import { Capacitor } from '@capacitor/core';
 
 import { businessById } from './businesses';
-import { jobById } from './jobs';
+import { cardTemplate, jobById } from './jobs';
 import { milestoneById } from './life';
 import { randomSeed } from './rng';
 import { stockById } from './stocks';
@@ -141,16 +141,16 @@ function sanitiseJob(raw: unknown, now: number): PlayerState['job'] {
 function sanitiseCard(raw: unknown, now: number): PlayerState['card'] {
   if (typeof raw !== 'object' || raw === null) return null;
   const card = raw as Record<string, unknown>;
-  if (typeof card['id'] !== 'string' || typeof card['title'] !== 'string') return null;
+  // An unknown template has no prose to show, and a card is worth seconds; a
+  // stale one is dropped rather than restored blank.
+  if (typeof card['key'] !== 'string' || !cardTemplate(card['key'])) return null;
 
   const expiresAt = clampInt(card['expiresAt'], 0, Number.MAX_SAFE_INTEGER, 0);
   if (expiresAt <= now) return null;
 
   return {
-    id: card['id'],
+    key: card['key'],
     kind: typeof card['kind'] === 'string' ? card['kind'] : 'cash',
-    title: card['title'],
-    flavour: typeof card['flavour'] === 'string' ? card['flavour'] : '',
     value: clampNum(card['value'], 0, Number.MAX_SAFE_INTEGER, 0),
     seconds: clampNum(card['seconds'], 0, 3600, 0),
     icon: typeof card['icon'] === 'string' ? card['icon'] : 'coin',

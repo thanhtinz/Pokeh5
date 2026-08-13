@@ -17,11 +17,9 @@ export interface ActiveBoost {
 }
 
 export interface PendingCard {
-  /** Serialised card, drawn once and held until taken or expired. */
-  id: string;
+  /** Template id, drawn once and held until taken or expired. */
+  key: string;
   kind: string;
-  title: string;
-  flavour: string;
   value: number;
   seconds: number;
   icon: string;

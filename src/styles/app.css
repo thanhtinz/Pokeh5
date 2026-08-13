@@ -271,8 +271,11 @@
 }
 
 .refinery__hint {
-  font-size: 10px;
-  letter-spacing: 0.14em;
+  /* Sized for the longest label any language puts here, not the shortest. */
+  max-width: 86%;
+  font-size: 9.5px;
+  letter-spacing: 0.08em;
+  text-align: center;
   text-transform: uppercase;
   color: var(--ink-faint);
 }

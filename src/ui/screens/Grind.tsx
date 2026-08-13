@@ -2,6 +2,7 @@ import { useRef, useState } from 'preact/hooks';
 
 import { JOBS, unlockedJobs } from '../../game/jobs';
 import { clock, count, money, rate } from '../../game/money';
+import { t } from '../../i18n';
 import type { PlayerState } from '../../game/state';
 import { Art, OreArt } from '../Art';
 import { Icon } from '../Icon';
@@ -43,7 +44,7 @@ export function Grind({ game, state, derived, now }: Props) {
     setSparks((current) => [
       // Only the last few are ever visible; the rest is memory nobody sees.
       ...current.slice(-5),
-      { id, text: `+${count(mined)} ore`, offset: (id % 5) * 14 - 28 },
+      { id, text: t('grind.oreSpark', { amount: count(mined) }), offset: (id % 5) * 14 - 28 },
     ]);
     window.setTimeout(() => setSparks((current) => current.filter((s) => s.id !== id)), 850);
   }
@@ -55,11 +56,11 @@ export function Grind({ game, state, derived, now }: Props) {
   return (
     <>
       <section class="panel refinery">
-        <button class="refinery__tap" onPointerDown={onTap} aria-label="Mine ore">
+        <button class="refinery__tap" onPointerDown={onTap} aria-label={t('grind.mine')}>
           <span class="refinery__face">
             <OreArt />
             <span class="refinery__value num">{money(derived.tapValue)}</span>
-            <span class="refinery__hint">per tap</span>
+            <span class="refinery__hint">{t('grind.perTap')}</span>
           </span>
           {sparks.map((spark) => (
             <span key={spark.id} class="spark" style={{ marginLeft: `${spark.offset}px` }}>
@@ -71,7 +72,7 @@ export function Grind({ game, state, derived, now }: Props) {
         <div class="refinery__ore">
           <div class="refinery__ore-row">
             <span>
-              Ore <b class="num">{count(state.ore)}</b> / {count(derived.oreCapacity)}
+              {t('grind.ore')} <b class="num">{count(state.ore)}</b> / {count(derived.oreCapacity)}
             </span>
             <span class="num">{rate(derived.refineryIncome)}</span>
           </div>
@@ -79,8 +80,8 @@ export function Grind({ game, state, derived, now }: Props) {
             <div class="bar__fill" style={{ width: `${oreFill * 100}%` }} />
           </div>
           <div class="refinery__ore-row">
-            <span>Refining {count(derived.oreRate)} ore/s</span>
-            <span>{money(derived.oreValue)} each</span>
+            <span>{t('grind.refining', { rate: count(derived.oreRate) })}</span>
+            <span>{t('grind.each', { value: money(derived.oreValue) })}</span>
           </div>
         </div>
       </section>
@@ -91,9 +92,9 @@ export function Grind({ game, state, derived, now }: Props) {
           disabled={!game.canAfford(tapCost)}
           onClick={() => game.upgradeTap()}
         >
-          <span class="upgrade__name">Better Pickaxe</span>
+          <span class="upgrade__name">{t('grind.pickaxe')}</span>
           <span class="upgrade__detail">
-            Level {state.tapLevel} · {count(derived.tapOre)} ore per tap
+            {t('grind.pickaxeDetail', { level: state.tapLevel, ore: count(derived.tapOre) })}
           </span>
           <span class="upgrade__cost num">{money(tapCost)}</span>
         </button>
@@ -103,9 +104,12 @@ export function Grind({ game, state, derived, now }: Props) {
           disabled={!game.canAfford(refineryCost)}
           onClick={() => game.upgradeRefinery()}
         >
-          <span class="upgrade__name">Refinery Upgrade</span>
+          <span class="upgrade__name">{t('grind.refinery')}</span>
           <span class="upgrade__detail">
-            Level {state.refineryLevel} · {money(derived.oreValue)} per ore
+            {t('grind.refineryDetail', {
+              level: state.refineryLevel,
+              value: money(derived.oreValue),
+            })}
           </span>
           <span class="upgrade__cost num">{money(refineryCost)}</span>
         </button>
@@ -113,8 +117,8 @@ export function Grind({ game, state, derived, now }: Props) {
 
       <section>
         <h2 class="section__title">
-          <span>Work</span>
-          <span>{state.job ? 'On shift' : 'Pick a shift'}</span>
+          <span>{t('grind.work')}</span>
+          <span>{state.job ? t('grind.onShift') : t('grind.pickShift')}</span>
         </h2>
         {JOBS.map((job) => {
           const unlocked = unlockedJobs(derived.netWorth).includes(job);
@@ -130,8 +134,8 @@ export function Grind({ game, state, derived, now }: Props) {
                   <Icon name="lock" />
                 </span>
                 <span class="row__body">
-                  <span class="row__name">{job.name}</span>
-                  <span class="row__meta">Unlocks at {money(job.unlockAt)} net worth</span>
+                  <span class="row__name">{t(`job.${job.id}`)}</span>
+                  <span class="row__meta">{t('grind.locked', { amount: money(job.unlockAt) })}</span>
                 </span>
                 <span class="row__side" />
               </div>
@@ -144,9 +148,11 @@ export function Grind({ game, state, derived, now }: Props) {
                 <Art name={job.icon} />
               </span>
               <span class="row__body">
-                <span class="row__name">{job.name}</span>
+                <span class="row__name">{t(`job.${job.id}`)}</span>
                 <span class="row__meta">
-                  {active ? job.description : `${clock(seconds)} · ${money(job.payout * derived.globalMultiplier)}`}
+                  {active
+                    ? t(`job.${job.id}.desc`)
+                    : `${clock(seconds)} · ${money(job.payout * derived.globalMultiplier)}`}
                 </span>
               </span>
               <span class="row__side">
@@ -160,7 +166,7 @@ export function Grind({ game, state, derived, now }: Props) {
                     disabled={state.job !== null}
                     onClick={() => game.startJob(job.id)}
                   >
-                    Start
+                    {t('grind.start')}
                   </button>
                 )}
               </span>

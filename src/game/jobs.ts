@@ -11,8 +11,6 @@ import type { Rng } from './rng';
 
 export interface JobDef {
   id: string;
-  name: string;
-  description: string;
   seconds: number;
   /** Payout at the base tap level, before any multipliers. */
   payout: number;
@@ -28,8 +26,6 @@ export interface JobDef {
 export const JOBS: readonly JobDef[] = [
   {
     id: 'flyers',
-    name: 'Hand Out Flyers',
-    description: 'Two hours on a corner in the cold.',
     seconds: 15,
     payout: 45,
     unlockAt: -Infinity,
@@ -37,8 +33,6 @@ export const JOBS: readonly JobDef[] = [
   },
   {
     id: 'dishes',
-    name: 'Wash Dishes',
-    description: 'Cash at the end of the shift, no questions.',
     seconds: 60,
     payout: 260,
     unlockAt: -990_000,
@@ -46,8 +40,6 @@ export const JOBS: readonly JobDef[] = [
   },
   {
     id: 'moving',
-    name: 'Moving Crew',
-    description: 'Your back will remember this one.',
     seconds: 300,
     payout: 1_800,
     unlockAt: -950_000,
@@ -55,8 +47,6 @@ export const JOBS: readonly JobDef[] = [
   },
   {
     id: 'night',
-    name: 'Night Security',
-    description: 'Twelve hours of nothing happening.',
     seconds: 900,
     payout: 7_200,
     unlockAt: -800_000,
@@ -64,8 +54,6 @@ export const JOBS: readonly JobDef[] = [
   },
   {
     id: 'rig',
-    name: 'Offshore Rig Rotation',
-    description: 'Three weeks out. The money is real.',
     seconds: 1_800,
     payout: 21_000,
     unlockAt: -400_000,
@@ -77,6 +65,11 @@ export function jobById(id: string): JobDef | null {
   return JOBS.find((job) => job.id === id) ?? null;
 }
 
+/** Card template by id, for validating a save. */
+export function cardTemplate(key: string): { key: string } | null {
+  return TEMPLATES.find((template) => template.key === key) ?? null;
+}
+
 export function unlockedJobs(netWorth: number): JobDef[] {
   return JOBS.filter((job) => netWorth >= job.unlockAt);
 }
@@ -86,10 +79,9 @@ export function unlockedJobs(netWorth: number): JobDef[] {
 export type CardKind = 'cash' | 'multiplier' | 'ore' | 'gamble';
 
 export interface OpportunityCard {
-  id: string;
+  /** Template id; the title and flavour are looked up from it. */
+  key: string;
   kind: CardKind;
-  title: string;
-  flavour: string;
   /** Cash payout, or the multiplier factor, depending on `kind`. */
   value: number;
   /** Seconds a multiplier card lasts. */
@@ -98,9 +90,8 @@ export interface OpportunityCard {
 }
 
 interface CardTemplate {
+  key: string;
   kind: CardKind;
-  title: string;
-  flavour: string;
   icon: string;
   /** Weight in the draw. */
   weight: number;
@@ -116,59 +107,52 @@ interface CardTemplate {
  */
 const TEMPLATES: readonly CardTemplate[] = [
   {
+    key: 'wallet',
     kind: 'cash',
-    title: 'Found Wallet',
-    flavour: 'Nobody is coming back for it.',
     icon: 'wallet',
     weight: 24,
     incomeSeconds: 60,
   },
   {
+    key: 'debt',
     kind: 'cash',
-    title: 'Old Debt Repaid',
-    flavour: 'A friend from before it all went wrong.',
     icon: 'coins',
     weight: 16,
     incomeSeconds: 240,
   },
   {
+    key: 'scrap',
     kind: 'cash',
-    title: 'Scrap Windfall',
-    flavour: 'The copper price moved your way.',
     icon: 'coin',
     weight: 14,
     incomeSeconds: 420,
   },
   {
+    key: 'streak',
     kind: 'multiplier',
-    title: 'Hot Streak',
-    flavour: 'Everything you touch pays double.',
     icon: 'flame',
     weight: 12,
     value: 2,
     seconds: 60,
   },
   {
+    key: 'investor',
     kind: 'multiplier',
-    title: 'Investor Interest',
-    flavour: 'Someone finally returned your call.',
     icon: 'call',
     weight: 8,
     value: 3,
     seconds: 45,
   },
   {
+    key: 'seam',
     kind: 'ore',
-    title: 'Rich Seam',
-    flavour: 'The refinery will be busy for a while.',
     icon: 'ore',
     weight: 14,
     value: 250,
   },
   {
+    key: 'sure',
     kind: 'gamble',
-    title: 'Sure Thing',
-    flavour: 'Double it, or lose the stake. Your call.',
     icon: 'dice',
     weight: 12,
     incomeSeconds: 300,
@@ -206,10 +190,8 @@ export function drawCard(rng: Rng, incomePerSecond: number, tapValue: number): O
       : (chosen.value ?? 0);
 
   return {
-    id: `${chosen.title}-${Math.floor(rng.next() * 1e9)}`,
+    key: chosen.key,
     kind: chosen.kind,
-    title: chosen.title,
-    flavour: chosen.flavour,
     value,
     seconds: chosen.seconds ?? 0,
     icon: chosen.icon,

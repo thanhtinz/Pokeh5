@@ -42,9 +42,11 @@ describe('clocks', () => {
     expect(clock(7530)).toBe('2:05:30');
   });
 
-  it('reads as prose for the offline dialog', () => {
-    expect(duration(11_520)).toBe('3h 12m');
-    expect(duration(90)).toBe('1m');
+  // Prose, so it follows the language rather than the number formatter.
+  it('reads as prose for the offline dialog, in the default language', () => {
+    expect(duration(11_520)).toBe('3 giờ 12 phút');
+    expect(duration(90)).toBe('1 phút');
+    expect(duration(12)).toBe('12 giây');
   });
 });
 

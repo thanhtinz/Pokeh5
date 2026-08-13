@@ -66,9 +66,9 @@ export function CityScene() {
   );
 }
 
-/** Six strips, one per district, drawn on a 300×46 stage sitting on the line. */
+/** Six strips, keyed by district id, on a 300×46 stage sitting on the line. */
 const DISTRICTS: Record<string, () => JSX.Element> = {
-  'Skid Row': () => (
+  skidrow: () => (
     <>
       {/* Lean-tos, a barrel fire and the shopping cart you started with. */}
       <path d="M4 46V32h28v14zM36 46V26h24v20zM64 46V34h30v12z" />
@@ -83,7 +83,7 @@ const DISTRICTS: Record<string, () => JSX.Element> = {
     </>
   ),
 
-  'The Docks': () => (
+  docks: () => (
     <>
       {/* Gantry cranes over stacked containers, water along the bottom. */}
       <path d="M28 40V8M52 40V8M18 8h44M62 8h20M82 8v8" />
@@ -96,7 +96,7 @@ const DISTRICTS: Record<string, () => JSX.Element> = {
     </>
   ),
 
-  Midtown: () => (
+  midtown: () => (
     <>
       {/* Mid-rise blocks with awnings and a street of shopfronts. */}
       <path d="M6 46V16h34v30zM44 46V22h28v24zM76 46V12h30v34z" />
@@ -109,7 +109,7 @@ const DISTRICTS: Record<string, () => JSX.Element> = {
     </>
   ),
 
-  'Financial District': () => (
+  financial: () => (
     <>
       {/* A columned bank in front, towers behind it. */}
       <path d="M12 46V14h24v32zM40 46V6h26v40zM70 46V18h22v28z" />
@@ -123,7 +123,7 @@ const DISTRICTS: Record<string, () => JSX.Element> = {
     </>
   ),
 
-  Uptown: () => (
+  uptown: () => (
     <>
       {/* Low villas, planted trees, a mast on the water behind. */}
       <path d="M10 46V28h36v18z" />
@@ -142,7 +142,7 @@ const DISTRICTS: Record<string, () => JSX.Element> = {
     </>
   ),
 
-  'The Heights': () => (
+  heights: () => (
     <>
       {/* Supertalls, an aerial, and the moon clear of the roofline. */}
       <path d="M8 46V20h22v26zM34 46V4h26v42zM64 46V26h20v20z" />

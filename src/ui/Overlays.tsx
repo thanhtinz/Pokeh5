@@ -3,6 +3,7 @@ import { describeBonus, type LifeMilestone } from '../game/life';
 import { count, duration, money } from '../game/money';
 import type { PendingCard } from '../game/state';
 import type { OfflineReport, Store } from '../game/store';
+import { t } from '../i18n';
 import { Art } from './Art';
 import { Sunburst } from './Scene';
 
@@ -22,20 +23,20 @@ export function CardSheet({ game, card, now }: { game: Store; card: PendingCard;
             <Art name={card.icon} />
           </span>
           <span class="sheet__head-text">
-            <span class="sheet__title">{card.title}</span>
-            <span class="sheet__sub">Opportunity · {Math.ceil(left)}s left</span>
+            <span class="sheet__title">{t(`card.${card.key}`)}</span>
+            <span class="sheet__sub">{t('card.header', { seconds: Math.ceil(left) })}</span>
           </span>
         </div>
 
-        <p class="sheet__body">{card.flavour}</p>
+        <p class="sheet__body">{t(`card.${card.key}.flavour`)}</p>
         <strong class="sheet__prize num">{prize(card)}</strong>
 
         <div class="sheet__actions">
           <button class="btn btn--ghost" onClick={() => game.dismissCard()}>
-            Walk away
+            {t('card.pass')}
           </button>
           <button class="btn btn--primary" onClick={() => game.takeCard()}>
-            Take it
+            {t('card.take')}
           </button>
         </div>
 
@@ -50,11 +51,11 @@ export function CardSheet({ game, card, now }: { game: Store; card: PendingCard;
 function prize(card: PendingCard): string {
   switch (card.kind) {
     case 'multiplier':
-      return `×${card.value} for ${Math.round(card.seconds)}s`;
+      return t('card.boost', { multiplier: card.value, seconds: Math.round(card.seconds) });
     case 'ore':
-      return `${count(card.value)} taps of ore`;
+      return t('card.oreGift', { amount: count(card.value) });
     case 'gamble':
-      return `${money(card.value * 2)} or nothing`;
+      return t('card.gamble', { amount: money(card.value * 2) });
     default:
       return money(card.value);
   }
@@ -79,13 +80,13 @@ export function MilestoneSheet({
           </span>
         </div>
 
-        <span class="sheet__title">{milestone.title}</span>
-        <p class="sheet__body sheet__body--art">{milestone.line}</p>
+        <span class="sheet__title">{t(`life.${milestone.id}`)}</span>
+        <p class="sheet__body sheet__body--art">{t(`life.${milestone.id}.line`)}</p>
         <span class="sheet__won">{describeBonus(milestone.bonus)}</span>
 
         <div class="sheet__actions">
           <button class="btn btn--primary" onClick={onClose}>
-            Keep going
+            {t('milestone.keepGoing')}
           </button>
         </div>
       </div>
@@ -102,20 +103,19 @@ export function OfflineSheet({ report, onClose }: { report: OfflineReport; onClo
             <Art name="moon" />
           </span>
           <span class="sheet__head-text">
-            <span class="sheet__title">While you were gone</span>
-            <span class="sheet__sub">{duration(report.seconds)} away</span>
+            <span class="sheet__title">{t('offline.title')}</span>
+            <span class="sheet__sub">{t('offline.away', { duration: duration(report.seconds) })}</span>
           </span>
         </div>
 
         <strong class="sheet__prize num">{money(report.earned)}</strong>
         <p class="sheet__body">
-          The businesses kept running at a reduced rate
-          {report.jobsFinished > 0 ? ', and your shift finished' : ''}.
+          {t(report.jobsFinished > 0 ? 'offline.bodyJob' : 'offline.body')}
         </p>
 
         <div class="sheet__actions">
           <button class="btn btn--primary" onClick={onClose}>
-            Back to work
+            {t('offline.back')}
           </button>
         </div>
       </div>

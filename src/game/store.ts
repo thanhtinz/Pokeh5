@@ -32,6 +32,7 @@ import {
   incomePerSecond,
   unitCost,
 } from './businesses';
+import { t as tr } from '../i18n';
 import { CARD_LIFETIME, drawCard, jobById } from './jobs';
 import { bonusesFrom, newlyReached, type LifeBonuses, type LifeMilestone } from './life';
 import { Rng } from './rng';
@@ -355,7 +356,7 @@ export class Store {
 
     const payout = def.payout * d.globalMultiplier;
     this.earn(payout);
-    this.notice({ kind: 'cash', amount: payout, label: def.name });
+    this.notice({ kind: 'cash', amount: payout, label: tr(`job.${def.id}`) });
   }
 
   private runCards(now: number, d: Derived): void {
@@ -408,7 +409,7 @@ export class Store {
 
       this.earn(holding.shares * price);
       delete this.state.holdings[id];
-      this.notice({ kind: 'info', label: `Manager sold ${stockById(id)?.ticker ?? id}` });
+      this.notice({ kind: 'info', label: tr('notice.sold', { ticker: stockById(id)?.ticker ?? id }) });
     }
 
     if (this.state.cash <= 0) return;
@@ -514,7 +515,7 @@ export class Store {
     if (!this.spend(def.managerCost)) return false;
 
     this.state.managers.push(id);
-    this.notice({ kind: 'info', label: `${def.name} runs itself now` });
+    this.notice({ kind: 'info', label: tr('notice.automated', { name: tr(`biz.${def.id}`) }) });
     this.persist();
     this.emit();
     return true;
@@ -541,20 +542,25 @@ export class Store {
     this.state.card = null;
     this.scheduleCard(now, d);
 
+    const title = tr(`card.${card.key}`);
+
     switch (card.kind) {
       case 'cash':
         this.earn(card.value);
-        this.notice({ kind: 'cash', amount: card.value, label: card.title });
+        this.notice({ kind: 'cash', amount: card.value, label: title });
         break;
 
       case 'multiplier':
         this.state.boost = { multiplier: card.value, endsAt: now + card.seconds * 1000 };
-        this.notice({ kind: 'info', label: `${card.title}: ×${card.value} for ${card.seconds}s` });
+        this.notice({
+          kind: 'info',
+          label: tr('notice.boost', { title, multiplier: card.value, seconds: card.seconds }),
+        });
         break;
 
       case 'ore':
         this.state.ore = Math.min(d.oreCapacity * 4, this.state.ore + card.value * d.tapOre);
-        this.notice({ kind: 'info', label: `${card.title}: the refinery is full` });
+        this.notice({ kind: 'info', label: tr('notice.ore', { title }) });
         break;
 
       case 'gamble': {
@@ -564,8 +570,8 @@ export class Store {
         if (won) this.earn(amount);
         this.notice(
           won
-            ? { kind: 'cash', amount, label: 'It paid off' }
-            : { kind: 'info', label: 'It did not pay off' },
+            ? { kind: 'cash', amount, label: tr('notice.gambleWin') }
+            : { kind: 'info', label: tr('notice.gambleLose') },
         );
         break;
       }
@@ -660,6 +666,11 @@ export class Store {
     if (!this.ready) return;
     const report = this.catchUp();
     if (report) this.offline = report;
+    this.emit();
+  }
+
+  /** Forces a redraw when something outside the save changed, like language. */
+  refresh(): void {
     this.emit();
   }
 
