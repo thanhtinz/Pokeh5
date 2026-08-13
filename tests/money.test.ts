@@ -44,7 +44,7 @@ describe('clocks', () => {
 
   // Prose, so it follows the language rather than the number formatter.
   it('reads as prose for the offline dialog, in the default language', () => {
-    expect(duration(11_520)).toBe('3 giờ 12 phút');
+    expect(duration(11_520)).toBe('3 tiếng 12 phút');
     expect(duration(90)).toBe('1 phút');
     expect(duration(12)).toBe('12 giây');
   });

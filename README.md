@@ -122,10 +122,25 @@ district, business, job, milestone, stock and sector — has a string in both. A
 missing key is a Vietnamese sentence appearing mid-English screen, and nothing
 is louder than that.
 
+The Vietnamese is written, not converted. The first pass was key-for-key
+faithful and read like a machine had done it, so the whole dictionary was
+rewritten against four rules, which are documented at the top of `vi.ts`:
+prefer the plain word over the Sino-Vietnamese one where both exist ("Sạch nợ",
+not "Thanh toán hết nợ"; "Tổng tài sản", not "Tài sản ròng" — this is a game
+screen, not a financial statement); drop the pronoun where the sentence still
+reads, because putting "bạn" in every line is the fastest way to sound
+translated; never carry an English idiom across intact ("Your back will
+remember this one" became "Xong ca này lưng nhớ đời"); and keep the milestone
+lines at the original's rhythm — short, present tense, no exclamation marks.
+
+Wording has to follow the numbers too. Early milestones sit at *negative* net
+worth, so "cần -$950K" reads backwards — the player is climbing up to it, not
+holding it — and the label became "khi tài sản lên -$950K".
+
 Text length is a layout constraint, not a translation detail: Vietnamese with
-diacritics runs wider than the English it replaced, which is what pushed
-"MỖI LẦN CHẠM" out of the tap target until the label was sized for the longest
-language rather than the shortest.
+diacritics runs wider than the English it replaced, which is what pushed the
+tap-target label out of its circle until it was sized for the longest language
+rather than the shortest.
 
 ## How the money works
 
