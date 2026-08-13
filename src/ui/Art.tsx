@@ -90,12 +90,14 @@ const ART: Record<string, () => JSX.Element> = {
   cart: () => (
     <>
       <Shade rx={13} />
-      <path class="t2" d="M13 16h26l-4 14H17z" />
-      <path class="t4" d="M17 19h18.6l-.9 3.4H17.9zM18.5 25h15.6l-.9 3.4H19.4z" />
-      <path class="t3" d="M6 10h6.4l1.6 6h-4z" />
-      <path class="t3" d="M17 30h20v3H17z" />
-      <Wheel cx={20} cy={38} r={3.6} />
-      <Wheel cx={33} cy={38} r={3.6} />
+      <path class="t1" d="M3 11c0-4.4 8.4-7.6 21-7.6S45 6.6 45 11z" />
+      <path class="t3" d="M22.6 9h2.8v13h-2.8z" />
+      <path class="t2" d="M7 22h28v13H7z" />
+      <path class="t3" d="M24 22h11v13H24z" />
+      <path class="t4" d="M11 26h8v6h-8zM25 26h8v6h-8z" />
+      <path class="t3" d="M35 24h7v3h-7z" />
+      <Wheel cx={14} cy={38} r={4} />
+      <Wheel cx={29} cy={38} r={4} />
     </>
   ),
 
@@ -226,14 +228,15 @@ const ART: Record<string, () => JSX.Element> = {
   truck: () => (
     <>
       <Shade />
-      <path class="t2" d="M4 14h24v22H4z" />
-      <path class="t1" d="M4 14h24v4H4z" />
-      <path class="t3" d="M28 20h6l6 7v9h-12z" />
-      <path class="lite" d="M30 22h4l4 5h-8z" />
-      <path class="t4" d="M8 22h16v8H8z" />
-      <path class="t1" d="M6 20h20l-3-4H9z" />
-      <Wheel cx={12} cy={38} r={4.4} />
-      <Wheel cx={34} cy={38} r={4.4} />
+      <path class="t1" d="M2 9c0-5 9.8-8.6 22-8.6S46 4 46 9z" />
+      <path class="t3" d="M22.6 7h2.8v6h-2.8z" />
+      <path class="t1" d="M8 13h32v13H8z" />
+      <path class="lite" d="M10 15h28v9H10z" />
+      <path class="t4" d="M13 17.5h9c1.4 0 1.4 4 0 4h-9c-1.4 0-1.4-4 0-4zM26 17.5h9c1.4 0 1.4 4 0 4h-9c-1.4 0-1.4-4 0-4z" />
+      <path class="t2" d="M6 26h36v11H6z" />
+      <path class="t3" d="M24 26h18v11H24z" />
+      <Wheel cx={14} cy={39} r={4} />
+      <Wheel cx={34} cy={39} r={4} />
     </>
   ),
 
@@ -677,13 +680,13 @@ const ART: Record<string, () => JSX.Element> = {
   car: () => (
     <>
       <Shade />
-      <path class="t1" d="M13 12h20l6 10H9z" />
-      <path class="lite" d="M15 15h7v6h-9zM25 15h7l4 6H25z" />
-      <path class="t2" d="M4 22h40v12H4z" />
-      <path class="t3" d="M24 22h20v12H24z" />
-      <path class="t4" d="M4 26h6v3H4zM38 26h6v3h-6z" />
-      <Wheel cx={13} cy={35} r={5} />
-      <Wheel cx={35} cy={35} r={5} />
+      <path class="t3" d="M10 28h28v7H10z" />
+      <path class="t2" d="M11 20h15v9H11z" />
+      <path class="t1" d="M24 17h11v11H24z" />
+      <path class="t3" d="m33 17 6-8h3.4v3.4L38 19z" />
+      <circle class="lite" cx="41" cy="21" r="3.2" />
+      <Wheel cx={12} cy={34} r={7} />
+      <Wheel cx={37} cy={34} r={7} />
     </>
   ),
 

@@ -43,7 +43,9 @@
   font-size: clamp(30px, 9vw, 40px);
   font-weight: 700;
   letter-spacing: -0.035em;
-  line-height: 1.05;
+  /* Dấu thanh chồng dấu mũ trong tiếng Việt cao hơn chữ Latin; 1.05 cắt mất
+     phần trên của "tỷ". */
+  line-height: 1.22;
   color: var(--ink);
   text-shadow: 0 0 28px var(--glow);
 }

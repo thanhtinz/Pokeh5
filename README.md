@@ -1,11 +1,12 @@
 # Broke to Boss
 
-An idle tycoon that opens at **-$1,000,000** and ends when there is nothing left
-to buy back. Tap a refinery, work shifts, take contracts, buy thirty-six
-businesses across six districts, trade twelve parody tickers, and reclaim twelve
-pieces of the life the debt took.
+Game nhàn rỗi mở màn ở **âm một tỷ**, kết thúc khi chẳng còn gì để chuộc lại.
+Chạm xưởng luyện, đi làm ca, nhận kèo, mua ba mươi sáu cơ ngơi trải sáu khu,
+chơi mười hai mã cổ phiếu nhại, và lấy lại mười hai mảnh cuộc đời mà món nợ
+đã cuỗm đi.
 
-Chơi bằng **tiếng Việt**, đổi sang English được trong màn Cuộc đời.
+Bối cảnh và tiền tệ là Việt Nam. Chơi bằng **tiếng Việt**, đổi sang English
+được trong màn Cuộc đời.
 
 TypeScript, Preact and Vite, wrapped in Capacitor for Android and iOS.
 No canvas, no engine, no runtime dependencies beyond Preact — the whole bundle
@@ -104,10 +105,28 @@ rather than reading like a heading.
 **The milestone payoff.** A sun clearing a horizon behind the thing you just won
 back. It is the only screen in the game allowed to be mostly picture.
 
-### Language
+### Setting and language
 
-The game is Vietnamese by default, with English as a second locale rather than
-the source one. That split is enforced by the file layout: **the rule layer
+The game is set in Vietnam and denominated in đồng. That is not a coat of paint
+on an American game: the fiction was moved. The opening debt is **âm một tỷ**
+rather than minus a million dollars, because a tỷ is the round, ruinous number
+a Vietnamese person actually says. The ladder out runs through nhặt ve chai,
+rửa xe máy, hát rong quán nhậu, bốc vác chợ đầu mối, sà lan chở cát, sàn vàng,
+vườn nho Ninh Thuận; the districts run from Xóm Nước Đen to Tầng Mây; the
+milestone that comes back is a **xe máy**, not a car.
+
+Moving the setting moved the numbers with it. Every money constant is scaled so
+the curve is unchanged and only the units differ, and `money()` formats in the
+shorthand Vietnamese people write every day — **k, tr, tỷ**, then ngt / trt / tt
+— with a comma for the decimal mark. English keeps K/M/B and always carries the
+₫, because "1B" on its own names no currency.
+
+Three drawn assets followed the fiction: the food truck became a **xe bánh mì**
+with a parasol, the shopping cart became a **xe hàng rong**, and the car became
+a **xe máy**.
+
+Vietnamese is the default, with English as a second locale rather than the
+source one. That split is enforced by the file layout: **the rule layer
 holds ids, never prose.** A business is `cans`, a shift is `night`, a milestone
 is `zero`; `src/i18n/` maps those to sentences.
 
@@ -122,9 +141,10 @@ district, business, job, milestone, stock and sector — has a string in both. A
 missing key is a Vietnamese sentence appearing mid-English screen, and nothing
 is louder than that.
 
-The Vietnamese is written, not converted. The first pass was key-for-key
-faithful and read like a machine had done it, so the whole dictionary was
-rewritten against four rules, which are documented at the top of `vi.ts`:
+The Vietnamese is written, not converted — twice over. The first pass was
+key-for-key faithful and read like a machine had done it. The second pass
+stopped translating sentences altogether and re-authored each one from its
+situation, against the rules documented at the top of `vi.ts`:
 prefer the plain word over the Sino-Vietnamese one where both exist ("Sạch nợ",
 not "Thanh toán hết nợ"; "Tổng tài sản", not "Tài sản ròng" — this is a game
 screen, not a financial statement); drop the pronoun where the sentence still

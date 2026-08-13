@@ -38,52 +38,52 @@ export type District = (typeof DISTRICTS)[number];
  */
 export const BUSINESSES: readonly BusinessDef[] = [
   // --- Skid Row: cents and hustle -----------------------------------------
-  b('cans', 'skidrow', 4, 1, 1.0, 1_000, 'can'),
-  b('cart', 'skidrow', 60, 12, 3.0, 8_000, 'cart'),
-  b('wash', 'skidrow', 720, 90, 6.0, 60_000, 'spray'),
-  b('busk', 'skidrow', 8_640, 720, 12.0, 480_000, 'mic'),
-  b('scrap', 'skidrow', 103_680, 5_760, 24.0, 4_000_000, 'gear'),
-  b('flip', 'skidrow', 1_244_160, 46_080, 48.0, 32_000_000, 'gem'),
+  b('cans', 'skidrow', 4000, 1000, 1.0, 1_000_000, 'can'),
+  b('cart', 'skidrow', 60_000, 12_000, 3.0, 8_000_000, 'cart'),
+  b('wash', 'skidrow', 720_000, 90_000, 6.0, 60_000_000, 'spray'),
+  b('busk', 'skidrow', 8_640_000, 720_000, 12.0, 480_000_000, 'mic'),
+  b('scrap', 'skidrow', 103_680_000, 5_760_000, 24.0, 4_000_000_000, 'gear'),
+  b('flip', 'skidrow', 1_244_160_000, 46_080_000, 48.0, 32_000_000_000, 'gem'),
 
   // --- The Docks ----------------------------------------------------------
-  b('forklift', 'docks', 14_929_920, 368_640, 60.0, 260_000_000, 'forklift'),
-  b('crate', 'docks', 179_159_040, 2_949_120, 90.0, 2_100_000_000, 'crate'),
-  b('fish', 'docks', 2_149_908_480, 23_592_960, 120.0, 17_000_000_000, 'fish'),
-  b('tug', 'docks', 25_798_901_760, 188_743_680, 180.0, 136_000_000_000, 'anchor'),
-  b('customs', 'docks', 309_586_821_120, 1_509_949_440, 240.0, 1.09e12, 'stamp'),
-  b('yard', 'docks', 3.7e12, 1.2e10, 300.0, 8.7e12, 'containers'),
+  b('forklift', 'docks', 14_929_920_000, 368_640_000, 60.0, 260_000_000_000, 'forklift'),
+  b('crate', 'docks', 179_159_040_000, 2_949_120_000, 90.0, 2_100_000_000_000, 'crate'),
+  b('fish', 'docks', 2_149_908_480_000, 23_592_960_000, 120.0, 17_000_000_000_000, 'fish'),
+  b('tug', 'docks', 25_798_901_760_000, 188_743_680_000, 180.0, 136_000_000_000_000, 'anchor'),
+  b('customs', 'docks', 309_586_821_120_000, 1_509_949_440_000, 240.0, 1.09e15, 'stamp'),
+  b('yard', 'docks', 3.7e15, 12_000_000_000_000, 300.0, 8.7e15, 'containers'),
 
   // --- Midtown ------------------------------------------------------------
-  b('food', 'midtown', 4.5e13, 9.7e10, 45.0, 7.0e13, 'truck'),
-  b('laundry', 'midtown', 5.4e14, 7.7e11, 75.0, 5.6e14, 'washer'),
-  b('gym', 'midtown', 6.4e15, 6.2e12, 110.0, 4.5e15, 'dumbbell'),
-  b('cafe', 'midtown', 7.7e16, 4.9e13, 150.0, 3.6e16, 'coffee'),
-  b('cinema', 'midtown', 9.3e17, 4.0e14, 200.0, 2.9e17, 'film'),
-  b('hotel', 'midtown', 1.1e19, 3.2e15, 280.0, 2.3e18, 'bed'),
+  b('food', 'midtown', 4.5e16, 97_000_000_000_000, 45.0, 7e16, 'truck'),
+  b('laundry', 'midtown', 5.4e17, 770_000_000_000_000, 75.0, 5.6e17, 'washer'),
+  b('gym', 'midtown', 6.4e18, 6.2e15, 110.0, 4.5e18, 'dumbbell'),
+  b('cafe', 'midtown', 7.7e19, 4.9e16, 150.0, 3.6e19, 'coffee'),
+  b('cinema', 'midtown', 9.3e20, 4e17, 200.0, 2.9e20, 'film'),
+  b('hotel', 'midtown', 1.1e22, 3.2e18, 280.0, 2.3e21, 'bed'),
 
   // --- Financial District -------------------------------------------------
-  b('fund', 'financial', 1.3e20, 2.5e16, 90.0, 1.8e19, 'chart'),
-  b('bank', 'financial', 1.6e21, 2.0e17, 130.0, 1.5e20, 'bank'),
-  b('insure', 'financial', 1.9e22, 1.6e18, 180.0, 1.2e21, 'shield'),
-  b('broker', 'financial', 2.3e23, 1.3e19, 240.0, 9.4e21, 'briefcase'),
-  b('ratings', 'financial', 2.7e24, 1.0e20, 320.0, 7.5e22, 'star'),
-  b('exchange', 'financial', 3.3e25, 8.2e20, 420.0, 6.0e23, 'scales'),
+  b('fund', 'financial', 1.3e23, 2.5e19, 90.0, 1.8e22, 'chart'),
+  b('bank', 'financial', 1.6e24, 2e20, 130.0, 1.5e23, 'bank'),
+  b('insure', 'financial', 1.9e25, 1.6e21, 180.0, 1.2e24, 'shield'),
+  b('broker', 'financial', 2.3e26, 1.3e22, 240.0, 9.4e24, 'briefcase'),
+  b('ratings', 'financial', 2.7e27, 1e23, 320.0, 7.5e25, 'star'),
+  b('exchange', 'financial', 3.3e28, 8.2e23, 420.0, 6e26, 'scales'),
 
   // --- Uptown -------------------------------------------------------------
-  b('gallery', 'uptown', 3.9e26, 6.6e21, 120.0, 4.8e24, 'frame'),
-  b('auction', 'uptown', 4.7e27, 5.3e22, 170.0, 3.9e25, 'gavel'),
-  b('yacht', 'uptown', 5.7e28, 4.2e23, 230.0, 3.1e26, 'yacht'),
-  b('jet', 'uptown', 6.8e29, 3.4e24, 310.0, 2.5e27, 'plane'),
-  b('vineyard', 'uptown', 8.2e30, 2.7e25, 400.0, 2.0e28, 'wine'),
-  b('island', 'uptown', 9.8e31, 2.2e26, 520.0, 1.6e29, 'island'),
+  b('gallery', 'uptown', 3.9e29, 6.6e24, 120.0, 4.8e27, 'frame'),
+  b('auction', 'uptown', 4.7e30, 5.3e25, 170.0, 3.9e28, 'gavel'),
+  b('yacht', 'uptown', 5.7e31, 4.2e26, 230.0, 3.1e29, 'yacht'),
+  b('jet', 'uptown', 6.8e32, 3.4e27, 310.0, 2.5e30, 'plane'),
+  b('vineyard', 'uptown', 8.2e33, 2.7e28, 400.0, 2e31, 'wine'),
+  b('island', 'uptown', 9.8e34, 2.2e29, 520.0, 1.6e32, 'island'),
 
   // --- The Heights --------------------------------------------------------
-  b('tower', 'heights', 1.2e33, 1.7e27, 150.0, 1.3e30, 'tower'),
-  b('media', 'heights', 1.4e34, 1.4e28, 210.0, 1.0e31, 'media'),
-  b('space', 'heights', 1.7e35, 1.1e29, 290.0, 8.2e31, 'rocket'),
-  b('fusion', 'heights', 2.0e36, 8.8e29, 380.0, 6.6e32, 'atom'),
-  b('bank2', 'heights', 2.4e37, 7.1e30, 500.0, 5.3e33, 'vault'),
-  b('empire', 'heights', 2.9e38, 5.7e31, 650.0, 4.2e34, 'crown'),
+  b('tower', 'heights', 1.2e36, 1.7e30, 150.0, 1.3e33, 'tower'),
+  b('media', 'heights', 1.4e37, 1.4e31, 210.0, 1e34, 'media'),
+  b('space', 'heights', 1.7e38, 1.1e32, 290.0, 8.2e34, 'rocket'),
+  b('fusion', 'heights', 2e39, 8.8e32, 380.0, 6.6e35, 'atom'),
+  b('bank2', 'heights', 2.4e40, 7.1e33, 500.0, 5.3e36, 'vault'),
+  b('empire', 'heights', 2.9e41, 5.7e34, 650.0, 4.2e37, 'crown'),
 ];
 
 function b(

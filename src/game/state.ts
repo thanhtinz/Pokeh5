@@ -2,8 +2,8 @@ import type { Holding } from './stocks';
 
 export const SAVE_VERSION = 1;
 
-/** Where every run begins: a million in the hole. */
-export const STARTING_BALANCE = -1_000_000;
+/** Chỗ mọi ván bắt đầu: âm một tỷ. */
+export const STARTING_BALANCE = -1_000_000_000;
 
 export interface ActiveJob {
   jobId: string;

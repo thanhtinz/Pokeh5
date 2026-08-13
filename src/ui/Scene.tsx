@@ -70,7 +70,7 @@ export function CityScene() {
 const DISTRICTS: Record<string, () => JSX.Element> = {
   skidrow: () => (
     <>
-      {/* Lean-tos, a barrel fire and the shopping cart you started with. */}
+      {/* Nhà sàn ven kênh, thùng phuy đốt lửa, cái xe đẩy khởi nghiệp. */}
       <path d="M4 46V32h28v14zM36 46V26h24v20zM64 46V34h30v12z" />
       <path d="m4 32 14-9 14 9M36 26l12-8 12 8" />
       <path d="M112 46V32h18v14z" />
@@ -79,7 +79,8 @@ const DISTRICTS: Record<string, () => JSX.Element> = {
       <circle cx="162" cy="45" r="2.4" />
       <circle cx="176" cy="45" r="2.4" />
       <path d="M206 46V34h20v12zM230 46V30h18v16zM252 46V36h22v10zM278 46V32h18v14z" />
-      <path d="M0 46h300" />
+      <path d="M8 46v-4M22 46v-4M42 46v-6M56 46v-6M70 46v-4M88 46v-4" />
+      <path d="M0 44c12-3 20 3 32 0s20 3 32 0 20 3 32 0 20 3 32 0 20 3 32 0 20 3 32 0 20 3 32 0 20 3 32 0" />
     </>
   ),
 

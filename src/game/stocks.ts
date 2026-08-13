@@ -22,18 +22,18 @@ export interface StockDef {
 }
 
 export const STOCKS: readonly StockDef[] = [
-  s('grnd', 'GRND', 42, 0.018, 0.0006, 'transport'),
-  s('bzzt', 'BZZT', 18, 0.032, 0.0009, 'consumer'),
-  s('cldy', 'CLDY', 130, 0.024, 0.0011, 'tech'),
-  s('mnch', 'MNCH', 27, 0.014, 0.0004, 'consumer'),
-  s('drll', 'DRLL', 88, 0.028, 0.0002, 'energy'),
-  s('bnkr', 'BNKR', 64, 0.010, 0.0003, 'finance'),
-  s('hype', 'HYPE', 9, 0.055, 0.0012, 'media'),
-  s('rustc', 'RUST', 51, 0.020, -0.0001, 'industrial'),
-  s('zoom2', 'ZMBI', 210, 0.026, 0.0008, 'health'),
-  s('gigl', 'GIGL', 340, 0.019, 0.0010, 'tech'),
-  s('moon', 'MOON', 3, 0.075, 0.0015, 'speculative'),
-  s('slug', 'SLUG', 76, 0.012, 0.0001, 'transport'),
+  s('grnd', 'XOM', 42_000, 0.018, 0.0006, 'transport'),
+  s('bzzt', 'BIA', 18_000, 0.032, 0.0009, 'consumer'),
+  s('cldy', 'MAY', 130_000, 0.024, 0.0011, 'tech'),
+  s('mnch', 'PHO', 27_000, 0.014, 0.0004, 'consumer'),
+  s('drll', 'DAU', 88_000, 0.028, 0.0002, 'energy'),
+  s('bnkr', 'HEO', 64_000, 0.010, 0.0003, 'finance'),
+  s('hype', 'HOT', 9_000, 0.055, 0.0012, 'media'),
+  s('rustc', 'SAT', 51_000, 0.020, -0.0001, 'industrial'),
+  s('zoom2', 'ZOM', 210_000, 0.026, 0.0008, 'health'),
+  s('gigl', 'TIM', 340_000, 0.019, 0.0010, 'tech'),
+  s('moon', 'MTR', 3_000, 0.075, 0.0015, 'speculative'),
+  s('slug', 'OSN', 76_000, 0.012, 0.0001, 'transport'),
 ];
 
 function s(

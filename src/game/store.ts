@@ -58,20 +58,20 @@ import {
 } from './stocks';
 
 /** Dollars a single unit of ore is worth at refinery level one. */
-export const ORE_BASE_VALUE = 8;
+export const ORE_BASE_VALUE = 8_000;
 /** Ore the refinery can process per second at level one. */
 export const REFINERY_BASE_RATE = 3;
 /** Value multiplier per refinery level. */
 export const REFINERY_GROWTH = 1.25;
 
 /** Credit extended before any progress has been made. */
-export const CREDIT_BASE = 2_000;
+export const CREDIT_BASE = 2_000_000;
 /** Share of the climb so far that the line grows by. */
 export const CREDIT_SHARE = 0.4;
 
-export const TAP_UPGRADE_BASE = 150;
+export const TAP_UPGRADE_BASE = 150_000;
 export const TAP_UPGRADE_GROWTH = 1.55;
-export const REFINERY_UPGRADE_BASE = 400;
+export const REFINERY_UPGRADE_BASE = 400_000;
 export const REFINERY_UPGRADE_GROWTH = 1.62;
 
 /** Offline pays at this rate, so playing is always worth more than not. */

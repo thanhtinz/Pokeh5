@@ -30,7 +30,7 @@ function richSave(now) {
     businesses: { cans: 320, cart: 210, wash: 140, busk: 90, scrap: 45, flip: 26, forklift: 12 },
     managers: ['cans', 'cart', 'wash', 'busk', 'scrap'],
     cycles: { flip: 12 },
-    holdings: { grnd: { shares: 1400, avgCost: 38 }, moon: { shares: 90_000, avgCost: 2.1 } },
+    holdings: { grnd: { shares: 1400, avgCost: 38_000 }, moon: { shares: 90_000, avgCost: 2_100 } },
     marketTick: 900,
     marketSeed: 12345,
     autoTrader: true,

@@ -40,7 +40,7 @@ describe('cost curve', () => {
 
 describe('the credit line', () => {
   it('opens small and widens only with progress actually made', () => {
-    expect(creditLine(STARTING_BALANCE)).toBe(2_000);
+    expect(creditLine(STARTING_BALANCE)).toBe(2_000_000);
     expect(creditLine(0)).toBeGreaterThan(creditLine(STARTING_BALANCE));
   });
 
@@ -66,9 +66,9 @@ describe('the credit line', () => {
     store.state = createNewSave(1);
     store.ready = true;
 
-    // The line is two thousand; a hundred thousand of cans is not on offer.
+    // Hạn mức mở màn là hai triệu; một tỷ tiền lon thì không có cửa.
     expect(store.buyBusiness(cans.id, 'max')).toBeGreaterThan(0);
-    expect(store.canAfford(1_000_000)).toBe(false);
+    expect(store.canAfford(1_000_000_000)).toBe(false);
   });
 });
 
@@ -134,9 +134,9 @@ describe('the tick', () => {
 describe('life milestones', () => {
   it('only offers what the peak has actually reached', () => {
     expect(newlyReached(STARTING_BALANCE, [])).toHaveLength(0);
-    expect(newlyReached(-900_000, []).map((m) => m.id)).toEqual(['phone']);
-    expect(newlyReached(-850_000, []).map((m) => m.id)).toEqual(['phone', 'dog']);
-    expect(newlyReached(-850_000, ['phone']).map((m) => m.id)).toEqual(['dog']);
+    expect(newlyReached(-900_000_000, []).map((m) => m.id)).toEqual(['phone']);
+    expect(newlyReached(-850_000_000, []).map((m) => m.id)).toEqual(['phone', 'dog']);
+    expect(newlyReached(-850_000_000, ['phone']).map((m) => m.id)).toEqual(['dog']);
   });
 
   it('folds claimed bonuses into one set of multipliers', () => {
