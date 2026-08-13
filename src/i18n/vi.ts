@@ -187,7 +187,6 @@ export const vi: Record<string, string> = {
   'ui.loading': 'Đang mở sổ sách',
   'gate.pitch': 'Âm một tỷ. Nhặt ve chai, đi làm ca, gây dựng lại từ đầu, và chuộc về từng thứ mà món nợ đã lấy đi.',
   'gate.start': 'Bắt đầu từ âm một tỷ',
-  'gate.why': 'Có tài khoản thì bản lưu nằm trên máy chủ chứ không nằm trong máy — đổi điện thoại vẫn chơi tiếp, và tên mình có chỗ trên bảng.',
 
   // ------------------------------------------------------------ tài khoản --
   'auth.register': 'Đăng ký',
@@ -197,7 +196,6 @@ export const vi: Record<string, string> = {
   'auth.password': 'Mật khẩu',
   'auth.rules': 'Tên 3–16 ký tự, chỉ chữ không dấu, số, gạch dưới. Mật khẩu từ 8 ký tự.',
   'auth.working': 'Đang gửi…',
-  'auth.why': 'Có tài khoản thì bản lưu nằm trên máy chủ, đổi máy vẫn chơi tiếp, và tên mình lên bảng.',
   'auth.syncNote': 'Bản lưu tự đẩy lên mỗi phút và mỗi lần tắt game.',
   'auth.pushNow': 'Đẩy lên ngay',
   'sync.offline': 'Chưa nối được máy chủ',

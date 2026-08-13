@@ -90,8 +90,6 @@ export function Gate({ account }: { account: Account }) {
             </button>
           </form>
         </section>
-
-        <p class="gate__note">{t('gate.why')}</p>
       </div>
     </div>
   );

@@ -163,7 +163,6 @@ export const en: Record<string, string> = {
   'ui.loading': 'Opening the books',
   'gate.pitch': 'Minus one billion đồng. Collect scrap, work shifts, build it back, and buy your life out of the hole one piece at a time.',
   'gate.start': 'Start at minus a billion',
-  'gate.why': 'An account keeps your save on the server rather than on this phone — change devices and carry on, and your name gets a place on the board.',
 
   'auth.register': 'Sign up',
   'auth.login': 'Sign in',
@@ -172,7 +171,6 @@ export const en: Record<string, string> = {
   'auth.password': 'Password',
   'auth.rules': '3–16 characters, letters, digits and underscores. Password at least 8.',
   'auth.working': 'Sending…',
-  'auth.why': 'An account keeps your save on the server, carries it to a new phone, and puts your name on the board.',
   'auth.syncNote': 'The save uploads every minute, and whenever you close the game.',
   'auth.pushNow': 'Upload now',
   'sync.offline': 'Server unreachable',

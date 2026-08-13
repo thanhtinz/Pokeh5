@@ -1145,13 +1145,6 @@ button.row__icon:not(:disabled):active {
   color: var(--ink-dim);
 }
 
-.gate__note {
-  font-size: 11.5px;
-  line-height: 1.5;
-  text-align: center;
-  color: var(--ink-faint);
-}
-
 /* ------------------------------------------------------------ tài khoản -- */
 
 .auth__form {
