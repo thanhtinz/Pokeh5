@@ -6,7 +6,7 @@
   "description": "Idle tycoon: climb out of a million in debt and win your life back",
   "scripts": {
     "dev": "vite",
-    "build": "tsc --noEmit && vite build",
+    "build": "tsc --noEmit && vite build && node scripts/sw.mjs",
     "preview": "vite preview --port 4173",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
@@ -15,7 +15,8 @@
     "cap:android": "npm run cap:sync && cap open android",
     "server": "node server/index.mjs",
     "dev:all": "node server/index.mjs & vite",
-    "art": "node scripts/art-sheet.mjs"
+    "art": "node scripts/art-sheet.mjs",
+    "icons": "node scripts/icons.mjs"
   },
   "dependencies": {
     "@capacitor/core": "^7.4.3",

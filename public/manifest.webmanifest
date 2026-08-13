@@ -1,0 +1,20 @@
+{
+  "name": "Broke to Boss",
+  "short_name": "Broke to Boss",
+  "description": "Game nhàn rỗi mở màn ở âm một tỷ. Nhặt ve chai, đi làm ca, gây dựng lại từ đầu, và chuộc về từng thứ mà món nợ đã lấy đi.",
+  "lang": "vi",
+  "dir": "ltr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#12070a",
+  "theme_color": "#12070a",
+  "categories": ["games"],
+  "icons": [
+    { "src": "./icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "./icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "./icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "./icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

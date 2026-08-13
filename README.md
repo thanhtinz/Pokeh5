@@ -23,6 +23,7 @@ npm test           # 110 tests over the rule layer, the dictionaries and the ser
 npm run build      # typecheck, then a production bundle in dist/
 npm run shot       # screenshots every screen at both ends of the palette
 npm run art        # all 58 drawn assets on one sheet, large enough to judge
+npm run icons      # re-render the app icon PNGs from public/icon.svg
 ```
 
 Native:
@@ -351,6 +352,41 @@ from its peak rather than paid out** — opening the game to fourteen lump sums 
 fourteen toasts is a bug, not a present.
 
 110 tests now, from 50.
+
+## It installs, and it opens without a network
+
+The game is a phone game people are meant to open every day, delivered over the
+web. Without a manifest it cannot go on a home screen, and without a service
+worker a tunnel means a blank page — on a game whose whole design premise is that
+it keeps running while you are away.
+
+So: `public/manifest.webmanifest`, an icon rendered from `public/icon.svg` (PNG
+as well as SVG, because iOS will not take an SVG for the home screen and iOS is
+where "add to home screen" actually gets used), and a service worker generated at
+the end of `npm run build` by `scripts/sw.mjs`.
+
+No plugin. The worker needs exactly two things a plugin brings three hundred
+others to provide — the list of hash-named files, and a cache name that changes
+per build — and both are ten lines against `dist/`. The cache name is a hash of
+the *contents*, not the build time, so rebuilding without changing anything does
+not push every player a fresh download.
+
+Three rules in the worker, and the second is the one that matters:
+
+1. Hash-named files never change, so serve them from the cache first.
+2. **`/api` is never cached.** A cached save or leaderboard means a player one
+   day opens the game, sees last week's net worth, and believes they have been
+   robbed. If the network is down, let it be down — the account layer already
+   knows how to wait. The check is scope-relative as well as absolute, so an app
+   deployed under `/game/` still recognises its own API.
+3. Navigations try the network and fall back to the cached shell. That is the
+   entire point of the file.
+
+It deliberately does **not** call `skipWaiting`. A new version waits until the
+old tabs close. Swapping the file set under a running page is faster, but it is
+how a late chunk import lands in the gap between two builds — and this is a game
+designed to be left open for an evening, which is the longest-lived kind of page
+there is.
 
 ## Accounts, cloud saves and the real leaderboard
 

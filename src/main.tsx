@@ -49,6 +49,27 @@ account.subscribe(() => void open());
 void account.boot().then(open);
 
 /**
+ * Đăng ký service worker, để mở app lúc mất mạng vẫn ra game chứ không ra
+ * trang trắng.
+ *
+ * Chỉ ở bản dựng thật và chỉ trên http(s). Lúc dev thì một cái kho nằm giữa
+ * biến mọi lần sửa thành một cuộc điều tra; còn bản Capacitor chạy ở
+ * `capacitor://` và đã có sẵn toàn bộ file trong máy rồi.
+ *
+ * Cái worker **không gọi `skipWaiting`**. Bản mới nằm chờ tới khi đóng hết tab
+ * cũ mới lên. Đổi bộ file dưới chân một trang đang chạy thì nhanh hơn thật,
+ * nhưng nó là cách để một lần nhập chunk muộn rơi vào khoảng trống giữa hai
+ * bản — mà đây là game để mở suốt buổi, đúng loại trang sống lâu nhất.
+ */
+if (import.meta.env.PROD && 'serviceWorker' in navigator && location.protocol.startsWith('http')) {
+  window.addEventListener('load', () => {
+    void navigator.serviceWorker.register('./sw.js').catch(() => {
+      // Không đăng ký được thì game vẫn chạy, chỉ là mất mạng sẽ không mở nổi.
+    });
+  });
+}
+
+/**
  * One loop for the whole game.
  *
  * Simulation runs at frame rate so the refinery and cycle bars move smoothly;

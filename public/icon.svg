@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!--
+    Biểu tượng app: viên quặng, cùng một viên nằm giữa nút chạm ở màn Cày.
+
+    Nền phủ kín khung chứ không bo góc sẵn, và viên quặng chỉ chiếm quãng giữa —
+    Android tự cắt biểu tượng theo hình của máy, nên bo góc sẵn là bo hai lần,
+    còn vẽ tràn ra mép là bị cắt mất góc. Vùng an toàn của `maskable` là cái
+    hình tròn đường kính 80%; viên này nằm gọn bên trong.
+
+    Màu ở đây là màu vàng cuối game chứ không phải đỏ nợ. Cả bảng màu trong game
+    chạy theo tài sản, nhưng cái biểu tượng trên màn hình chính thì không đổi
+    được theo ai — nên nó lấy cái đích, không lấy vạch xuất phát.
+  -->
+  <rect width="512" height="512" fill="#12100c" />
+  <rect width="512" height="512" fill="url(#glow)" />
+
+  <defs>
+    <radialGradient id="glow" cx="50%" cy="38%" r="62%">
+      <stop offset="0" stop-color="#e0a94a" stop-opacity="0.22" />
+      <stop offset="1" stop-color="#e0a94a" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+
+  <g transform="translate(256 264) scale(6.4) translate(-32 -32)">
+    <!-- Mặt trên: ba mặt cắt, mặt giữa ăn sáng. -->
+    <path d="M12 20 20 8h6v12z" fill="#c98f3d" />
+    <path d="M20 8h24l-6 12H26z" fill="#f2c874" />
+    <path d="M44 8l8 12h-14z" fill="#dda75a" />
+
+    <!-- Thân: ba mặt đổ về một điểm. -->
+    <path d="M12 20h14L32 56z" fill="#a9752f" />
+    <path d="M26 20h12L32 56z" fill="#e0b463" />
+    <path d="M38 20h14L32 56z" fill="#c08c3d" />
+
+    <path
+      d="M20 8h24l8 12L32 56 12 20zM12 20h40M26 20 20 8M38 20 44 8M26 20 32 56M38 20 32 56"
+      fill="none"
+      stroke="#1a1109"
+      stroke-width="1.4"
+      stroke-linejoin="round"
+      opacity="0.55"
+    />
+    <path d="M24.5 10.5h5.5l-3 7h-5.5z" fill="#fff6e2" opacity="0.72" />
+  </g>
+</svg>
