@@ -22,6 +22,7 @@ npm run dev:all    # both at once
 npm test           # 103 tests over the rule layer, the dictionaries and the server
 npm run build      # typecheck, then a production bundle in dist/
 npm run shot       # screenshots every screen at both ends of the palette
+npm run art        # all 58 drawn assets on one sheet, large enough to judge
 ```
 
 Native:
@@ -43,9 +44,10 @@ is derived from net worth.**
 `src/ui/theme.ts` maps net worth to a single hue and writes two custom
 properties on the document root. At minus a million the entire app is a
 desaturated blood red; at a quadrillion it is gold; in between it is whatever
-the player has earned. Nothing else in the CSS names a colour, so the palette
-is the progress bar — the screen fills with warmth at exactly the rate the
-player fills it with money.
+the player has earned. Every surface, rule, accent and glow resolves through it,
+so the palette is the progress bar — the screen fills with warmth at exactly the
+rate the player fills it with money. The drawn assets are the one deliberate
+exception, and the next section is about why.
 
 The climb out of debt is deliberately given *half* the whole scale, even though
 it is a rounding error in absolute terms, because it is most of the emotional
@@ -66,17 +68,45 @@ carrying geometry and nothing else; stroke weight, caps and joins live in one
 CSS rule and are inherited, and `currentColor` ties each one to whatever
 contains it.
 
-**Assets** (`src/ui/Art.tsx`) are for content: sixty flat vector illustrations
-on a 48×48 stage, lit from the upper left, built from four tones plus an ink and
-a highlight. A business the player has bought two hundred of, the shift they
-chose, the dog that came home — those are things in the world, and a 1.6px
-outline is a label for them rather than a picture of them.
+**Assets** (`src/ui/Art.tsx`) are for content: fifty-eight flat vector
+illustrations on a 48×48 stage, lit from the upper left, built from four tones
+plus an ink and a highlight. A business the player has bought two hundred of, the
+shift they chose, the dog that came home — those are things in the world, and a
+1.6px outline is a label for them rather than a picture of them.
 
-The tones are `--art-1` … `--art-4`, all derived from the same hue the palette
-runs on, so every asset warms from debt-red to gold along with everything else.
-Because custom properties inherit, a tile with a bright accent background —
-a milestone disc, a card header — redeclares the ramp dark on the asset itself
-and flips the whole drawing without touching a single shape.
+**Assets are made of materials, and materials have colours.** The four tones in
+a drawing are not one light-to-dark ramp: they are *two pairs*. `t2`/`t3` are the
+lit and shaded faces of the **primary** material — the body of the thing — and
+`t1`/`t4` are the lit and shaded faces of the **secondary** — the label, the
+canopy, the trim. That pairing was already in every drawing; it just wasn't being
+used, because all four tones resolved to the same hue and sixty different objects
+came out as sixty gold lumps.
+
+So each asset now declares what it is made of, one line in `Art.tsx`:
+
+```
+can:  'p-steel s-red'      cart:  'p-wood s-red'      fish: 'p-ice s-blue'
+wine: 'p-wine s-gold'      atom:  'p-cyan s-ice'      dog:  'p-coffee s-cream'
+```
+
+Twenty-seven materials, each three numbers in `base.css`: hue, saturation, and —
+the one worth explaining — **a lightness offset**. Fixing lightness by role alone
+crushes cream and porcelain into mud and floats charcoal and navy up into pale
+grey, because "the lit face of a thing" and "a thing that is a light colour" are
+different claims. Each material says where it sits on the lightness scale; the
+*spacing* between the four tones stays constant across the whole set, and that
+spacing is what keeps sixty drawings looking like one set.
+
+An asset that declares nothing falls back to the theme hue and still warms from
+debt-red to gold, as everything did before.
+
+On a bright tile — a milestone disc, a card header — a light asset used to
+disappear, and the old fix replaced all four tones with a brown ramp. That fixed
+the contrast and threw away the colour, which is now the part worth keeping. The
+override is one line instead: **drop the lightness, leave the hue alone.** Custom
+properties inherit and that selector outranks the material classes, so a single
+rule darkens all twenty-seven materials at once and the can is still an aluminium
+can with a red band, just dark enough to read on gold.
 
 Both are rendered inline rather than through an SVG sprite. A `<use>` reference
 builds a shadow tree that ordinary CSS selectors cannot reach, which would leave
@@ -99,6 +129,24 @@ Opacity is set per layer rather than capped on the parent, because the two ends
 want opposite things. The lot is the only thing on screen at the start and has
 to carry it; the finished skyline sits under translucent panels full of numbers
 and must not compete with them.
+
+It competed anyway, and the bug is worth writing down because it names a rule.
+The last rows of every scrolling screen were sitting on the scene and the fence —
+thin, high-contrast line work, the worst possible thing to put behind a
+sentence — was cutting straight through the text. Three causes, one lesson each:
+
+- `.row` was 66% transparent and, unlike `.panel`, had no backdrop blur. Surfaces
+  are now opaque enough to read on, which also costs nothing: a blur on
+  thirty-six rows is a real bill on a cheap phone.
+- A locked job row carried `style={{ opacity: 0.4 }}`. **Opacity on a row fades
+  its own background too**, so the one row that most needed a surface had the
+  least. Dim the contents, never the surface.
+- The milestone timeline had no surface at all, and it is the last block on its
+  screen — the one block guaranteed to overlap the scene. It is a card now, like
+  every other block on that screen.
+
+The scene's own opacities came down a notch on top of all that. It is decoration
+sitting exactly where the text lands, so it loses, and it should lose by default.
 
 **District strips.** One drawn scene per district, so buying into The Docks
 looks like somewhere — cranes over stacked containers, water along the bottom —
@@ -453,7 +501,7 @@ src/ui/       Preact components, the theme engine, icons, assets and scenes
 src/styles/   two stylesheets: tokens, then components
 server/       the account API: five files, no dependencies
 tests/        vitest over src/game/, and server/*.test.mjs beside the server
-scripts/      playwright screenshots of every screen
+scripts/      playwright screenshots of every screen, and the art contact sheet
 ```
 
 ### Things worth knowing before changing them

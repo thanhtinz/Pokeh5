@@ -20,7 +20,17 @@
 
   --bg: hsl(var(--hue) 24% 4.5%);
   --bg-lift: hsl(var(--hue) 20% 7%);
-  --panel: hsl(var(--hue) 16% 10% / 0.66);
+  /*
+   * Mặt của mọi thẻ và mọi hàng.
+   *
+   * Từng để 0.66 cho ra vẻ kính mờ. Nhưng chỉ `.panel` có `backdrop-filter`,
+   * còn `.row` thì không — mà `.row` mới là thứ có ba mươi sáu cái xếp chồng
+   * lên cảnh thành phố ở đáy mọi màn cuộn. Hàng rào và đường viền toà nhà là
+   * nét mảnh tương phản cao, đúng thứ tệ nhất để đặt sau một dòng chữ, nên
+   * mấy hàng cuối của mọi danh sách đọc không ra. Đặc thêm là hết, và không
+   * tốn một cái backdrop-filter nào cho ba mươi sáu hàng trên máy yếu.
+   */
+  --panel: hsl(var(--hue) 16% 10% / 0.9);
   --panel-solid: hsl(var(--hue) 16% 9.5%);
   --panel-edge: hsl(var(--hue) 30% 70% / 0.09);
   --panel-edge-lit: hsl(var(--hue) var(--sat) 62% / 0.34);
@@ -30,17 +40,15 @@
   --ink-faint: hsl(var(--hue) 8% 50%);
 
   /*
-   * The asset ramp. Four tones, an ink and a highlight, all derived from the
-   * same hue the palette runs on — so a business drawn once warms from
-   * debt-red to gold along with everything else, and no asset ever names a
-   * colour of its own.
+   * Mực và ánh sáng của asset.
+   *
+   * Hai thứ này gần như trung tính chứ không ăn theo màu chủ đề: bóng đổ của
+   * một cái lon nhôm không đỏ lên vì người chơi đang nợ, và một vệt sáng có
+   * màu thì nó thôi không còn là ánh sáng nữa. Vẫn để lại một chút hơi hướng
+   * của chủ đề để chúng không rơi ra ngoài bảng màu chung.
    */
-  --art-1: hsl(var(--hue) calc(var(--sat) * 0.9) 74%);
-  --art-2: hsl(var(--hue) calc(var(--sat) * 0.85) 57%);
-  --art-3: hsl(var(--hue) calc(var(--sat) * 0.75) 40%);
-  --art-4: hsl(var(--hue) 42% 24%);
-  --art-ink: hsl(var(--hue) 55% 11%);
-  --art-lite: hsl(var(--hue) 45% 93%);
+  --art-ink: hsl(var(--hue) 24% 9%);
+  --art-lite: hsl(var(--hue) 22% 95%);
 
   --up: hsl(146 62% 52%);
   --down: hsl(4 78% 62%);
@@ -150,12 +158,107 @@ button:disabled {
  * the ramp above. Geometry lives in the markup; every tone is named here, so
  * one rule restyles sixty pieces of artwork.
  */
+/*
+ * Vật liệu của asset.
+ *
+ * Mỗi hình làm bằng hai thứ: vật liệu **chính** cho thân (`t2` mặt sáng, `t3`
+ * mặt khuất) và vật liệu **phụ** cho nhãn, mái, viền (`t1` sáng, `t4` khuất).
+ * Cặp đôi đó vốn đã nằm sẵn trong từng hình từ lúc vẽ; trước đây cả bốn tông
+ * cùng rút từ một màu nên sáu mươi thứ khác nhau nhìn ra sáu mươi cục vàng.
+ *
+ * Mỗi vật liệu chỉ khai một sắc và một độ tươi, còn bốn mức sáng thì dùng chung
+ * — đó là thứ giữ cho cả bộ nhìn như một bộ chứ không như sáu mươi người vẽ.
+ *
+ * Hình nào không khai vật liệu thì rơi về màu chủ đề, tức là vẫn ấm dần theo
+ * tài sản đúng như cũ.
+ */
 .art {
   display: block;
   width: 40px;
   height: 40px;
   flex: none;
+
+  --pa: var(--hue);
+  --ps: var(--sat);
+  --pl: 0%;
+  --sa: var(--hue);
+  --ss: var(--sat);
+  --sl: 0%;
+
+  --art-1: hsl(var(--sa) calc(var(--ss) * 0.95) calc(65% + var(--sl)));
+  --art-2: hsl(var(--pa) calc(var(--ps) * 0.82) calc(56% + var(--pl)));
+  --art-3: hsl(var(--pa) calc(var(--ps) * 0.76) calc(37% + var(--pl)));
+  --art-4: hsl(var(--sa) calc(var(--ss) * 0.62) calc(31% + var(--sl)));
 }
+
+/*
+ * Ba con số cho mỗi vật liệu: sắc, độ tươi, và **độ sáng lệch đi bao nhiêu**.
+ *
+ * Con số thứ ba mới là con số phải học. Cố định độ sáng theo vai trò thì kem
+ * với sứ bị dìm xuống thành nâu đất, còn than với chàm thì nổi lên thành xám
+ * nhạt — vì "mặt sáng của vật" và "vật màu sáng" là hai chuyện khác nhau. Mỗi
+ * vật liệu tự nói nó nằm cao hay thấp trên thang sáng, còn khoảng cách giữa bốn
+ * tông thì giữ nguyên cho cả bộ, và đó là thứ giữ cho sáu mươi hình nhìn như
+ * một bộ.
+ */
+
+/* Vật liệu chính: thân vật (t2 mặt sáng, t3 mặt khuất). */
+.p-steel { --pa: 212; --ps: 20%; --pl: 2%; }
+.p-graphite { --pa: 222; --ps: 12%; --pl: -12%; }
+.p-stone { --pa: 38; --ps: 14%; --pl: 14%; }
+.p-cream { --pa: 40; --ps: 34%; --pl: 20%; }
+.p-cardboard { --pa: 32; --ps: 40%; --pl: 6%; }
+.p-wood { --pa: 26; --ps: 44%; --pl: -2%; }
+.p-leather { --pa: 20; --ps: 48%; --pl: -8%; }
+.p-coffee { --pa: 22; --ps: 52%; --pl: -10%; }
+.p-sand { --pa: 44; --ps: 50%; --pl: 12%; }
+.p-skin { --pa: 26; --ps: 56%; --pl: 12%; }
+.p-gold { --pa: 44; --ps: 80%; --pl: 6%; }
+.p-amber { --pa: 36; --ps: 84%; --pl: 2%; }
+.p-flame { --pa: 14; --ps: 88%; --pl: 0%; }
+.p-rust { --pa: 18; --ps: 64%; --pl: -4%; }
+.p-red { --pa: 2; --ps: 72%; --pl: -3%; }
+.p-ruby { --pa: 350; --ps: 68%; --pl: -2%; }
+.p-wine { --pa: 340; --ps: 50%; --pl: -8%; }
+.p-pink { --pa: 336; --ps: 70%; --pl: 8%; }
+.p-magenta { --pa: 308; --ps: 64%; --pl: 0%; }
+.p-violet { --pa: 268; --ps: 60%; --pl: 0%; }
+.p-navy { --pa: 222; --ps: 54%; --pl: -14%; }
+.p-blue { --pa: 206; --ps: 68%; --pl: -2%; }
+.p-ice { --pa: 196; --ps: 40%; --pl: 16%; }
+.p-cyan { --pa: 186; --ps: 70%; --pl: 2%; }
+.p-teal { --pa: 172; --ps: 52%; --pl: -2%; }
+.p-green { --pa: 146; --ps: 56%; --pl: -2%; }
+.p-leaf { --pa: 110; --ps: 46%; --pl: -4%; }
+
+/* Vật liệu phụ: nhãn, mái, viền (t1 mặt sáng, t4 mặt khuất). */
+.s-steel { --sa: 212; --ss: 20%; --sl: 2%; }
+.s-graphite { --sa: 222; --ss: 12%; --sl: -12%; }
+.s-stone { --sa: 38; --ss: 14%; --sl: 14%; }
+.s-cream { --sa: 40; --ss: 34%; --sl: 20%; }
+.s-cardboard { --sa: 32; --ss: 40%; --sl: 6%; }
+.s-wood { --sa: 26; --ss: 44%; --sl: -2%; }
+.s-leather { --sa: 20; --ss: 48%; --sl: -8%; }
+.s-coffee { --sa: 22; --ss: 52%; --sl: -10%; }
+.s-sand { --sa: 44; --ss: 50%; --sl: 12%; }
+.s-skin { --sa: 26; --ss: 56%; --sl: 12%; }
+.s-gold { --sa: 44; --ss: 80%; --sl: 6%; }
+.s-amber { --sa: 36; --ss: 84%; --sl: 2%; }
+.s-flame { --sa: 14; --ss: 88%; --sl: 0%; }
+.s-rust { --sa: 18; --ss: 64%; --sl: -4%; }
+.s-red { --sa: 2; --ss: 72%; --sl: -3%; }
+.s-ruby { --sa: 350; --ss: 68%; --sl: -2%; }
+.s-wine { --sa: 340; --ss: 50%; --sl: -8%; }
+.s-pink { --sa: 336; --ss: 70%; --sl: 8%; }
+.s-magenta { --sa: 308; --ss: 64%; --sl: 0%; }
+.s-violet { --sa: 268; --ss: 60%; --sl: 0%; }
+.s-navy { --sa: 222; --ss: 54%; --sl: -14%; }
+.s-blue { --sa: 206; --ss: 68%; --sl: -2%; }
+.s-ice { --sa: 196; --ss: 40%; --sl: 16%; }
+.s-cyan { --sa: 186; --ss: 70%; --sl: 2%; }
+.s-teal { --sa: 172; --ss: 52%; --sl: -2%; }
+.s-green { --sa: 146; --ss: 56%; --sl: -2%; }
+.s-leaf { --sa: 110; --ss: 46%; --sl: -4%; }
 
 .art .t1 {
   fill: var(--art-1);

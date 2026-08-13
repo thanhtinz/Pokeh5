@@ -80,10 +80,12 @@ const ART: Record<string, () => JSX.Element> = {
       <Shade rx={11} />
       <path class="t2" d="M15 13h18v24a9 4.5 0 0 1-18 0z" />
       <path class="t3" d="M24 13h9v24a4.5 4.5 0 0 1-9 4.5z" />
+      {/* Chỉ cái nhãn quấn quanh mới ăn màu vật liệu phụ; nắp lon là nhôm, và
+          vẽ nó đỏ theo nhãn thì cái lon thành hộp sơn. */}
       <path class="t1" d="M15 20h18v8H15z" />
       <path class="t4" d="M24 20h9v8h-9z" />
-      <ellipse class="t1" cx="24" cy="13" rx="9" ry="4.5" />
-      <ellipse class="t4" cx="24" cy="13" rx="5.6" ry="2.6" />
+      <ellipse class="t2" cx="24" cy="13" rx="9" ry="4.5" />
+      <ellipse class="t3" cx="24" cy="13" rx="5.6" ry="2.6" />
     </>
   ),
 
@@ -807,13 +809,114 @@ const ART: Record<string, () => JSX.Element> = {
   ),
 };
 
+/**
+ * Chất liệu của từng asset.
+ *
+ * Bốn tông trong mỗi hình không phải một dải sáng-tối liền mạch mà là **hai
+ * cặp**: `t2`/`t3` là mặt sáng và mặt khuất của vật liệu chính, `t1`/`t4` là
+ * mặt sáng và mặt khuất của vật liệu phụ. Cái lon là nhôm với nhãn đỏ, bình xịt
+ * là nhựa xanh với tem trắng — hai cặp đó có sẵn trong từng hình rồi, chỉ là
+ * trước đây cả bốn tông đều rút từ một màu nên nhìn ra một cục vàng.
+ *
+ * Nên bảng này chỉ cần nói mỗi hình làm bằng gì. `p-` là chính, `s-` là phụ;
+ * bảng màu của từng chất liệu nằm trong `base.css`, và tên nào không có ở đây
+ * thì vẫn chạy theo màu chủ đề như cũ.
+ */
+const PALETTE: Record<string, string> = {
+  // --------------------------------------------------------- Xóm Nước Đen --
+  can: 'p-steel s-red',
+  cart: 'p-wood s-red',
+  spray: 'p-blue s-cream',
+  mic: 'p-graphite s-gold',
+  gear: 'p-steel s-rust',
+  gem: 'p-violet s-ice',
+
+  // -------------------------------------------------------------- Bến Cảng --
+  forklift: 'p-amber s-graphite',
+  crate: 'p-wood s-cream',
+  fish: 'p-ice s-blue',
+  anchor: 'p-steel s-rust',
+  stamp: 'p-wood s-red',
+  containers: 'p-rust s-teal',
+
+  // -------------------------------------------------------------- Phố Thị --
+  truck: 'p-red s-cream',
+  washer: 'p-cream s-blue',
+  dumbbell: 'p-graphite s-red',
+  coffee: 'p-coffee s-cream',
+  film: 'p-graphite s-amber',
+  bed: 'p-wood s-cream',
+
+  // ------------------------------------------------------- Phố Tài Chính --
+  chart: 'p-cream s-green',
+  bank: 'p-stone s-gold',
+  shield: 'p-navy s-gold',
+  briefcase: 'p-leather s-gold',
+  star: 'p-gold s-amber',
+  scales: 'p-gold s-stone',
+
+  // ------------------------------------------------------- Khu Nhà Giàu ---
+  frame: 'p-gold s-teal',
+  gavel: 'p-wood s-gold',
+  yacht: 'p-cream s-navy',
+  plane: 'p-cream s-blue',
+  wine: 'p-wine s-gold',
+  island: 'p-sand s-leaf',
+
+  // --------------------------------------------------------------- Tầng Mây --
+  tower: 'p-ice s-cyan',
+  media: 'p-graphite s-magenta',
+  rocket: 'p-cream s-red',
+  atom: 'p-cyan s-ice',
+  vault: 'p-steel s-gold',
+  crown: 'p-gold s-ruby',
+
+  // ------------------------------------------------------------- ca làm ----
+  flyer: 'p-cream s-red',
+  plate: 'p-cream s-leaf',
+  boxes: 'p-cardboard s-wood',
+  camera: 'p-graphite s-steel',
+  derrick: 'p-steel s-rust',
+
+  // ---------------------------------------------------------- kèo và tiền --
+  wallet: 'p-leather s-gold',
+  coins: 'p-gold s-amber',
+  coin: 'p-gold s-amber',
+  flame: 'p-flame s-amber',
+  call: 'p-graphite s-green',
+  ore: 'p-violet s-ice',
+  dice: 'p-cream s-red',
+
+  // ------------------------------------------------------- mốc cuộc đời ---
+  smartphone: 'p-graphite s-cyan',
+  dog: 'p-coffee s-cream',
+  car: 'p-red s-steel',
+  door: 'p-wood s-gold',
+  receipt: 'p-cream s-stone',
+  cheers: 'p-amber s-cream',
+  child: 'p-skin s-teal',
+  house: 'p-cream s-red',
+  ring: 'p-gold s-ice',
+  flower: 'p-leaf s-pink',
+  robot: 'p-steel s-cyan',
+  moon: 'p-ice s-cream',
+};
+
+/** Every name the set answers to, for the review sheet. */
+export const ART_NAMES: readonly string[] = Object.keys(ART);
+
 export function Art({ name, class: className }: { name: string; class?: string }) {
   // A save written before a rename should keep its layout rather than leaving a
   // hole where a picture was.
   const draw = ART[name] ?? ART['coin']!;
+  const palette = PALETTE[name] ?? '';
 
   return (
-    <svg class={`art${className ? ` ${className}` : ''}`} viewBox="0 0 48 48" aria-hidden="true">
+    <svg
+      class={`art ${palette}${className ? ` ${className}` : ''}`}
+      viewBox="0 0 48 48"
+      aria-hidden="true"
+    >
       {draw()}
     </svg>
   );

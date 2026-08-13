@@ -129,7 +129,7 @@ export function Grind({ game, state, derived, now }: Props) {
 
           if (!unlocked) {
             return (
-              <div key={job.id} class="row" style={{ opacity: 0.4 }}>
+              <div key={job.id} class="row row--locked">
                 <span class="row__icon">
                   <Icon name="lock" />
                 </span>

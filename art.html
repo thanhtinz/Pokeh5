@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark" />
+    <title>Broke to Boss — bảng soi asset</title>
+    <style>
+      /* Chỉ dùng để soi, nên style nằm ngay đây thay vì lẫn vào app.css. */
+      body {
+        overflow: auto;
+        height: auto;
+      }
+
+      .sheet-page {
+        padding: 24px;
+        background: var(--bg);
+        min-height: 100vh;
+      }
+
+      .sheet-page h1 {
+        margin: 28px 0 14px;
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--ink-dim);
+      }
+
+      .sheet-page h1:first-child {
+        margin-top: 0;
+      }
+
+      .sheet-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
+        gap: 10px;
+      }
+
+      .sheet-cell {
+        display: grid;
+        justify-items: center;
+        gap: 7px;
+        padding: 12px 6px;
+        border: 1px solid var(--panel-edge);
+        border-radius: 12px;
+        background: var(--panel);
+      }
+
+      .sheet-cell b {
+        font-size: 10px;
+        font-weight: 600;
+        color: var(--ink-faint);
+      }
+
+      .sheet-big {
+        width: 76px;
+        height: 76px;
+      }
+
+      /* Cái đĩa sáng thật của mốc cuộc đời; chỗ này chỉ tắt cái sợi chỉ dọc
+         mà timeline vẽ qua từng mốc, vì ở đây không có timeline nào cả. */
+      .sheet-lit {
+        display: block;
+        padding: 0;
+      }
+
+      .sheet-lit::before {
+        display: none;
+      }
+
+      .sheet-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 14px;
+        border: 1px solid var(--panel-edge);
+        border-radius: 12px;
+        background: var(--panel);
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/art-sheet.tsx"></script>
+  </body>
+</html>

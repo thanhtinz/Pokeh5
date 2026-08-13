@@ -393,6 +393,19 @@
   border-color: var(--panel-edge-lit);
 }
 
+/*
+ * Một hàng chưa mở khoá.
+ *
+ * Mờ **chữ và hình**, không mờ cái mặt thẻ. Hạ `opacity` lên cả hàng thì cái
+ * nền của nó mờ theo, và cảnh thành phố ở đáy mọi màn cuộn xuyên thẳng qua
+ * dòng chữ — hàng rào với cột đèn cắt ngang đúng chỗ đang có tên một ca làm.
+ * Đó là lỗi nhìn thấy được, và nó nằm ở chỗ dễ mắc nhất: một dòng style viết
+ * thẳng vào JSX.
+ */
+.row--locked > * {
+  opacity: 0.45;
+}
+
 .row__icon {
   display: grid;
   place-items: center;
@@ -587,9 +600,21 @@ button.row__icon:not(:disabled):active {
 
 /* ------------------------------------------------------------------ life -- */
 
+/*
+ * Dòng thời gian mốc cuộc đời.
+ *
+ * Có mặt thẻ như mọi khối khác trên màn này. Trước đây nó là một sợi chỉ trần
+ * chạy thẳng trên nền — nhìn thoáng hơn thật, nhưng nó là khối *cuối* của màn
+ * cuộn, tức là khối duy nhất luôn nằm đè lên cảnh thành phố, và mấy mốc cuối
+ * đọc trên nền các nóc nhà đang sáng đèn thì không đọc được.
+ */
 .life {
   display: grid;
   gap: 0;
+  padding: 4px 14px;
+  border: 1px solid var(--panel-edge);
+  border-radius: var(--radius);
+  background: var(--panel);
 }
 
 .life__item {
@@ -971,31 +996,34 @@ button.row__icon:not(:disabled):active {
 }
 
 /*
- * Opacity is set per layer rather than capped on the parent, because the two
- * ends of the game want opposite things: the vacant lot is the only thing on
- * screen at the start and has to carry it, while the finished skyline sits
- * under translucent panels full of numbers and must not compete with them.
+ * Độ mờ đặt cho từng lớp chứ không chặn ở lớp cha, vì hai đầu của game muốn hai
+ * thứ ngược nhau: cái bãi đất trống là thứ duy nhất trên màn hình lúc mở đầu
+ * nên phải gánh cả khung hình, còn cái skyline đã dựng xong thì nằm dưới những
+ * tấm thẻ đầy số và tuyệt đối không được tranh với chúng.
+ *
+ * Mấy con số này đã hạ xuống một nấc so với lúc đầu. Cảnh nền là trang trí, mà
+ * ở đáy mọi màn cuộn nó lại là thứ nằm ngay sau chữ — nên nó thua, và thua sẵn.
  */
 .scene__far {
-  opacity: calc((var(--wealth) - 0.58) * 0.3);
+  opacity: calc((var(--wealth) - 0.58) * 0.24);
 }
 
 .scene__mid {
-  opacity: calc((var(--wealth) - 0.34) * 0.28);
+  opacity: calc((var(--wealth) - 0.34) * 0.22);
 }
 
 .scene__near {
-  opacity: calc(var(--wealth) * 0.22);
+  opacity: calc(var(--wealth) * 0.17);
 }
 
 .scene__lights {
   color: hsl(var(--hue) 90% 84%);
-  opacity: calc((var(--wealth) - 0.22) * 0.45);
+  opacity: calc((var(--wealth) - 0.22) * 0.32);
 }
 
 /* Strokes, not fills: the lot is a line drawing of what was there before. */
 .scene__lot {
-  opacity: calc(0.28 - var(--wealth) * 0.66);
+  opacity: calc(0.22 - var(--wealth) * 0.52);
 }
 
 .scene__lot path {
@@ -1346,22 +1374,25 @@ button.row__icon:not(:disabled):active {
 }
 
 /*
- * Assets on a lit tile.
+ * Asset trên đĩa sáng.
  *
- * The ramp and the tile gradient are both derived from the accent, so on a
- * bright disc a light-toned asset all but disappears into it. Custom properties
- * inherit, so redeclaring the ramp on the asset itself flips it dark without
- * touching a single shape.
+ * Đĩa mốc cuộc đời và đầu thẻ cơ hội đều là một mảng accent chói, nên một hình
+ * tông sáng đặt lên đó là biến mất. Cách chữa cũ là thay sạch bốn tông bằng một
+ * dải nâu — sửa được tương phản nhưng lấy mất luôn màu của vật, và giờ thì màu
+ * của vật mới là thứ đáng giữ.
+ *
+ * Nên chỉ **dìm độ sáng xuống**, không đụng tới sắc. Thuộc tính tuỳ biến thì
+ * kế thừa, mà bộ chọn này lại đặc hiệu hơn class vật liệu, nên một dòng ở đây
+ * đè được cả hai mươi bảy vật liệu và cái lon vẫn là lon nhôm nhãn đỏ, chỉ là
+ * tối đi cho đọc được trên nền vàng.
  */
 .life__dot .art,
 .sheet__icon .art,
 .sheet__art-icon .art {
-  --art-1: hsl(var(--hue) 45% 38%);
-  --art-2: hsl(var(--hue) 50% 28%);
-  --art-3: hsl(var(--hue) 55% 19%);
-  --art-4: hsl(var(--hue) 60% 12%);
-  --art-ink: hsl(var(--hue) 60% 8%);
-  --art-lite: hsl(var(--hue) 30% 88%);
+  --pl: -26%;
+  --sl: -24%;
+  --art-ink: hsl(var(--hue) 55% 7%);
+  --art-lite: hsl(var(--hue) 25% 86%);
 }
 
 /* --------------------------------------------------------------- làm lại -- */
