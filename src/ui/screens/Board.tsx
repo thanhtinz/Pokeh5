@@ -54,7 +54,7 @@ function SignIn({ account }: { account: Account }) {
   }
 
   return (
-    <section class="panel auth">
+    <section class="panel panel--inset auth">
       <div class="segments">
         <button aria-pressed={mode === 'register'} onClick={() => setMode('register')}>
           {t('auth.register')}
@@ -116,7 +116,7 @@ function Signed({ account }: { account: Account }) {
   const user = account.user!;
 
   return (
-    <section class="panel auth">
+    <section class="panel panel--inset auth">
       <div class="prestige__head">
         <span class="section__title" style={{ margin: 0 }}>
           {user.name}
@@ -148,7 +148,7 @@ function Table({ account, state }: Props) {
   const board = account.board;
 
   return (
-    <section class="panel board">
+    <section class="panel panel--inset board">
       <div class="prestige__head">
         <span class="section__title" style={{ margin: 0 }}>
           {t('board.title')}

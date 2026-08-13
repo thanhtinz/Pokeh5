@@ -32,7 +32,7 @@ export function More({ game, state, derived }: Props) {
   return (
     <>
       {/* ---------------------------------------------------- việc hôm nay -- */}
-      <section class="panel">
+      <section class="panel panel--inset">
         <div class="prestige__head">
           <span class="section__title" style={{ margin: 0 }}>
             {t('quest.title')}
@@ -78,7 +78,7 @@ export function More({ game, state, derived }: Props) {
       </section>
 
       {/* ------------------------------------------------------- điểm danh -- */}
-      <section class="panel daily">
+      <section class="panel panel--inset daily">
         <div class="prestige__head">
           <span class="section__title" style={{ margin: 0 }}>
             {t('daily.title')}
@@ -121,7 +121,7 @@ export function More({ game, state, derived }: Props) {
       </section>
 
       {/* ------------------------------------------------------ đổi uy tín -- */}
-      <section class="panel prestige">
+      <section class="panel panel--inset prestige">
         <div class="prestige__head">
           <span class="section__title" style={{ margin: 0 }}>
             {t('perk.title')}

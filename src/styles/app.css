@@ -147,6 +147,20 @@
   text-transform: none;
 }
 
+/*
+ * Cái đệm mà gần như panel nào cũng muốn.
+ *
+ * `.panel` cố tình không tự đệm, vì vài chỗ nội dung phải chạm mép — bảng giá
+ * sàn, cái nút chạm to ở màn Cày. Nhưng "vài chỗ" là thiểu số, và để mặc thì
+ * mỗi panel mới lại phải tự nhớ khai lấy; quên một cái là chữ dính sát viền,
+ * và đó đúng là chuyện vừa xảy ra với hai màn mới nhất. Nên cái đệm có tên.
+ */
+.panel--inset {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+}
+
 .panel {
   border: 1px solid var(--panel-edge);
   border-radius: var(--radius);
@@ -1079,11 +1093,6 @@ button.row__icon:not(:disabled):active {
 
 /* ------------------------------------------------------------ tài khoản -- */
 
-.auth {
-  display: grid;
-  gap: 12px;
-}
-
 .auth__form {
   display: grid;
   gap: 10px;
@@ -1156,7 +1165,6 @@ button.row__icon:not(:disabled):active {
 /* -------------------------------------------------------- bảng người ta -- */
 
 .board {
-  display: grid;
   gap: 10px;
 }
 
@@ -1398,9 +1406,6 @@ button.row__icon:not(:disabled):active {
 /* --------------------------------------------------------------- làm lại -- */
 
 .prestige {
-  display: grid;
-  gap: 12px;
-  padding: 14px;
   /* Viền sáng hơn panel thường: đây là thứ đắt nhất trên màn hình. */
   border-color: var(--panel-edge-lit);
 }
@@ -1419,12 +1424,6 @@ button.row__icon:not(:disabled):active {
 }
 
 /* ------------------------------------------------ điểm danh & thành tựu -- */
-
-.daily {
-  display: grid;
-  gap: 12px;
-  padding: 14px;
-}
 
 /* Bảy ô một hàng, co lại vừa màn chứ không cuộn ngang. */
 .daily__row {

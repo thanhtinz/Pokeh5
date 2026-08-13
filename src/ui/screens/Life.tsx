@@ -50,7 +50,7 @@ function nearby(rank: number): (RivalDef | null)[] {
 export function Life({ game, state, derived, now }: Props) {
   return (
     <>
-      <section class="panel" style={{ padding: '14px' }}>
+      <section class="panel panel--inset">
         <div class="market__summary" style={{ padding: 0 }}>
           <span class="stat">
             <span class="stat__label">{t('life.peak')}</span>
@@ -70,7 +70,7 @@ export function Life({ game, state, derived, now }: Props) {
       </section>
 
       {/* ---------------------------------------------------- bảng người ta -- */}
-      <section class="panel board">
+      <section class="panel panel--inset board">
         <div class="prestige__head">
           <span class="section__title" style={{ margin: 0 }}>
             {t('rival.title')}
@@ -164,7 +164,7 @@ export function Life({ game, state, derived, now }: Props) {
         })}
       </section>
 
-      <section class="panel prestige">
+      <section class="panel panel--inset prestige">
         <div class="prestige__head">
           <span class="section__title" style={{ margin: 0 }}>
             {t('prestige.title')}
@@ -212,7 +212,7 @@ export function Life({ game, state, derived, now }: Props) {
         )}
       </section>
 
-      <section class="panel" style={{ padding: '14px', display: 'grid', gap: '12px' }}>
+      <section class="panel panel--inset">
         <span class="section__title" style={{ margin: 0 }}>
           {t('life.language')}
         </span>
