@@ -31,6 +31,16 @@ export interface PlayerState {
   createdAt: number;
   lastSeenAt: number;
 
+  /**
+   * Tài khoản sở hữu ván này.
+   *
+   * Từ lúc bắt buộc đăng nhập thì bản lưu không còn thuộc về cái máy nữa mà
+   * thuộc về một người. Thiếu trường này thì hai người mượn chung một máy là
+   * người sau mở game lên thấy cơ ngơi của người trước — rồi đẩy luôn nó lên
+   * tài khoản mình. `null` là bản lưu ghi từ trước khi có tài khoản.
+   */
+  ownerId: number | null;
+
   /** Cash on hand. Negative for most of the first act. */
   cash: number;
   /** Đỉnh tài sản của lượt này; làm lại thì về mốc đầu. */
@@ -118,6 +128,7 @@ export function createNewSave(seed: number): PlayerState {
     version: SAVE_VERSION,
     createdAt: now,
     lastSeenAt: now,
+    ownerId: null,
 
     cash: STARTING_BALANCE,
     peakNetWorth: STARTING_BALANCE,

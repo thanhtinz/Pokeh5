@@ -1091,6 +1091,67 @@ button.row__icon:not(:disabled):active {
   margin-bottom: 0;
 }
 
+/* --------------------------------------------------------------- cổng ---- */
+
+/*
+ * Màn đầu tiên, và với người lạ là màn *duy nhất* cho tới khi họ điền xong.
+ *
+ * Nên nó không phải một cái form. Nó là chỗ nói game này là game gì, rồi mới
+ * xin tên với mật khẩu — ai đời điền mật khẩu vào một cái hộp trên nền đen mà
+ * còn chưa biết đang đăng ký vào cái gì.
+ */
+.gate {
+  position: relative;
+  display: grid;
+  align-content: center;
+  height: 100%;
+  width: 100%;
+  max-width: var(--shell);
+  margin-inline: auto;
+  padding: 24px 20px calc(24px + env(safe-area-inset-bottom));
+  overflow-y: auto;
+}
+
+/* Cảnh nền ở đây không có thanh tab nào để đứng lên, nên nó ngồi đúng đáy. */
+.gate .scene {
+  bottom: 0;
+}
+
+.gate__body {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 18px;
+}
+
+.gate__intro {
+  display: grid;
+  gap: 8px;
+  text-align: center;
+}
+
+.gate__title {
+  font-size: clamp(28px, 8.5vw, 36px);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 1.2;
+  color: var(--ink);
+  text-shadow: 0 0 34px var(--glow);
+}
+
+.gate__pitch {
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--ink-dim);
+}
+
+.gate__note {
+  font-size: 11.5px;
+  line-height: 1.5;
+  text-align: center;
+  color: var(--ink-faint);
+}
+
 /* ------------------------------------------------------------ tài khoản -- */
 
 .auth__form {

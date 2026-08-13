@@ -170,6 +170,12 @@ export function sanitise(raw: unknown): PlayerState | null {
     version: SAVE_VERSION,
     createdAt: clampInt(data.createdAt, 0, Number.MAX_SAFE_INTEGER, now),
     lastSeenAt: clampInt(data.lastSeenAt, 0, Number.MAX_SAFE_INTEGER, now),
+    // Bản lưu ghi trước khi có tài khoản không có chủ. Không đoán bừa một id:
+    // `null` nói đúng sự thật, và chỗ nhận ván biết phải làm gì với nó.
+    ownerId:
+      typeof data.ownerId === 'number' && Number.isInteger(data.ownerId) && data.ownerId > 0
+        ? data.ownerId
+        : null,
 
     // Cash may legitimately be negative; only the magnitude is bounded.
     cash: clampNum(data.cash, -Number.MAX_SAFE_INTEGER, Number.MAX_SAFE_INTEGER, 0),
@@ -289,7 +295,15 @@ function parse(text: string | null): PlayerState | null {
   }
 }
 
-export async function loadSave(): Promise<{ state: PlayerState; isNew: boolean }> {
+/**
+ * Đọc bản lưu của **một tài khoản cụ thể**.
+ *
+ * Bản lưu trong máy mà mang chủ khác thì bỏ qua, không phải vì nó hỏng mà vì nó
+ * không phải của người đang đăng nhập. Bản lưu chưa có chủ — ghi từ trước khi
+ * game có tài khoản — thì nhận, và người đầu tiên đăng nhập trên máy này lấy
+ * luôn tiến độ đó; ván đó vốn là của họ chứ của ai.
+ */
+export async function loadSave(ownerId: number): Promise<{ state: PlayerState; isNew: boolean }> {
   let local: PlayerState | null = null;
   try {
     local = parse(window.localStorage.getItem(KEY));
@@ -307,10 +321,20 @@ export async function loadSave(): Promise<{ state: PlayerState; isNew: boolean }
     }
   }
 
+  const mine = (save: PlayerState | null) =>
+    save && (save.ownerId === null || save.ownerId === ownerId) ? save : null;
+
   // The mirror only wins when it is genuinely newer, which is exactly the
   // eviction case it exists for.
-  const best = native && (!local || native.lastSeenAt > local.lastSeenAt) ? native : local;
-  if (!best) return { state: createNewSave(randomSeed()), isNew: true };
+  const ours = { local: mine(local), native: mine(native) };
+  const best =
+    ours.native && (!ours.local || ours.native.lastSeenAt > ours.local.lastSeenAt)
+      ? ours.native
+      : ours.local;
+
+  if (!best) return { state: { ...createNewSave(randomSeed()), ownerId }, isNew: true };
+
+  best.ownerId = ownerId;
   return { state: best, isNew: false };
 }
 

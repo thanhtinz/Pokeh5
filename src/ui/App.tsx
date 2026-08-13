@@ -11,6 +11,7 @@ import { derive } from '../game/store';
 import { Hud } from './Hud';
 import { CardSheet, MilestoneSheet, OfflineSheet } from './Overlays';
 import { Board } from './screens/Board';
+import { Gate } from './screens/Gate';
 import { Empire } from './screens/Empire';
 import { Grind } from './screens/Grind';
 import { Life } from './screens/Life';
@@ -70,8 +71,18 @@ export function App() {
     );
   });
 
-  if (!game.ready) {
+  // Ba trạng thái trước khi có game, theo đúng thứ tự chúng xảy ra: chưa hỏi
+  // xong máy chủ, chưa đăng nhập, và đã đăng nhập mà ván còn đang nạp.
+  if (!account.checked) {
     return <div class="boot">{t('ui.boot')}</div>;
+  }
+
+  if (!account.signedIn) {
+    return <Gate account={account} />;
+  }
+
+  if (!game.ready) {
+    return <div class="boot">{t('ui.loading')}</div>;
   }
 
   const now = Date.now();
@@ -108,7 +119,7 @@ export function App() {
         {tab === 'empire' && <Empire game={game} state={state} derived={derived} />}
         {tab === 'market' && <Market game={game} state={state} />}
         {tab === 'life' && <Life game={game} state={state} derived={derived} now={now} />}
-        {tab === 'board' && <Board account={account} state={state} />}
+        {tab === 'board' && <Board account={account} />}
         {tab === 'more' && <More game={game} state={state} derived={derived} />}
       </main>
 

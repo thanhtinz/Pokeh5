@@ -18,6 +18,7 @@ const VIEWPORT = { width: 393, height: 852 };
 
 const SAVE_KEY = 'broketoboss.save.v1';
 const TOKEN_KEY = 'broketoboss.token';
+const USER_KEY = 'broketoboss.user';
 
 /**
  * Máy chủ tài khoản riêng cho lần chụp này, cổng riêng, kho riêng.
@@ -31,6 +32,14 @@ const API_DB = `${OUT}-api.sqlite`;
 const API = `http://localhost:${API_PORT}/api`;
 
 process.env['API_URL'] = `http://localhost:${API_PORT}`;
+
+// Dọn kho **trước** khi dựng, không phải chỉ sau khi xong. Lần chạy nào hỏng
+// giữa chừng cũng để lại file cũ, và lần sau đăng ký mấy cái tên đó sẽ ăn
+// `name.taken` — tức là không có token, tức là mọi màn hình đứng ở cổng, tức là
+// một lỗi trông chẳng liên quan gì tới nguyên nhân.
+for (const leftover of [API_DB, `${API_DB}-wal`, `${API_DB}-shm`]) {
+  await rm(leftover, { force: true });
+}
 
 const apiServer = spawn('node', ['server/index.mjs'], {
   env: { ...process.env, PORT: String(API_PORT), DB_FILE: API_DB },
@@ -86,8 +95,15 @@ async function seedBoard() {
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ name, password: PASSWORD }),
     }).then((response) => response.json());
-    tokens.set(name, registered.token);
+    tokens.set(name, registered);
   }
+
+  // Người chơi của bản "mới toanh": có tài khoản, chưa có ván nào.
+  const rookie = await fetch(`${API}/register`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ name: 'moi_choi', password: PASSWORD }),
+  }).then((response) => response.json());
 
   const db = new DatabaseSync(API_DB);
   db.prepare('UPDATE users SET created_at = ?').run(Date.now() - 7 * 86_400_000);
@@ -98,7 +114,7 @@ async function seedBoard() {
       method: 'PUT',
       headers: {
         'content-type': 'application/json',
-        authorization: `Bearer ${tokens.get(name)}`,
+        authorization: `Bearer ${tokens.get(name).token}`,
       },
       body: JSON.stringify({
         save: { version: 1, lastSeenAt: 1 },
@@ -107,7 +123,7 @@ async function seedBoard() {
     });
   }
 
-  return tokens.get('tinz');
+  return { rich: tokens.get('tinz'), rookie };
 }
 
 /** Cùng phép tính với `dayIndex` trong `src/game/daily.ts`. */
@@ -118,9 +134,10 @@ function dayIndex(at) {
 }
 
 /** A save far enough along that every screen has something on it. */
-function richSave(now) {
+function richSave(now, ownerId) {
   return {
     version: 1,
+    ownerId,
     createdAt: now - 9_000_000,
     lastSeenAt: now,
     cash: 4.2e9,
@@ -163,8 +180,8 @@ function richSave(now) {
 const TABS = ['grind', 'empire', 'market', 'life', 'board', 'more'];
 
 const apiUp = await waitForApi();
-const boardToken = apiUp ? await seedBoard() : null;
-if (!apiUp) console.warn('api did not start — the board screens will show the offline state');
+if (!apiUp) throw new Error('the account api did not start; every screen is behind it now');
+const players = await seedBoard();
 
 const server = await createServer({ server: { port: 5199 }, logLevel: 'warn' });
 await server.listen();
@@ -178,21 +195,38 @@ await mkdir(OUT, { recursive: true });
 const executablePath = process.env['CHROMIUM_PATH'];
 const browser = await chromium.launch(executablePath ? { executablePath } : {});
 
+/** Mọi màn game giờ nằm sau cổng, nên fixture nào cũng phải mang một phiên. */
+async function signedIn(page, save, who = players.rich) {
+  await page.addInitScript(
+    ([saveKey, seed, tokenKey, token, userKey, user]) => {
+      if (seed) window.localStorage.setItem(saveKey, JSON.stringify(seed));
+      window.localStorage.setItem(tokenKey, token);
+      window.localStorage.setItem(userKey, JSON.stringify(user));
+    },
+    [SAVE_KEY, save, TOKEN_KEY, who.token, USER_KEY, who.user],
+  );
+}
+
+// Cái cổng: chưa đăng nhập thì đây là toàn bộ game.
+{
+  const context = await browser.newContext({ viewport: VIEWPORT, deviceScaleFactor: 2 });
+  const page = await context.newPage();
+  await page.goto(base, { waitUntil: 'networkidle' });
+  await page.waitForSelector('.gate', { timeout: 15_000 });
+  await page.waitForTimeout(400);
+  await page.screenshot({ path: `${OUT}/gate.png` });
+  await context.close();
+}
+
 for (const stage of ['broke', 'rich']) {
   const context = await browser.newContext({ viewport: VIEWPORT, deviceScaleFactor: 2 });
   const page = await context.newPage();
 
-  if (stage === 'rich') {
-    // Bản giàu cũng là bản đã đăng nhập: hai màn hình của tab Bảng — chưa có
-    // tài khoản và đã có — đều phải nhìn thấy, và đây là chỗ chia đôi sẵn.
-    await page.addInitScript(
-      ([saveKey, save, tokenKey, token]) => {
-        window.localStorage.setItem(saveKey, JSON.stringify(save));
-        if (token) window.localStorage.setItem(tokenKey, token);
-      },
-      [SAVE_KEY, richSave(Date.now()), TOKEN_KEY, boardToken],
-    );
-  }
+  // Phải đăng nhập mới vào được game, nên cả hai bản đều mang sẵn một phiên.
+  // Bản nợ là tài khoản vừa lập chưa có ván nào; bản giàu có ván đóng dấu đúng
+  // chủ của nó — sai dấu là `loadSave` bỏ qua và ảnh chụp ra một ván trắng.
+  const who = stage === 'rich' ? players.rich : players.rookie;
+  await signedIn(page, stage === 'rich' ? richSave(Date.now(), who.user.id) : null, who);
 
   await page.goto(base, { waitUntil: 'networkidle' });
   await page.waitForSelector('.shell', { timeout: 15_000 });
@@ -220,7 +254,7 @@ for (const stage of ['broke', 'rich']) {
 // together rather than one district per session.
 {
   const now = Date.now();
-  const save = richSave(now);
+  const save = richSave(now, players.rich.user.id);
   save.lastSeenAt = now;
   save.job = null;
   save.boost = null;
@@ -233,10 +267,7 @@ for (const stage of ['broke', 'rich']) {
 
   const context = await browser.newContext({ viewport: VIEWPORT, deviceScaleFactor: 1.5 });
   const page = await context.newPage();
-  await page.addInitScript(
-    ([key, value]) => window.localStorage.setItem(key, JSON.stringify(value)),
-    [SAVE_KEY, save],
-  );
+  await signedIn(page, save);
 
   await page.goto(base, { waitUntil: 'networkidle' });
   await page.waitForSelector('.shell', { timeout: 15_000 });
@@ -256,7 +287,7 @@ for (const stage of ['broke', 'rich']) {
 // The opportunity card, which only ever exists for twenty-five seconds.
 {
   const now = Date.now();
-  const save = richSave(now);
+  const save = richSave(now, players.rich.user.id);
   save.cash = 18_400;
   save.peakNetWorth = -120_000;
   save.businesses = { cans: 40, cart: 22, wash: 9 };
@@ -275,10 +306,7 @@ for (const stage of ['broke', 'rich']) {
 
   const context = await browser.newContext({ viewport: VIEWPORT, deviceScaleFactor: 2 });
   const page = await context.newPage();
-  await page.addInitScript(
-    ([key, value]) => window.localStorage.setItem(key, JSON.stringify(value)),
-    [SAVE_KEY, save],
-  );
+  await signedIn(page, save);
 
   await page.goto(base, { waitUntil: 'networkidle' });
   await page.waitForSelector('.sheet', { timeout: 15_000 });
@@ -290,7 +318,7 @@ for (const stage of ['broke', 'rich']) {
 // The milestone payoff, which only appears for a moment when one is claimed.
 {
   const now = Date.now();
-  const save = richSave(now);
+  const save = richSave(now, players.rich.user.id);
   save.lastSeenAt = now;
   save.cash = 900_000;
   save.peakNetWorth = 900_000;
@@ -304,10 +332,7 @@ for (const stage of ['broke', 'rich']) {
 
   const context = await browser.newContext({ viewport: VIEWPORT, deviceScaleFactor: 2 });
   const page = await context.newPage();
-  await page.addInitScript(
-    ([key, value]) => window.localStorage.setItem(key, JSON.stringify(value)),
-    [SAVE_KEY, save],
-  );
+  await signedIn(page, save);
 
   await page.goto(base, { waitUntil: 'networkidle' });
   await page.waitForSelector('.shell', { timeout: 15_000 });
@@ -330,4 +355,4 @@ await rm(API_DB, { force: true });
 await rm(`${API_DB}-wal`, { force: true });
 await rm(`${API_DB}-shm`, { force: true });
 
-console.log(`Wrote ${TABS.length * 2 + 3} screenshots to ${OUT}/`);
+console.log(`Wrote ${TABS.length * 2 + 4} screenshots to ${OUT}/`);

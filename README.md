@@ -17,9 +17,9 @@ is **50 kB gzipped**, and the server it talks to has no dependencies at all.
 ```bash
 npm install
 npm run dev        # http://localhost:5173
-npm run server     # the account API on :8787 (optional — the game plays without it)
+npm run server     # the account API on :8787 (required — the game is behind a sign-in)
 npm run dev:all    # both at once
-npm test           # 103 tests over the rule layer, the dictionaries and the server
+npm test           # 106 tests over the rule layer, the dictionaries and the server
 npm run build      # typecheck, then a production bundle in dist/
 npm run shot       # screenshots every screen at both ends of the palette
 npm run art        # all 58 drawn assets on one sheet, large enough to judge
@@ -32,8 +32,9 @@ npx cap add android
 npm run cap:android
 ```
 
-`npm run shot` needs a Chromium. If the environment pins one, point at it:
-`CHROMIUM_PATH=/opt/pw-browsers/chromium npm run shot`.
+`npm run shot` needs a Chromium and starts its own throwaway API on :8788, since
+every screen now sits behind a session. If the environment pins a browser, point
+at it: `CHROMIUM_PATH=/opt/pw-browsers/chromium npm run shot`.
 
 ## The one idea
 
@@ -349,7 +350,7 @@ A save written before any of this existed has its `beaten` list **backfilled
 from its peak rather than paid out** — opening the game to fourteen lump sums and
 fourteen toasts is a bug, not a present.
 
-103 tests now, from 50.
+106 tests now, from 50.
 
 ## Accounts, cloud saves and the real leaderboard
 
@@ -430,6 +431,31 @@ fail the first time. Seeding a board of brand-new accounts with trillions got
 `score.tooFast` on every one, exactly as designed. The fix was to age the fixture
 accounts by a week, not to widen the gate.
 
+### An account is required, and what that forced
+
+Signing in is the way into the game: there is no play-as-guest. That is a
+product decision, and it drags two engineering ones behind it.
+
+**A save belongs to a person, not to a phone.** Every save carries an `ownerId`,
+and `loadSave(ownerId)` ignores one stamped with somebody else. Without it, two
+brothers sharing a handset means the second one opens the game onto the first
+one's empire — and then uploads it to his own account. A save written before
+accounts existed has `ownerId: null` and is adopted by whoever signs in first,
+because that run really was theirs.
+
+**Losing the network must not lock the door.** This is a single-player idle game
+that has always run offline; requiring an account is for the leaderboard, not for
+turning a dropped signal into an evening you cannot play. So a session that has
+signed in once is remembered on the device — token *and* the user record — and a
+later launch that cannot reach the server still goes straight into the game with
+sync parked. Exactly one thing locks the door: the server answering that the
+token is no longer valid. That is not a network failure, it is "this session is
+not that account any more", and then you sign in again.
+
+The simulation loop only starts once you are through the gate. Running it behind
+the sign-in screen would have businesses cycling, cards landing and money
+arriving for a save nobody had claimed yet.
+
 ### Sync
 
 The board reads **the same row the save writes** — there is no separate score
@@ -444,11 +470,20 @@ stores a blob some client sent it — "trusting the server" here is really trust
 whatever client wrote that blob, and not having to do that is what `sanitise()`
 is for.
 
-Signing in is **additive, never required**. No network, no account, server down —
-the game plays exactly as before, because the real save is still on the device
-and this layer only mirrors it. Nothing in `src/net/` throws; every call returns
-`{ok}` or `{ok: false, error}`, and the errors are ids that `src/i18n/` turns
-into sentences, same as everything else.
+Picking which save to open is three cases, and the third is where progress goes
+missing if you are careless:
+
+1. The device has this account's save → newest `lastSeenAt` wins.
+2. The device has nothing, the server does → take the server's, no comparison.
+3. Neither → a fresh run.
+
+Case 2 has to be separate rather than folded into "newest wins", because a
+freshly created save has `lastSeenAt` of *now* and would beat any server copy —
+so switching phones would wipe you out at the moment it was supposed to save you.
+
+Nothing in `src/net/` throws; every call returns `{ok}` or `{ok: false, error}`,
+and the errors are ids that `src/i18n/` turns into sentences, same as everything
+else.
 
 ## How the money works
 

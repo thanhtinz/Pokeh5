@@ -85,7 +85,7 @@ export const vi: Record<string, string> = {
   'life.locked': 'Mốc {amount}',
   'life.claim': 'Chuộc lại',
   'life.offlineNote':
-    'Tắt game vẫn ăn tiền, tối đa {hours} tiếng. Bản lưu nằm trong máy, mất máy là mất.',
+    'Tắt game vẫn ăn tiền, tối đa {hours} tiếng. Bản lưu nằm trên máy chủ, đổi máy đăng nhập lại là có.',
   'life.language': 'Ngôn ngữ',
   'life.reset': 'Chơi lại từ đầu',
   'life.resetConfirm': 'Xoá sạch, quay lại vạch âm một tỷ?',
@@ -184,6 +184,11 @@ export const vi: Record<string, string> = {
   'goal.upgrades': 'Nâng cấp {target} lần',
   'tab.board': 'Bảng',
 
+  'ui.loading': 'Đang mở sổ sách',
+  'gate.pitch': 'Âm một tỷ. Nhặt ve chai, đi làm ca, gây dựng lại từ đầu, và chuộc về từng thứ mà món nợ đã lấy đi.',
+  'gate.start': 'Bắt đầu từ âm một tỷ',
+  'gate.why': 'Có tài khoản thì bản lưu nằm trên máy chủ chứ không nằm trong máy — đổi điện thoại vẫn chơi tiếp, và tên mình có chỗ trên bảng.',
+
   // ------------------------------------------------------------ tài khoản --
   'auth.register': 'Đăng ký',
   'auth.login': 'Đăng nhập',
@@ -195,7 +200,7 @@ export const vi: Record<string, string> = {
   'auth.why': 'Có tài khoản thì bản lưu nằm trên máy chủ, đổi máy vẫn chơi tiếp, và tên mình lên bảng.',
   'auth.syncNote': 'Bản lưu tự đẩy lên mỗi phút và mỗi lần tắt game.',
   'auth.pushNow': 'Đẩy lên ngay',
-  'sync.off': 'Chưa nối',
+  'sync.offline': 'Chưa nối được máy chủ',
   'sync.idle': 'Đã đồng bộ',
   'sync.busy': 'Đang gửi',
   'sync.error': 'Lỗi đồng bộ',
@@ -206,7 +211,6 @@ export const vi: Record<string, string> = {
   'board.load': 'Tải lại',
   'board.empty': 'Chưa tải được bảng. Kiểm tra mạng rồi bấm Tải lại.',
   'board.detail': '{runs} lần làm lại · chuộc {claimed}/12',
-  'board.anon': 'Kỷ lục của mình là {amount}. Đăng ký để lên bảng.',
   'board.fair': 'Xếp theo kỷ lục tổng tài sản. Số gửi lên có kiểm, nhưng luật chơi chạy ở máy người chơi nên bảng này là sân chơi của người chơi thật.',
 
   // ------------------------------------------------------------------ lỗi --

@@ -13,7 +13,13 @@ import { store, type Store } from '../game/store';
 export function useGame(): Store {
   const [, force] = useReducer((n: number) => n + 1, 0);
 
-  useEffect(() => store.subscribe(() => force(undefined)), []);
+  // Ép vẽ ngay sau khi đăng ký: effect chạy sau lần vẽ đầu, nên tín hiệu nào
+  // phát trong khoảng đó là phát vào chỗ không ai nghe. Xem `useAccount`.
+  useEffect(() => {
+    const off = store.subscribe(() => force(undefined));
+    force(undefined);
+    return off;
+  }, []);
 
   return store;
 }

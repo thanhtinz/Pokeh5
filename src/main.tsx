@@ -14,12 +14,39 @@ const FLUSH_SECONDS = 0.1;
 const root = document.getElementById('app');
 if (root) render(<App />, root);
 
-// Ván chơi khởi động trước, tài khoản theo sau. Thứ tự này là cố ý: người chơi
-// chạm được vào game ngay, còn phần mạng thì tới lúc nào cũng được.
-void store.boot().then(() => {
-  startLoop();
-  void account.boot();
-});
+/**
+ * Thứ tự mở màn, và lý do nó là thứ tự này.
+ *
+ * Tài khoản trước, ván chơi sau. Nạp ván trước thì phải nạp *ván của ai* —
+ * chưa biết thì chỉ còn cách đoán, mà đoán sai là người sau mượn máy thấy cơ
+ * ngơi của người trước.
+ *
+ * Và vòng lặp mô phỏng chỉ chạy sau khi đã vào được game. Cho nó chạy sau lưng
+ * cái cổng đăng nhập thì cơ sở vẫn quay, thẻ cơ hội vẫn rơi, tiền vẫn vào —
+ * cho một ván mà chưa ai nhận là của mình.
+ */
+let looping = false;
+let opening = false;
+
+async function open(): Promise<void> {
+  // `account.playing` về false lúc đăng xuất, nên hàm này phải chạy lại được
+  // cho phiên sau; chỉ cái vòng lặp là dựng một lần duy nhất.
+  if (opening || !account.signedIn || account.playing) return;
+  opening = true;
+
+  try {
+    await account.openGame();
+    if (!looping) {
+      looping = true;
+      startLoop();
+    }
+  } finally {
+    opening = false;
+  }
+}
+
+account.subscribe(() => void open());
+void account.boot().then(open);
 
 /**
  * One loop for the whole game.
@@ -39,15 +66,18 @@ function startLoop(): void {
     const dt = Math.min(1, (time - last) / 1000);
     last = time;
 
-    store.tick(dt);
-    sinceFlush += dt;
+    // Đăng xuất giữa chừng thì ván đã rời khỏi bộ nhớ; đừng tính tiếp cho nó.
+    if (store.ready) {
+      store.tick(dt);
+      sinceFlush += dt;
 
-    if (sinceFlush >= FLUSH_SECONDS) {
-      sinceFlush = 0;
-      applyTheme(derive(store.state).netWorth, html);
-      store.flush();
-      // Tự chặn nhịp bên trong, nên gọi mỗi lần vẽ cũng chỉ đẩy mỗi phút một lần.
-      void account.push();
+      if (sinceFlush >= FLUSH_SECONDS) {
+        sinceFlush = 0;
+        applyTheme(derive(store.state).netWorth, html);
+        store.flush();
+        // Tự chặn nhịp bên trong, nên gọi mỗi lần vẽ cũng chỉ đẩy mỗi phút một lần.
+        void account.push();
+      }
     }
 
     requestAnimationFrame(frame);

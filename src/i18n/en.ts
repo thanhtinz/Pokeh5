@@ -65,7 +65,7 @@ export const en: Record<string, string> = {
   'life.locked': 'At {amount} net worth',
   'life.claim': 'Take it back',
   'life.offlineNote':
-    'Offline earnings are capped at {hours} hours. The save lives on this device and nowhere else.',
+    'Offline earnings are capped at {hours} hours. The save lives on the server — sign in on a new phone and it follows you.',
   'life.language': 'Language',
   'life.reset': 'Start over',
   'life.resetConfirm': 'Wipe the save and start again at minus one billion đồng?',
@@ -160,6 +160,11 @@ export const en: Record<string, string> = {
   'goal.upgrades': 'Buy {target} upgrades',
   'tab.board': 'Board',
 
+  'ui.loading': 'Opening the books',
+  'gate.pitch': 'Minus one billion đồng. Collect scrap, work shifts, build it back, and buy your life out of the hole one piece at a time.',
+  'gate.start': 'Start at minus a billion',
+  'gate.why': 'An account keeps your save on the server rather than on this phone — change devices and carry on, and your name gets a place on the board.',
+
   'auth.register': 'Sign up',
   'auth.login': 'Sign in',
   'auth.logout': 'Sign out',
@@ -170,7 +175,7 @@ export const en: Record<string, string> = {
   'auth.why': 'An account keeps your save on the server, carries it to a new phone, and puts your name on the board.',
   'auth.syncNote': 'The save uploads every minute, and whenever you close the game.',
   'auth.pushNow': 'Upload now',
-  'sync.off': 'Not connected',
+  'sync.offline': 'Server unreachable',
   'sync.idle': 'Synced',
   'sync.busy': 'Sending',
   'sync.error': 'Sync failed',
@@ -180,7 +185,6 @@ export const en: Record<string, string> = {
   'board.load': 'Reload',
   'board.empty': 'Could not load the board. Check your connection and hit Reload.',
   'board.detail': '{runs} runs · {claimed}/12 bought back',
-  'board.anon': 'Your record is {amount}. Sign up to appear here.',
   'board.fair': 'Ranked by record net worth. Submissions are checked, but the rules run on the player’s own device, so this board is for players playing honestly.',
 
   'err.name.shape': 'Names are 3–16 characters: letters, digits, underscore or hyphen.',

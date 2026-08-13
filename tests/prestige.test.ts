@@ -483,3 +483,32 @@ describe('bảng người ta', () => {
     expect(loaded.beaten.length).toBeGreaterThan(6);
   });
 });
+
+describe('ván thuộc về ai', () => {
+  it('bản lưu mang dấu chủ khác thì không nhận', () => {
+    const saved = sanitise({ ...createNewSave(1), ownerId: 7, cash: 5e12 })!;
+    expect(saved.ownerId).toBe(7);
+
+    // Người số 9 mở game trên cùng cái máy: không được thấy tiền của người số 7.
+    const reloaded = sanitise({ ...saved, ownerId: 9 })!;
+    expect(reloaded.ownerId).toBe(9);
+  });
+
+  it('bản lưu chưa có chủ thì `null`, không đoán bừa một id', () => {
+    const old = { ...createNewSave(1) } as Record<string, unknown>;
+    delete old['ownerId'];
+    expect(sanitise(old)!.ownerId).toBeNull();
+
+    // Và id vớ vẩn cũng thành `null` chứ không lọt qua thành một chủ có thật.
+    for (const junk of [0, -3, 1.5, '7', {}, null]) {
+      expect(sanitise({ ...createNewSave(1), ownerId: junk })!.ownerId).toBeNull();
+    }
+  });
+
+  it('xoá tiến độ không phải là đổi chủ', () => {
+    const store = ready(1e13);
+    store.state.ownerId = 42;
+    store.reset();
+    expect(store.state.ownerId).toBe(42);
+  });
+});

@@ -1,28 +1,23 @@
-import { useEffect, useState } from 'preact/hooks';
+import { useEffect } from 'preact/hooks';
 
 import { money } from '../../game/money';
-import type { PlayerState } from '../../game/state';
 import type { Account } from '../../net/account';
 import { t } from '../../i18n';
 import { Icon } from '../Icon';
 
 interface Props {
   account: Account;
-  state: PlayerState;
 }
 
 /**
- * Bảng xếp hạng thật, và chỗ đăng nhập.
+ * Bảng xếp hạng, và tài khoản đang đăng nhập.
  *
- * Hai thứ này ở chung một màn vì chúng là một câu chuyện: bảng là **lý do** để
- * đăng nhập. Nhét form đăng nhập vào màn cài đặt rồi để bảng ở chỗ khác thì
- * người chơi nhìn form và hỏi "để làm gì".
- *
- * Nên chưa đăng nhập vẫn thấy bảng — mờ đi, chỉ mười dòng đầu, nhưng thấy. Một
- * cái ổ khoá to đùng che mất thứ đang mời người ta vào là cách nhanh nhất để
- * họ bỏ đi.
+ * Không có nhánh "chưa đăng nhập" ở đây, vì tới được màn này thì đã đăng nhập
+ * rồi — cái cổng ở `Gate.tsx` là đường duy nhất vào game. Giữ lại một bản form
+ * thứ hai cho chắc nghe thì phòng thủ, nhưng thực ra là một màn hình không ai
+ * chạy tới bao giờ, và những màn hình đó là những màn hình hỏng mà không ai biết.
  */
-export function Board({ account, state }: Props) {
+export function Board({ account }: Props) {
   // Mở màn này ra là tải bảng, một lần. Bắt người chơi bấm một nút "tải" để
   // thấy thứ duy nhất trên màn hình thì cái nút đó là một bước thừa.
   useEffect(() => {
@@ -31,84 +26,9 @@ export function Board({ account, state }: Props) {
 
   return (
     <>
-      {account.signedIn ? <Signed account={account} /> : <SignIn account={account} />}
-      <Table account={account} state={state} />
+      <Signed account={account} />
+      <Table account={account} />
     </>
-  );
-}
-
-// ------------------------------------------------------------- đăng nhập ----
-
-function SignIn({ account }: { account: Account }) {
-  const [mode, setMode] = useState<'login' | 'register'>('register');
-  const [name, setName] = useState('');
-  const [password, setPassword] = useState('');
-
-  const ready = name.trim().length >= 3 && password.length >= 8;
-
-  async function submit(event: Event) {
-    event.preventDefault();
-    if (!ready || account.busy) return;
-    if (mode === 'register') await account.register(name.trim(), password);
-    else await account.login(name.trim(), password);
-  }
-
-  return (
-    <section class="panel panel--inset auth">
-      <div class="segments">
-        <button aria-pressed={mode === 'register'} onClick={() => setMode('register')}>
-          {t('auth.register')}
-        </button>
-        <button aria-pressed={mode === 'login'} onClick={() => setMode('login')}>
-          {t('auth.login')}
-        </button>
-      </div>
-
-      <form class="auth__form" onSubmit={submit}>
-        <label class="auth__field">
-          <span class="auth__label">{t('auth.name')}</span>
-          <input
-            class="auth__input"
-            type="text"
-            autocomplete="username"
-            autocapitalize="none"
-            spellcheck={false}
-            maxLength={16}
-            value={name}
-            onInput={(event) => setName((event.target as HTMLInputElement).value)}
-          />
-        </label>
-
-        <label class="auth__field">
-          <span class="auth__label">{t('auth.password')}</span>
-          <input
-            class="auth__input"
-            type="password"
-            autocomplete={mode === 'register' ? 'new-password' : 'current-password'}
-            value={password}
-            onInput={(event) => setPassword((event.target as HTMLInputElement).value)}
-          />
-        </label>
-
-        <span class="row__meta" style={{ whiteSpace: 'normal' }}>
-          {t('auth.rules')}
-        </span>
-
-        {account.error && <span class="auth__error">{errorText(account.error)}</span>}
-
-        <button class="btn btn--wide btn--primary" disabled={!ready || account.busy}>
-          {account.busy
-            ? t('auth.working')
-            : mode === 'register'
-              ? t('auth.register')
-              : t('auth.login')}
-        </button>
-      </form>
-
-      <span class="row__meta" style={{ whiteSpace: 'normal' }}>
-        {t('auth.why')}
-      </span>
-    </section>
   );
 }
 
@@ -144,7 +64,7 @@ function Signed({ account }: { account: Account }) {
 
 // ---------------------------------------------------------------- bảng ------
 
-function Table({ account, state }: Props) {
+function Table({ account }: { account: Account }) {
   const board = account.board;
 
   return (
@@ -199,11 +119,6 @@ function Table({ account, state }: Props) {
             </div>
           )}
 
-          {!account.signedIn && (
-            <span class="row__meta" style={{ whiteSpace: 'normal' }}>
-              {t('board.anon', { amount: money(state.bestNetWorth) })}
-            </span>
-          )}
         </>
       )}
 

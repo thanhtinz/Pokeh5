@@ -293,14 +293,33 @@ export class Store {
   private tradeCooldown = 0;
   private saveCooldown = 0;
 
-  async boot(): Promise<void> {
-    const { state, isNew } = await loadSave();
+  /**
+   * Nạp ván của một tài khoản.
+   *
+   * Trả về `true` khi phải mở ván mới — máy này chưa có gì của người vừa đăng
+   * nhập. Bên gọi cần biết điều đó: một ván mới có `lastSeenAt` là *bây giờ*,
+   * nên đem so với bản trên mây theo luật "mới hơn thì thắng" là ván trắng luôn
+   * thắng, và người chơi mất sạch tiến độ chỉ vì đổi máy.
+   */
+  async boot(ownerId: number): Promise<boolean> {
+    const { state, isNew } = await loadSave(ownerId);
     this.state = state;
     this.rng = new Rng(state.rngSeed);
     if (!isNew) this.offline = this.catchUp();
     this.ready = true;
     // Trước khi người chơi kịp chạm cái gì, để mốc số đếm của hôm nay là thật.
     this.rollQuests(Date.now());
+    this.emit();
+    return isNew;
+  }
+
+  /** Rời ván hiện tại khi đăng xuất, để màn sau không thấy tiền của người trước. */
+  unload(): void {
+    this.persist();
+    this.ready = false;
+    this.offline = null;
+    this.notices = [];
+    this.state = createNewSave(this.state.marketSeed);
     this.emit();
   }
 
@@ -1013,7 +1032,10 @@ export class Store {
 
   reset(): void {
     wipeSave();
-    this.state = createNewSave(this.state.marketSeed);
+    // Ván mới vẫn là ván của người đang đăng nhập; xoá tiến độ không phải là
+    // đổi chủ, và bỏ dấu chủ ở đây là để lại một ván vô thừa nhận trong máy.
+    const owner = this.state.ownerId;
+    this.state = { ...createNewSave(this.state.marketSeed), ownerId: owner };
     this.rng = new Rng(this.state.rngSeed);
     this.offline = null;
     this.notices = [];
