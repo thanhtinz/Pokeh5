@@ -19,7 +19,7 @@
  *   DELETE /api/account   {password}            → 204
  *   PUT    /api/save      {save, score}         → {user}
  *   GET    /api/save                            → {save, seenAt}
- *   GET    /api/board?limit=50                  → {rows, total, you}
+ *   GET    /api/board?mode=week&limit=50        → {mode, rows, total, you, endsAt}
  *   GET    /api/health                          → {ok, players, uptime}
  *
  * Mọi đường có dấu sao cần `Authorization: Bearer <token>`.
@@ -31,6 +31,7 @@ import { checkCredentials, hashPassword, hashToken, mintToken, verifyPassword } 
 import { SESSION_TTL, createQueries, openDb, publicUser } from './db.mjs';
 import { bearer, clientIp, fail, rateLimiter, readJson, send } from './http.mjs';
 import { gradeScore } from './scores.mjs';
+import { seasonOf, weekEnds, weekOf } from './season.mjs';
 
 const PORT = Number(process.env['PORT'] ?? 8787);
 const DB_FILE = process.env['DB_FILE'] ?? 'broketoboss.sqlite';
@@ -241,12 +242,17 @@ async function route(req, res, url, now) {
     });
     if (!graded.ok) return fail(res, 422, graded.reason);
 
+    const season = seasonOf(session.user, graded.score.bestNetWorth, now);
+
     const seenAt = Number(body.save.lastSeenAt);
     q.writeSave.run(
       graded.score.bestNetWorth,
       graded.score.reputationTotal,
       graded.score.runs,
       graded.score.claimed,
+      season.key,
+      season.base,
+      season.climb,
       JSON.stringify(body.save),
       Number.isFinite(seenAt) ? seenAt : now,
       now,
@@ -279,37 +285,49 @@ async function route(req, res, url, now) {
 
     const asked = Number(url.searchParams.get('limit') ?? 50);
     const limit = Math.min(BOARD_MAX, Math.max(1, Number.isFinite(asked) ? asked : 50));
+    // Hai bảng, một đường: mọi thời là mặc định, tuần này là thứ hỏi thêm.
+    const mode = url.searchParams.get('mode') === 'week' ? 'week' : 'all';
+    const week = weekOf(now);
 
-    const rows = q.top.all(limit).map((row, index) => ({
-      rank: index + 1,
+    // Số bậc leo được đọc kèm nhãn tuần: một người bỏ chơi từ tháng trước vẫn
+    // còn nguyên `week_climb` của tuần đó trong kho, và bày nó ra như thành
+    // tích của tuần này là nói sai.
+    const shape = (row, rank) => ({
+      rank,
       name: row.name,
       bestNetWorth: row.best_net_worth,
       reputationTotal: row.reputation_total,
       runs: row.runs,
       claimed: row.claimed,
-    }));
+      weekClimb: row.week_key === week ? row.week_climb : 0,
+    });
+
+    const listed = mode === 'week' ? q.topWeek.all(week, limit) : q.top.all(limit);
+    const rows = listed.map((row, index) => shape(row, index + 1));
 
     // Hạng của chính mình tính riêng, vì người thứ chín trăm cũng phải thấy
     // được mình đứng đâu mà không cần tải về chín trăm dòng.
     let you = null;
     const session = sessionOf(req, now);
     if (session && session.user.updated_at > 0) {
-      const { above } = q.rankOf.get(
-        session.user.best_net_worth,
-        session.user.best_net_worth,
-        session.user.id,
-      );
-      you = {
-        rank: above + 1,
-        name: session.user.name,
-        bestNetWorth: session.user.best_net_worth,
-        reputationTotal: session.user.reputation_total,
-        runs: session.user.runs,
-        claimed: session.user.claimed,
-      };
+      const me = session.user;
+
+      if (mode !== 'week') {
+        const { above } = q.rankOf.get(me.best_net_worth, me.best_net_worth, me.id);
+        you = shape(me, above + 1);
+      } else if (me.week_key === week && me.week_climb > 0) {
+        const { above } = q.rankOfWeek.get(week, me.week_climb, me.week_climb, me.id);
+        you = shape(me, above + 1);
+      } else {
+        // Tuần này chưa leo được bậc nào thì chưa có hạng. Hạng 0 nghĩa là
+        // "chưa vào bảng", và nói thế đúng hơn là gán cho người ta số thứ tự
+        // cuối của một danh sách không có tên họ.
+        you = shape(me, 0);
+      }
     }
 
-    return send(res, 200, { rows, total: q.playerCount.get().total, you });
+    const total = mode === 'week' ? q.weekCount.get(week).total : q.playerCount.get().total;
+    return send(res, 200, { mode, rows, total, you, endsAt: weekEnds(now) });
   }
 
   return fail(res, 404, 'not.found');

@@ -399,12 +399,13 @@ up where the old one left off, and a board of actual people.
 Pulling in Express, bcrypt and an ORM to do what three built-in modules already
 do would leave the server permanently out of step with a client whose only
 dependency is Preact, and every package added is a CVE feed subscribed to for
-life. The whole thing is five files.
+life. The whole thing is six files.
 
 ```
 server/auth.mjs     scrypt hashing, opaque tokens, credential shape
 server/db.mjs       schema and every prepared statement
 server/scores.mjs   what a submitted score has to survive
+server/season.mjs   the week the board runs on, and how far a week is
 server/http.mjs     json, CORS, rate limiting — the bits under a framework
 server/index.mjs    routing
 ```
@@ -418,8 +419,37 @@ POST   /api/password  {current, next}    → 204
 DELETE /api/account   {password}         → 204
 PUT    /api/save      {save, score}      → {user}
 GET    /api/save                         → {save, seenAt}
-GET    /api/board?limit=50               → {rows, total, you}
+GET    /api/board?mode=week&limit=50     → {mode, rows, total, you, endsAt}
 ```
+
+### The weekly board, and why there are two
+
+An all-time board sorted by net worth is a wall. A player on day one opens it,
+sees `9.4aa` at the top, and correctly concludes they will never get there. A
+board that tells you at a glance that you have no chance is not a reason to keep
+playing.
+
+So there is a second board, and it does not measure *how rich* — it measures
+**how far you climbed this week**, in orders of magnitude, resetting at midnight
+on Monday. It is the board that opens by default.
+
+Measuring the climb in money instead would have been the same wall repainted:
+someone sitting at `1e30` earns more per idle hour than a newcomer's entire net
+worth, so they would win every week, forever. Measured in orders, a rookie going
+`1e3 → 1e9` scores six and a veteran going `1e30 → 1e33` scores three — and the
+rookie deserves it, because in this game every order costs more than the one
+before. It is also the same yardstick `src/game/rivals.ts` already uses for
+distance, so the two speak the same language.
+
+Two details worth knowing:
+
+- **The week's starting line is where you stood entering the week**, not where
+  you stand at the first save of the week. Taking the latter would score zero on
+  every Monday sync and quietly delete everything climbed before the client got
+  around to pushing.
+- **Nothing runs at midnight.** Each row carries its own week number, and the
+  query filters on the current one, so a player who stopped last month simply is
+  not in it. There is no cron to miss its slot while the server restarts.
 
 ### What the security actually is
 
@@ -464,6 +494,9 @@ playing honestly:
    there so "register, POST `1e40`" goes nowhere.
 3. **Going backwards.** Records only rise, and standing is checked against the
    record it claims to come from — reputation cannot exceed `sqrt(best / 1e9)`.
+
+The weekly board inherits all three, because a week's climb is computed from the
+record that already passed them — there is no second door into the rankings.
 
 One thing worth knowing about that gate: it is what made the screenshot script
 fail the first time. Seeding a board of brand-new accounts with trillions got
@@ -656,7 +689,7 @@ src/net/      the account client and save sync — optional, never required
 src/i18n/     every string the player reads, in vi and en
 src/ui/       Preact components, the theme engine, icons, assets and scenes
 src/styles/   two stylesheets: tokens, then components
-server/       the account API: five files, no dependencies
+server/       the account API: six files, no dependencies
 tests/        vitest over src/game/, and server/*.test.mjs beside the server
 scripts/      playwright screenshots of every screen, and the art contact sheet
 ```

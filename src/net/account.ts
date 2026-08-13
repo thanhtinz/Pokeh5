@@ -18,7 +18,7 @@
  * trị. Đó không phải mất mạng, đó là "tài khoản này không còn là của phiên này
  * nữa", và lúc đó thì phải đăng nhập lại.
  */
-import { api, type AccountUser, type Board, type Score } from './api';
+import { api, type AccountUser, type Board, type BoardMode, type Score } from './api';
 import { saveNow } from '../game/save';
 import type { PlayerState } from '../game/state';
 import { store } from '../game/store';
@@ -37,6 +37,8 @@ export class Account {
   token: string | null = read(TOKEN_KEY);
   user: AccountUser | null = readUser();
   board: Board | null = null;
+  /** Bảng nào đang xem. Bắt đầu ở tuần này, vì đó là bảng người mới có cửa. */
+  boardMode: BoardMode = 'week';
 
   /** Đã hỏi xong máy chủ chưa — trước lúc đó chưa biết nên hiện cổng hay game. */
   checked = false;
@@ -269,8 +271,19 @@ export class Account {
     this.emit();
   }
 
-  async refreshBoard(): Promise<void> {
-    const result = await api.board(this.token);
+  async refreshBoard(mode: BoardMode = this.boardMode): Promise<void> {
+    // Đổi bảng thì xoá bảng cũ đi trước khi hỏi: để nguyên thì trong lúc chờ
+    // mạng, tiêu đề nói "tuần này" mà mấy dòng bên dưới vẫn là bảng mọi thời.
+    if (mode !== this.boardMode) {
+      this.boardMode = mode;
+      this.board = null;
+      this.emit();
+    }
+
+    const result = await api.board(this.token, mode);
+    // Bấm nhanh qua lại thì câu trả lời có thể về sau khi đã đổi ý; bảng của
+    // chế độ không còn xem nữa thì bỏ.
+    if (result.ok && result.data.mode !== this.boardMode) return;
     if (result.ok) {
       this.board = result.data;
       this.error = null;

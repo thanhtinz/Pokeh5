@@ -217,12 +217,22 @@ export const vi: Record<string, string> = {
   'sync.error': 'Lỗi đồng bộ',
 
   // -------------------------------------------------------- bảng xếp hạng --
-  'board.title': 'Bảng xếp hạng',
+  'board.title.week': 'Bảng tuần này',
+  'board.title.all': 'Bảng mọi thời',
+  'board.mode.week': 'Tuần này',
+  'board.mode.all': 'Mọi thời',
+  'board.climb': '{steps} bậc',
+  'board.weekNote': 'Xếp theo số bậc leo được từ sáng thứ Hai. Còn {left} là đóng sổ, ai cũng về lại vạch xuất phát.',
+  'board.weekWhat': 'Xếp theo số bậc leo được trong tuần, không theo ai giàu hơn ai.',
+  'board.weekEmpty': 'Tuần này chưa ai leo được bậc nào. Chơi một lát là có tên ngay.',
+  'board.allNote': 'Kỷ lục tổng tài sản, tính từ ngày lập tài khoản.',
+  'board.leftDays': '{days} ngày {hours} giờ',
+  'board.leftHours': '{hours} giờ',
   'board.players': '{count} người chơi',
   'board.load': 'Tải lại',
   'board.empty': 'Chưa tải được bảng. Kiểm tra mạng rồi bấm Tải lại.',
   'board.detail': '{runs} lần làm lại · chuộc {claimed}/12',
-  'board.fair': 'Xếp theo kỷ lục tổng tài sản. Số gửi lên có kiểm, nhưng luật chơi chạy ở máy người chơi nên bảng này là sân chơi của người chơi thật.',
+  'board.fair': 'Số gửi lên có kiểm, nhưng luật chơi chạy ở máy người chơi nên bảng này là sân chơi của người chơi thật.',
 
   // ------------------------------------------------------------------ lỗi --
   'err.name.shape': 'Tên phải 3–16 ký tự, chỉ chữ không dấu, số, gạch dưới hoặc gạch ngang.',

@@ -1255,6 +1255,43 @@ button.row__icon:not(:disabled):active {
   gap: 10px;
 }
 
+/* Hai bảng, một hàng nút. Cả hàng nằm trong một rãnh chìm để nó đọc như một
+   cái công tắc hai nấc, không phải hai cái nút rời cạnh nhau. */
+.board__modes {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: 3px;
+  padding: 3px;
+  border-radius: 11px;
+  background: hsl(var(--hue) calc(var(--sat) * 0.5) 8% / 0.5);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.board__mode {
+  padding: 7px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink-dim);
+  transition:
+    background 0.18s var(--ease),
+    color 0.18s var(--ease);
+}
+
+.board__mode[aria-current] {
+  background: hsl(var(--hue) var(--sat) 58% / 0.16);
+  color: var(--ink);
+  box-shadow: inset 0 0 0 1px hsl(var(--hue) var(--sat) 62% / 0.34);
+}
+
+/* Một câu nói bảng này đo cái gì. Bảng tuần đo bằng đơn vị không ai gặp bao
+   giờ, nên thiếu câu này thì "3,4 bậc" là một con số không có nghĩa. */
+.board__note {
+  white-space: normal;
+  line-height: 1.45;
+}
+
 .board__list {
   display: grid;
   gap: 2px;
@@ -1321,6 +1358,12 @@ button.row__icon:not(:disabled):active {
 .board__worth {
   font-size: 11.5px;
   color: var(--ink-dim);
+}
+
+.board__worth--lead {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--ink);
 }
 
 .board__refresh {

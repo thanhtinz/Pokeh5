@@ -34,19 +34,27 @@ export interface AccountUser {
   updatedAt: number;
 }
 
+export type BoardMode = 'all' | 'week';
+
 export interface BoardRow {
+  /** Hạng 0 nghĩa là chưa vào bảng — tuần này chưa leo được bậc nào. */
   rank: number;
   name: string;
   bestNetWorth: number;
   reputationTotal: number;
   runs: number;
   claimed: number;
+  /** Số bậc mười leo được trong tuần đang chạy. */
+  weekClimb: number;
 }
 
 export interface Board {
+  mode: BoardMode;
   rows: BoardRow[];
   total: number;
   you: BoardRow | null;
+  /** Tuần này đóng sổ lúc nào. */
+  endsAt: number;
 }
 
 export interface Score {
@@ -123,6 +131,6 @@ export const api = {
   pullSave: (token: string) =>
     call<{ save: PlayerState | null; seenAt: number }>('/save', { token }),
 
-  board: (token: string | null, limit = 50) =>
-    call<Board>(`/board?limit=${limit}`, { token }),
+  board: (token: string | null, mode: BoardMode = 'all', limit = 50) =>
+    call<Board>(`/board?mode=${mode}&limit=${limit}`, { token }),
 };

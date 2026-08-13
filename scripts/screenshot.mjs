@@ -8,6 +8,7 @@
  *   node scripts/screenshot.mjs [outDir]
  */
 import { spawn } from 'node:child_process';
+import { existsSync } from 'node:fs';
 import { mkdir, rm } from 'node:fs/promises';
 import { DatabaseSync } from 'node:sqlite';
 import { chromium } from 'playwright';
@@ -46,13 +47,44 @@ const apiServer = spawn('node', ['server/index.mjs'], {
   stdio: 'ignore',
 });
 
-/** Đợi máy chủ mở cổng, tối đa mười giây. */
+// Kể cả khi script ngã ở đâu đó giữa chừng. Không có dòng này thì mỗi lần chạy
+// hỏng để lại một cái xác còn ôm cổng 8788, lần chạy sau không bind được, và
+// cái xác cũ trả lời `/health` thay — tức là lỗi thật bị thay bằng một lỗi khác
+// ở tận cuối script, và mỗi lần chạy lại đẻ thêm một cái xác nữa.
+process.on('exit', () => apiServer.kill());
+
+/**
+ * Đợi máy chủ mở cổng, tối đa mười giây — và đợi **đúng máy chủ vừa dựng**.
+ *
+ * Lần chạy nào chết giữa chừng cũng để lại một tiến trình còn ôm cổng 8788 và
+ * ôm luôn file kho đã bị xoá ở trên. Lần chạy sau hỏi `/health` thì cái xác cũ
+ * trả lời "ok", script đi tiếp, rồi ngã ở một câu SQL với `no such table` —
+ * một câu báo lỗi không nói gì về nguyên nhân thật. `uptime` phân biệt được hai
+ * cái: máy chủ mình vừa spawn thì mới sống được vài giây.
+ */
 async function waitForApi() {
   for (let i = 0; i < 100; i += 1) {
+    // Con mình chết rồi mà cổng vẫn có người trả lời thì người đó là người lạ.
+    if (apiServer.exitCode !== null) {
+      throw new Error(
+        `máy chủ tài khoản tắt ngay lúc dựng (mã ${apiServer.exitCode}) — thường là ` +
+          `cổng ${API_PORT} đang có người khác giữ.`,
+      );
+    }
+
     try {
-      const response = await fetch(`${API}/health`);
-      if (response.ok) return true;
-    } catch {
+      const health = await fetch(`${API}/health`).then((response) =>
+        response.ok ? response.json() : null,
+      );
+      if (health?.uptime > 30) {
+        throw new Error(
+          `cổng ${API_PORT} đang có một máy chủ khác sống ${health.uptime} giây rồi — ` +
+            'nhiều khả năng là xác của lần chạy trước. Tắt nó đi rồi chạy lại.',
+        );
+      }
+      if (health) return true;
+    } catch (error) {
+      if (error instanceof Error && error.message.startsWith('cổng')) throw error;
       // Chưa lên. Thử lại.
     }
     await new Promise((resolve) => setTimeout(resolve, 100));
@@ -123,6 +155,22 @@ async function seedBoard() {
     });
   }
 
+  // Đặt tay vạch xuất phát của tuần cho từng người.
+  //
+  // Gửi bản lưu lần đầu thì vạch nằm ở đáy, nên ai cũng "leo được" đúng bằng cả
+  // gia tài của mình, và bảng tuần chụp ra y hệt bảng mọi thời — tức là ảnh
+  // chụp giấu mất đúng cái thứ nó cần cho thấy. Mấy con số dưới đây là một tuần
+  // bình thường: người giàu nhất bảng nhích được ít nhất, còn người đứng gần
+  // chót leo nhiều nhất.
+  const climbs = { ba_tam: 0.4, chu_bay: 1.1, co_hai: 2.6, tinz: 1.7, anh_tu: 3.2, di_ba: 0.9 };
+
+  const season = new DatabaseSync(API_DB);
+  const setBase = season.prepare(
+    `UPDATE users SET week_base = week_climb - ?, week_climb = ? WHERE name_lower = ?`,
+  );
+  for (const [name, steps] of Object.entries(climbs)) setBase.run(steps, steps, name);
+  season.close();
+
   return { rich: tokens.get('tinz'), rookie };
 }
 
@@ -192,8 +240,12 @@ await rm(OUT, { recursive: true, force: true });
 await mkdir(OUT, { recursive: true });
 
 // Honour a pre-installed browser when the environment pins one, rather than
-// downloading a second copy to match the bundled revision.
-const executablePath = process.env['CHROMIUM_PATH'];
+// downloading a second copy to match the bundled revision. Playwright asks for
+// đúng số hiệu bản dựng mà nó đi kèm, nên nâng gói lên một bản là mất browser —
+// còn cái đã cài sẵn thì vẫn chạy được.
+const PINNED = '/opt/pw-browsers/chromium';
+const executablePath =
+  process.env['CHROMIUM_PATH'] ?? (existsSync(PINNED) ? PINNED : undefined);
 const browser = await chromium.launch(executablePath ? { executablePath } : {});
 
 /** Mọi màn game giờ nằm sau cổng, nên fixture nào cũng phải mang một phiên. */
@@ -254,6 +306,15 @@ for (const stage of ['broke', 'rich']) {
     await page.locator('.tab').nth(index).click();
     await page.waitForTimeout(700);
     await page.screenshot({ path: `${OUT}/${stage}-${tab}.png` });
+  }
+
+  // Bảng mọi thời phải bấm mới ra, nên vòng lặp trên không bao giờ chụp được
+  // nó — và một màn hình không ai nhìn là một màn hình hỏng mà không ai biết.
+  if (stage === 'rich') {
+    await page.locator('.tab').nth(TABS.indexOf('board')).click();
+    await page.locator('.board__mode').nth(1).click();
+    await page.waitForTimeout(900);
+    await page.screenshot({ path: `${OUT}/board-all.png` });
   }
 
   // The colour of the whole interface at this point on the climb.

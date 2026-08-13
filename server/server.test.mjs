@@ -13,6 +13,7 @@ import { checkCredentials, hashPassword, hashToken, mintToken, verifyPassword } 
 import { createQueries, openDb, publicUser } from './db.mjs';
 import { rateLimiter } from './http.mjs';
 import { ABSOLUTE_CEILING, OPENING_CEILING, ceilingFor, gradeScore } from './scores.mjs';
+import { orders, seasonOf, weekEnds, weekOf } from './season.mjs';
 
 describe('mật khẩu', () => {
   it('băm rồi kiểm lại được, và hai lần băm ra hai chuỗi khác nhau', async () => {
@@ -120,6 +121,72 @@ describe('trần điểm', () => {
   });
 });
 
+describe('mùa', () => {
+  /** Một mốc thứ Tư bất kỳ, để không rơi đúng vào chỗ chuyển tuần. */
+  const WED = Date.UTC(2026, 7, 12, 3, 0, 0);
+  const DAY = 86_400_000;
+
+  it('bắt đầu ván ở đúng bậc không, và mỗi bậc là một số mười', () => {
+    expect(orders(-1e9)).toBeCloseTo(0, 6);
+    expect(orders(0)).toBeCloseTo(9, 3);
+    expect(orders(1e12)).toBeCloseTo(12, 2);
+  });
+
+  it('số vô nghĩa rơi về đáy chứ không thành NaN', () => {
+    // Cột trong kho có thể là null ở một dòng cũ, và một cái NaN lọt vào cột
+    // xếp hạng thì cả bảng xếp sai mà không ai thấy lỗi ở đâu.
+    for (const bad of [null, undefined, NaN, Infinity, -Infinity, 'nhiều']) {
+      expect(orders(bad)).toBe(0);
+    }
+  });
+
+  it('tuần đổi vào nửa đêm thứ Hai giờ Việt Nam', () => {
+    // 0h thứ Hai ở Việt Nam là 17h Chủ nhật theo UTC.
+    const justBefore = Date.UTC(2026, 7, 9, 16, 59) + 60_000 - 1;
+    expect(weekOf(justBefore)).toBe(weekOf(justBefore - 3 * DAY));
+    expect(weekOf(justBefore + 2)).toBe(weekOf(justBefore) + 1);
+  });
+
+  it('mốc hết tuần nằm đúng ở chỗ số tuần nhảy', () => {
+    const ends = weekEnds(WED);
+    expect(weekOf(ends - 1)).toBe(weekOf(WED));
+    expect(weekOf(ends)).toBe(weekOf(WED) + 1);
+  });
+
+  it('trong cùng một tuần thì giữ nguyên vạch xuất phát', () => {
+    const row = { week_key: weekOf(WED), week_base: 9, best_net_worth: 1e12 };
+    const season = seasonOf(row, 1e15, WED);
+
+    expect(season.key).toBe(weekOf(WED));
+    expect(season.base).toBe(9);
+    expect(season.climb).toBeCloseTo(orders(1e15) - 9, 6);
+  });
+
+  it('sang tuần mới thì vạch là chỗ đứng lúc bước vào tuần, không phải chỗ đứng bây giờ', () => {
+    // Người này lên bảng tuần trước, nghỉ, rồi tuần này chơi tiếp. Nếu vạch
+    // lấy theo kỷ lục mới thì lần ghi đầu tiên của tuần luôn ra 0 bậc và mọi
+    // thứ leo được trước lúc bản lưu kịp gửi lên bị mất trắng.
+    const row = { week_key: weekOf(WED) - 1, week_base: 0, best_net_worth: 1e12 };
+    const season = seasonOf(row, 1e15, WED);
+
+    expect(season.key).toBe(weekOf(WED));
+    expect(season.base).toBeCloseTo(orders(1e12), 6);
+    expect(season.climb).toBeCloseTo(orders(1e15) - orders(1e12), 6);
+  });
+
+  it('người mới tinh được tính cả quãng đường tuần đầu', () => {
+    const row = { week_key: 0, week_base: 0, best_net_worth: -1e9 };
+    expect(seasonOf(row, 1e9, WED).climb).toBeCloseTo(orders(1e9), 6);
+  });
+
+  it('không có số bậc âm', () => {
+    // Kỷ lục thì chỉ tăng, nhưng cột trong kho là dữ liệu, và dữ liệu thì có
+    // ngày lệch. Bảng xếp hạng không phải chỗ để phát hiện ra điều đó.
+    const row = { week_key: weekOf(WED), week_base: 30, best_net_worth: 1e30 };
+    expect(seasonOf(row, 1e12, WED).climb).toBe(0);
+  });
+});
+
 describe('đếm lượt gọi', () => {
   it('cho tới hạn rồi chặn, và mở lại khi qua cửa sổ', () => {
     const allow = rateLimiter({ windowMs: 1000, max: 3 });
@@ -158,7 +225,7 @@ describe('kho dữ liệu', () => {
     const { q } = fresh();
     for (const [name, best] of [['a', 5e12], ['b', 1e15], ['c', 2e9]]) {
       const id = q.insertUser.run(name, name, 'hash', 1, 0).lastInsertRowid;
-      q.writeSave.run(best, 0, 0, 0, '{}', 1, 1, id);
+      q.writeSave.run(best, 0, 0, 0, 0, 0, 0, '{}', 1, 1, id);
     }
     // Đăng ký xong chưa chơi buổi nào thì chưa lên bảng.
     q.insertUser.run('d', 'd', 'hash', 1, 0);
@@ -172,7 +239,7 @@ describe('kho dữ liệu', () => {
     const ids = [];
     for (const [name, best] of [['a', 5e12], ['b', 1e15], ['c', 2e9]]) {
       const id = q.insertUser.run(name, name, 'hash', 1, 0).lastInsertRowid;
-      q.writeSave.run(best, 0, 0, 0, '{}', 1, 1, id);
+      q.writeSave.run(best, 0, 0, 0, 0, 0, 0, '{}', 1, 1, id);
       ids.push({ name, id, best });
     }
 
@@ -192,55 +259,56 @@ describe('kho dữ liệu', () => {
   });
 });
 
-describe('đổi mật khẩu và xoá tài khoản', () => {
-  /**
-   * Chạy máy chủ thật trên một cổng riêng.
-   *
-   * Mấy đường này là chuyện của cả một phiên — đổi mật khẩu rồi *phiên kia*
-   * phải chết — nên gọi hàm rời rạc không kiểm được. Phải đi qua HTTP.
-   */
-  async function serve() {
-    const port = 8790 + Math.floor(performance.now() % 40);
-    const file = `test-${port}.sqlite`;
-    for (const leftover of [file, `${file}-wal`, `${file}-shm`]) rmSync(leftover, { force: true });
+/**
+ * Chạy máy chủ thật trên một cổng riêng.
+ *
+ * Mấy đường này là chuyện của cả một phiên — đổi mật khẩu rồi *phiên kia*
+ * phải chết — nên gọi hàm rời rạc không kiểm được. Phải đi qua HTTP.
+ */
+async function serve() {
+  const port = 8790 + Math.floor(performance.now() % 40);
+  const file = `test-${port}.sqlite`;
+  for (const leftover of [file, `${file}-wal`, `${file}-shm`]) rmSync(leftover, { force: true });
 
-    const child = spawn('node', ['server/index.mjs'], {
-      env: { ...process.env, PORT: String(port), DB_FILE: file },
-      stdio: 'ignore',
-    });
+  const child = spawn('node', ['server/index.mjs'], {
+    env: { ...process.env, PORT: String(port), DB_FILE: file },
+    stdio: 'ignore',
+  });
 
-    const base = `http://localhost:${port}/api`;
-    for (let i = 0; i < 100; i += 1) {
-      try {
-        if ((await fetch(`${base}/health`)).ok) break;
-      } catch {
-        // Chưa lên.
-      }
-      await new Promise((resolve) => setTimeout(resolve, 50));
+  const base = `http://localhost:${port}/api`;
+  for (let i = 0; i < 100; i += 1) {
+    try {
+      if ((await fetch(`${base}/health`)).ok) break;
+    } catch {
+      // Chưa lên.
     }
-
-    const call = (path, options = {}) =>
-      fetch(base + path, {
-        method: options.method ?? 'GET',
-        headers: {
-          ...(options.body ? { 'content-type': 'application/json' } : {}),
-          ...(options.token ? { authorization: `Bearer ${options.token}` } : {}),
-        },
-        body: options.body ? JSON.stringify(options.body) : undefined,
-      });
-
-    const stop = () => {
-      child.kill();
-      for (const leftover of [file, `${file}-wal`, `${file}-shm`]) {
-        rmSync(leftover, { force: true });
-      }
-    };
-
-    return { call, stop };
+    await new Promise((resolve) => setTimeout(resolve, 50));
   }
 
-  const signUp = (call, name, password) =>
-    call('/register', { method: 'POST', body: { name, password } }).then((r) => r.json());
+  const call = (path, options = {}) =>
+    fetch(base + path, {
+      method: options.method ?? 'GET',
+      headers: {
+        ...(options.body ? { 'content-type': 'application/json' } : {}),
+        ...(options.token ? { authorization: `Bearer ${options.token}` } : {}),
+      },
+      body: options.body ? JSON.stringify(options.body) : undefined,
+    });
+
+  const stop = () => {
+    child.kill();
+    for (const leftover of [file, `${file}-wal`, `${file}-shm`]) {
+      rmSync(leftover, { force: true });
+    }
+  };
+
+  return { call, stop, file };
+}
+
+const signUp = (call, name, password) =>
+  call('/register', { method: 'POST', body: { name, password } }).then((r) => r.json());
+
+describe('đổi mật khẩu và xoá tài khoản', () => {
 
   it('đổi được mật khẩu, và mật khẩu cũ thôi dùng được', async () => {
     const { call, stop } = await serve();
@@ -343,6 +411,77 @@ describe('đổi mật khẩu và xoá tài khoản', () => {
         body: { name: 'roi_di', password: 'matkhaudai123' },
       });
       expect(again.status).toBe(201);
+    } finally {
+      stop();
+    }
+  });
+});
+
+describe('bảng mùa qua HTTP', () => {
+  /**
+   * Một bản lưu tối thiểu kèm điểm.
+   *
+   * Trần theo tuổi tài khoản đứng chắn ở đây, nên con số phải nằm trong tầm
+   * một tài khoản vừa lập — đúng bằng cái mà một người chơi thật gửi lên trong
+   * mấy phút đầu.
+   */
+  const put = (call, token, best) =>
+    call('/save', {
+      method: 'PUT',
+      token,
+      body: { save: { lastSeenAt: 1 }, score: { bestNetWorth: best } },
+    });
+
+  it('xếp theo số bậc leo được, nên người mới hơn được người đã giàu', async () => {
+    const { call, stop, file } = await serve();
+    try {
+      // Người cũ bước vào tuần này khi đã có sẵn ba trăm tỷ, rồi tuần này leo
+      // thêm một quãng ngắn. Vạch xuất phát của họ phải đặt thẳng vào kho: sang
+      // tuần là chuyện của đồng hồ, và bài kiểm thì không đợi được tới thứ Hai.
+      const cu = await signUp(call, 'nguoi_cu', 'matkhaudai123');
+      await put(call, cu.token, 3e11);
+
+      const db = openDb(file);
+      db.exec(
+        `UPDATE users SET week_base = ${orders(3e11)}, week_climb = 0
+          WHERE name_lower = 'nguoi_cu'`,
+      );
+      db.close();
+
+      await put(call, cu.token, 6e11);
+
+      // Người mới thì đi từ đáy lên một triệu — ít tiền hơn hẳn, nhưng là sáu
+      // bậc so với chưa tới một bậc.
+      const moi = await signUp(call, 'nguoi_moi', 'matkhaudai123');
+      await put(call, moi.token, 1e6);
+
+      const week = await (await call('/board?mode=week', { token: moi.token })).json();
+      expect(week.mode).toBe('week');
+      expect(week.rows.map((row) => row.name)).toEqual(['nguoi_moi', 'nguoi_cu']);
+      expect(week.you.name).toBe('nguoi_moi');
+      expect(week.you.rank).toBe(1);
+      expect(week.endsAt).toBeGreaterThan(Date.now());
+
+      // Còn trên bảng mọi thời thì thứ tự ngược lại, đúng như nó vẫn thế.
+      const all = await (await call('/board', { token: moi.token })).json();
+      expect(all.mode).toBe('all');
+      expect(all.rows.map((row) => row.name)).toEqual(['nguoi_cu', 'nguoi_moi']);
+    } finally {
+      stop();
+    }
+  });
+
+  it('chưa gửi bản lưu nào thì chưa có hạng, không phải hạng bét', async () => {
+    const { call, stop } = await serve();
+    try {
+      const me = await signUp(call, 'chua_choi', 'matkhaudai123');
+      const week = await (await call('/board?mode=week', { token: me.token })).json();
+
+      expect(week.rows).toEqual([]);
+      expect(week.total).toBe(0);
+      // `you` là null vì chưa từng ghi bản lưu; ghi rồi mà chưa leo bậc nào thì
+      // mới ra hạng 0.
+      expect(week.you).toBeNull();
     } finally {
       stop();
     }

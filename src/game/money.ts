@@ -38,6 +38,17 @@ function decimal(): string {
   return locale() === 'vi' ? ',' : '.';
 }
 
+/**
+ * Một con số lẻ, theo dấu thập phân của ngôn ngữ đang dùng.
+ *
+ * Có chỗ trong game hiện số mà không phải tiền — số bậc leo được trong tuần
+ * chẳng hạn — và một cái "3.2 bậc" đứng cạnh "144,2ngt" thì đọc như của một
+ * game khác.
+ */
+export function fixed(value: number, places = 1): string {
+  return value.toFixed(places).replace('.', decimal());
+}
+
 /** "1,23tr", "-998,4k", "450đ". */
 export function money(value: number): string {
   const unit = UNIT[locale()];
