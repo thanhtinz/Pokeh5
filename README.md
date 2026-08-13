@@ -65,6 +65,30 @@ builds a shadow tree that ordinary CSS selectors cannot reach, which would make
 the accents inside the drawings unstylable; inline costs some DOM and buys back
 the whole cascade.
 
+### Three places wanted a picture, not an icon
+
+`src/ui/Scene.tsx`:
+
+**The city.** It sits behind every screen and is the literal reading of the
+game's own pitch. It opens as a vacant lot — a chain-link fence, one broken
+lamp, rubble — and gains a skyline layer by layer as net worth climbs, until the
+windows come on. Each layer's opacity is a `calc()` on `--wealth`, the same
+custom property the palette runs on, so the city is drawn by the theme engine
+rather than animated by a timer. The vacant lot is the one layer that starts at
+full strength and leaves; everything else is something the player put there.
+
+Opacity is set per layer rather than capped on the parent, because the two ends
+want opposite things. The lot is the only thing on screen at the start and has
+to carry it; the finished skyline sits under translucent panels full of numbers
+and must not compete with them.
+
+**District strips.** One drawn scene per district, so buying into The Docks
+looks like somewhere — cranes over stacked containers, water along the bottom —
+rather than reading like a heading.
+
+**The milestone payoff.** A sun clearing a horizon behind the thing you just won
+back. It is the only screen in the game allowed to be mostly picture.
+
 ## How the money works
 
 This is the one mechanic that is not standard for the genre, and it exists

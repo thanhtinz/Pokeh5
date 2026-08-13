@@ -163,6 +163,41 @@ for (const stage of ['broke', 'rich']) {
   await context.close();
 }
 
+// The milestone payoff, which only appears for a moment when one is claimed.
+{
+  const now = Date.now();
+  const save = richSave(now);
+  save.lastSeenAt = now;
+  save.cash = 900_000;
+  save.peakNetWorth = 900_000;
+  save.businesses = { cans: 60, cart: 40, wash: 20, busk: 8 };
+  save.managers = ['cans', 'cart', 'wash'];
+  save.holdings = {};
+  save.job = null;
+  save.boost = null;
+  // Reached but unclaimed, so the Life screen offers it.
+  save.claimed = ['phone', 'dog', 'car', 'room', 'mother', 'zero'];
+
+  const context = await browser.newContext({ viewport: VIEWPORT, deviceScaleFactor: 2 });
+  const page = await context.newPage();
+  await page.addInitScript(
+    ([key, value]) => window.localStorage.setItem(key, JSON.stringify(value)),
+    [SAVE_KEY, save],
+  );
+
+  await page.goto(base, { waitUntil: 'networkidle' });
+  await page.waitForSelector('.shell', { timeout: 15_000 });
+  const offline = page.locator('.sheet .btn--primary');
+  if (await offline.count()) await offline.first().click();
+
+  await page.locator('.tab').nth(3).click();
+  await page.locator('.life__item--ready .btn').first().click();
+  await page.waitForSelector('.sheet--art', { timeout: 5_000 });
+  await page.waitForTimeout(500);
+  await page.screenshot({ path: `${OUT}/milestone.png` });
+  await context.close();
+}
+
 await browser.close();
 await server.close();
 console.log(`Wrote ${TABS.length * 2} screenshots to ${OUT}/`);

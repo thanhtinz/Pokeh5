@@ -14,6 +14,7 @@ import { clock, count, money, rate } from '../../game/money';
 import { hasManager, ownedOf, type PlayerState } from '../../game/state';
 import type { Derived, Store } from '../../game/store';
 import { Icon } from '../Icon';
+import { DistrictArt } from '../Scene';
 
 interface Props {
   game: Store;
@@ -72,10 +73,13 @@ export function Empire({ game, state, derived }: Props) {
 
         return (
           <section key={district}>
-            <h2 class="section__title">
-              <span>{district}</span>
-              <span class="num">{rate(districtIncome)}</span>
-            </h2>
+            <div class="district">
+              <DistrictArt district={district} />
+              <h2 class="section__title district__title">
+                <span>{district}</span>
+                <span class="num">{rate(districtIncome)}</span>
+              </h2>
+            </div>
 
             {defs.map((def) => {
               const owned = ownedOf(state, def.id);

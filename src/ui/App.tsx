@@ -5,6 +5,7 @@ import type { LifeMilestone } from '../game/life';
 import { money } from '../game/money';
 import { hasManager, ownedOf } from '../game/state';
 import { Icon } from './Icon';
+import { CityScene } from './Scene';
 import { derive } from '../game/store';
 import { Hud } from './Hud';
 import { CardSheet, MilestoneSheet, OfflineSheet } from './Overlays';
@@ -84,6 +85,9 @@ export function App() {
 
   return (
     <div class="shell">
+      {/* Behind everything, and drawn by the same value the palette runs on. */}
+      <CityScene />
+
       <Hud state={state} derived={derived} now={now} />
 
       <main class="screen scroll">

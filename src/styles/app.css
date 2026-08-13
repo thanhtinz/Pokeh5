@@ -920,3 +920,213 @@ button.row__icon:not(:disabled):active {
   letter-spacing: 0.2em;
   text-transform: uppercase;
 }
+
+/* ---------------------------------------------------------------- scenes -- */
+
+/*
+ * The city behind every screen. Anchored to the bottom of the shell and never
+ * scrolled, so it reads as a place the interface is standing in front of.
+ *
+ * Each layer's opacity is a function of --wealth, which the theme engine writes
+ * alongside the hue: the skyline is drawn by the player's net worth rather than
+ * by any animation. `calc()` here goes negative early on, and computed opacity
+ * clamps to zero, which is exactly the staging wanted.
+ */
+.scene {
+  position: absolute;
+  inset-inline: 0;
+  /*
+   * Stands on the tab bar rather than behind it. Anchored at the shell's floor
+   * the ground line — and the whole vacant lot, which is the opening image —
+   * sat under an opaque nav and was never seen.
+   */
+  bottom: calc(61px + env(safe-area-inset-bottom));
+  z-index: 0;
+  width: 100%;
+  height: clamp(120px, 22vh, 172px);
+  color: hsl(var(--hue) var(--sat) 66%);
+  pointer-events: none;
+
+  /* Fades up out of the floor rather than ending on a hard edge. */
+  mask-image: linear-gradient(180deg, transparent, #000 52%);
+  -webkit-mask-image: linear-gradient(180deg, transparent, #000 52%);
+}
+
+/* The HUD, screen and tab bar all stand in front of it. */
+.hud,
+.screen,
+.tabs {
+  position: relative;
+  z-index: 1;
+}
+
+.scene__layer path,
+.scene__layer circle {
+  fill: currentColor;
+  stroke: none;
+}
+
+/*
+ * Opacity is set per layer rather than capped on the parent, because the two
+ * ends of the game want opposite things: the vacant lot is the only thing on
+ * screen at the start and has to carry it, while the finished skyline sits
+ * under translucent panels full of numbers and must not compete with them.
+ */
+.scene__far {
+  opacity: calc((var(--wealth) - 0.58) * 0.3);
+}
+
+.scene__mid {
+  opacity: calc((var(--wealth) - 0.34) * 0.28);
+}
+
+.scene__near {
+  opacity: calc(var(--wealth) * 0.22);
+}
+
+.scene__lights {
+  color: hsl(var(--hue) 90% 84%);
+  opacity: calc((var(--wealth) - 0.22) * 0.45);
+}
+
+/* Strokes, not fills: the lot is a line drawing of what was there before. */
+.scene__lot {
+  opacity: calc(0.28 - var(--wealth) * 0.66);
+}
+
+.scene__lot path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* The lamp head is the one thing still lit down there. */
+.scene__lot path:nth-child(4) {
+  fill: currentColor;
+}
+
+.scene__moon {
+  opacity: 0.65;
+}
+
+/* A header strip per district, sitting on the section title's baseline. */
+.district {
+  position: relative;
+  margin-bottom: 8px;
+  padding-top: 46px;
+}
+
+.district-art {
+  position: absolute;
+  inset: 0 0 auto;
+  width: 100%;
+  height: 42px;
+  color: var(--accent);
+  opacity: 0.42;
+  /* Fades into the rows below rather than sitting on a hard edge. */
+  mask-image: linear-gradient(90deg, transparent, #000 12%, #000 78%, transparent);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 78%, transparent);
+}
+
+.district-art path,
+.district-art circle {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.district__title {
+  position: relative;
+  margin-bottom: 0;
+}
+
+/* ------------------------------------------------------- milestone payoff -- */
+
+.sheet--art {
+  text-align: center;
+  padding-top: 0;
+  overflow: hidden;
+}
+
+.sheet__art {
+  position: relative;
+  display: grid;
+  place-items: center;
+  height: 128px;
+  margin: -20px -20px 14px;
+}
+
+.sunburst {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  color: var(--accent-bright);
+}
+
+.sunburst__rays {
+  opacity: 0.26;
+  animation: turn 44s linear infinite;
+  transform-origin: 50% 81%;
+}
+
+.sunburst__ray {
+  fill: currentColor;
+}
+
+.sunburst__sun {
+  fill: currentColor;
+  opacity: 0.32;
+}
+
+.sunburst__horizon {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  opacity: 0.5;
+}
+
+@keyframes turn {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.sheet__art-icon {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 62px;
+  height: 62px;
+  margin-top: 14px;
+  border-radius: 20px;
+  color: var(--accent-ink);
+  background: linear-gradient(135deg, var(--accent-bright), var(--accent-deep));
+  box-shadow: 0 0 40px var(--glow);
+}
+
+.sheet__art-icon .icon {
+  width: 32px;
+  height: 32px;
+  stroke-width: 1.8;
+}
+
+.sheet__body--art {
+  margin: 4px 0 10px;
+  color: var(--ink);
+  font-size: 14.5px;
+}
+
+.sheet__won {
+  display: block;
+  margin-bottom: 18px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--accent-bright);
+}

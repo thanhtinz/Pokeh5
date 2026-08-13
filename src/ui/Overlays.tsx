@@ -4,6 +4,7 @@ import { count, duration, money } from '../game/money';
 import type { PendingCard } from '../game/state';
 import type { OfflineReport, Store } from '../game/store';
 import { Icon } from './Icon';
+import { Sunburst } from './Scene';
 
 /**
  * An offer with a clock on it. The bar is the point — a card the player watches
@@ -69,18 +70,18 @@ export function MilestoneSheet({
 }) {
   return (
     <div class="scrim scrim--centre" onClick={onClose}>
-      <div class="sheet" onClick={(event) => event.stopPropagation()}>
-        <div class="sheet__head">
-          <span class="sheet__icon">
+      <div class="sheet sheet--art" onClick={(event) => event.stopPropagation()}>
+        {/* The one screen in the game that is allowed to be only a picture. */}
+        <div class="sheet__art">
+          <Sunburst />
+          <span class="sheet__art-icon">
             <Icon name={milestone.icon} />
-          </span>
-          <span class="sheet__head-text">
-            <span class="sheet__title">{milestone.title}</span>
-            <span class="sheet__sub">{describeBonus(milestone.bonus)}</span>
           </span>
         </div>
 
-        <p class="sheet__body">{milestone.line}</p>
+        <span class="sheet__title">{milestone.title}</span>
+        <p class="sheet__body sheet__body--art">{milestone.line}</p>
+        <span class="sheet__won">{describeBonus(milestone.bonus)}</span>
 
         <div class="sheet__actions">
           <button class="btn btn--primary" onClick={onClose}>
