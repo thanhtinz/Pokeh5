@@ -20,7 +20,7 @@
  *   PUT    /api/save      {save, score}         → {user}
  *   GET    /api/save                            → {save, seenAt}
  *   GET    /api/board?limit=50                  → {rows, total, you}
- *   GET    /api/health                          → {ok}
+ *   GET    /api/health                          → {ok, players, uptime}
  *
  * Mọi đường có dấu sao cần `Authorization: Bearer <token>`.
  */
@@ -35,6 +35,8 @@ import { gradeScore } from './scores.mjs';
 const PORT = Number(process.env['PORT'] ?? 8787);
 const DB_FILE = process.env['DB_FILE'] ?? 'broketoboss.sqlite';
 const TRUST_PROXY = process.env['TRUST_PROXY'] === '1';
+/** Ghi một dòng cho mỗi request. Tắt bằng `LOG=0` khi có lớp khác lo việc đó. */
+const LOG = process.env['LOG'] !== '0';
 
 /** Bao nhiêu dòng bảng xếp hạng trả về nhiều nhất trong một lần gọi. */
 const BOARD_MAX = 100;
@@ -85,7 +87,17 @@ async function route(req, res, url, now) {
   const path = url.pathname;
 
   if (req.method === 'OPTIONS') return send(res, 204);
-  if (path === '/api/health') return send(res, 200, { ok: true });
+
+  // Đủ để một cái giám sát biết máy chủ sống *và* đọc được kho — `ok: true`
+  // suông thì vẫn trả về đúng ngay cả khi ổ đĩa đã hỏng. Không có gì ở đây mà
+  // bảng xếp hạng chưa công khai sẵn.
+  if (path === '/api/health') {
+    return send(res, 200, {
+      ok: true,
+      players: q.playerCount.get().total,
+      uptime: Math.round(process.uptime()),
+    });
+  }
 
   // ------------------------------------------------------------- tài khoản --
 
@@ -307,6 +319,21 @@ const server = createServer((req, res) => {
   const now = Date.now();
   const url = new URL(req.url ?? '/', `http://${req.headers.host ?? 'localhost'}`);
 
+  /*
+   * Một dòng cho mỗi request, ra stdout để cái nào đang trông tiến trình thì
+   * gom. Chỉ đường dẫn, mã trả về và số mili giây — **không thân request, không
+   * header**. Thân của `/api/login` là mật khẩu thô và header là token; ghi
+   * chúng vào log là biến file log thành thứ nguy hiểm hơn cả cơ sở dữ liệu,
+   * vì log thì ai cũng nghĩ là đọc được.
+   */
+  if (LOG) {
+    res.on('finish', () => {
+      console.log(
+        `${req.method} ${url.pathname} ${res.statusCode} ${Date.now() - now}ms`,
+      );
+    });
+  }
+
   route(req, res, url, now).catch((error) => {
     // Một request hỏng không được phép mang cả tiến trình đi theo, và cũng
     // không được kể cho người gọi nghe stack trace của mình.
@@ -315,6 +342,26 @@ const server = createServer((req, res) => {
     else res.end();
   });
 });
+
+/**
+ * Tắt cho sạch.
+ *
+ * SQLite chịu được cúp điện, nên chuyện này không phải để chống hỏng dữ liệu.
+ * Nó để hai việc: request đang dở được trả lời xong thay vì đứt giữa chừng, và
+ * `db.close()` gộp nốt phần WAL vào file chính — nên bản sao lưu ngay sau khi
+ * dừng máy chủ là một file, không phải ba.
+ */
+for (const signal of ['SIGTERM', 'SIGINT']) {
+  process.on(signal, () => {
+    console.log(`${signal} — đang đóng`);
+    server.close(() => {
+      db.close();
+      process.exit(0);
+    });
+    // Ai đó giữ kết nối mở mãi thì cũng không được giữ cả tiến trình lại.
+    setTimeout(() => process.exit(0), 5_000).unref();
+  });
+}
 
 // Phiên bỏ quên lâu ngày dọn mỗi giờ. `unref` để lệnh dừng máy chủ không phải
 // đợi hết một tiếng mới thoát được.

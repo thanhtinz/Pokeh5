@@ -24,6 +24,7 @@ npm run build      # typecheck, then a production bundle in dist/
 npm run shot       # screenshots every screen at both ends of the palette
 npm run art        # all 58 drawn assets on one sheet, large enough to judge
 npm run icons      # re-render the app icon PNGs from public/icon.svg
+npm run backup     # a live, consistent copy of the account database
 ```
 
 Native:
@@ -509,6 +510,73 @@ goes back into circulation rather than being held by an account that no longer
 exists. Both ask for the current password — obvious for the first, and for the
 second it is the brake that stops an unlocked phone in someone else's hand from
 erasing a run.
+
+### Running it for real
+
+The server holds every player's save in one SQLite file, so the operational
+questions are: how does it stay up, how does it get backed up, and how does the
+client find it.
+
+**Where the client looks.** The API defaults to `/api` on the same origin, so the
+usual shape is one reverse proxy serving `dist/` and passing `/api` through. A
+Capacitor build has no same origin — it runs at `capacitor://localhost` — so that
+build needs `VITE_API_URL=https://your.host` set **at build time**, since it is
+baked into the bundle.
+
+```nginx
+server {
+  listen 443 ssl;
+  server_name broketoboss.example;
+
+  root /srv/broketoboss/dist;
+  location / { try_files $uri /index.html; }
+
+  location /api/ {
+    proxy_pass http://127.0.0.1:8787;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+  }
+}
+```
+
+Behind a proxy, start the server with `TRUST_PROXY=1` — otherwise every request
+appears to come from `127.0.0.1` and the per-IP rate limits become one shared
+bucket for the whole internet, which is worse than having none.
+
+```ini
+# /etc/systemd/system/broketoboss.service
+[Service]
+ExecStart=/usr/bin/node /srv/broketoboss/server/index.mjs
+Environment=PORT=8787 DB_FILE=/var/lib/broketoboss/db.sqlite TRUST_PROXY=1
+Restart=always
+[Install]
+WantedBy=multi-user.target
+```
+
+**Backups, and why not `cp`.** In WAL mode the `.sqlite` file is not the whole
+database — the most recent writes are still in the `-wal` sidecar — so copying it
+alone gets a backup that is missing exactly the newest data. `npm run backup`
+uses `VACUUM INTO`, which makes SQLite write out one complete, consistent,
+compacted file without stopping the server and without blocking writers. The
+result opens as-is: restoring is a rename.
+
+```
+0 4 * * *  cd /srv/broketoboss && DB_FILE=/var/lib/broketoboss/db.sqlite \
+           node scripts/backup.mjs /var/backups/broketoboss 14
+```
+
+`GET /api/health` reports `players` and `uptime` as well as `ok`, because a bare
+`ok: true` keeps answering correctly after the disk has gone — reading a row
+proves the thing a monitor actually wants to know.
+
+The process logs one line per request to stdout: method, path, status, duration.
+**No bodies and no headers** — the body of `/api/login` is a plaintext password
+and the headers carry session tokens, and writing those to a log file makes the
+log more dangerous than the database, because everyone treats logs as readable.
+`LOG=0` turns it off where something else already does it.
+
+`SIGTERM` finishes in-flight requests and closes the database, which folds the
+WAL back into the main file. SQLite survives a hard kill regardless; this is so a
+backup taken right after a restart is one file rather than three.
 
 ### Sync
 

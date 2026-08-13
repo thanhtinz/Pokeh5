@@ -16,7 +16,8 @@
     "server": "node server/index.mjs",
     "dev:all": "node server/index.mjs & vite",
     "art": "node scripts/art-sheet.mjs",
-    "icons": "node scripts/icons.mjs"
+    "icons": "node scripts/icons.mjs",
+    "backup": "node scripts/backup.mjs"
   },
   "dependencies": {
     "@capacitor/core": "^7.4.3",

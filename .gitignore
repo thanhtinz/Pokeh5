@@ -10,3 +10,6 @@ ios/
 undefined/
 *.sqlite
 *.sqlite-journal
+
+# Bản sao lưu kho tài khoản.
+backups/
