@@ -1,5 +1,6 @@
 import { MILESTONES, describeBonus } from '../../game/life';
-import { duration, money } from '../../game/money';
+import { count, duration, money } from '../../game/money';
+import { PRESTIGE_UNLOCK } from '../../game/prestige';
 import type { PlayerState } from '../../game/state';
 import type { Derived, Store } from '../../game/store';
 import { locale, setLocale, t, type Locale } from '../../i18n';
@@ -30,7 +31,7 @@ export function Life({ game, state, derived, now }: Props) {
         <div class="market__summary" style={{ padding: 0 }}>
           <span class="stat">
             <span class="stat__label">{t('life.peak')}</span>
-            <b class="stat__value num">{money(state.peakNetWorth)}</b>
+            <b class="stat__value num">{money(state.bestNetWorth)}</b>
           </span>
           <span class="stat">
             <span class="stat__label">{t('life.reclaimed')}</span>
@@ -48,7 +49,9 @@ export function Life({ game, state, derived, now }: Props) {
       <section class="life">
         {MILESTONES.map((milestone) => {
           const claimed = state.claimed.includes(milestone.id);
-          const reached = state.peakNetWorth >= milestone.at;
+          // Đã chuộc rồi thì mãi mãi là của mình — làm lại không lấy đi được,
+          // nên đừng đọc mỗi đỉnh của lượt đang chơi.
+          const reached = claimed || state.peakNetWorth >= milestone.at;
           const status = claimed ? 'won' : reached ? 'ready' : 'locked';
 
           return (
@@ -79,6 +82,54 @@ export function Life({ game, state, derived, now }: Props) {
             </div>
           );
         })}
+      </section>
+
+      <section class="panel prestige">
+        <div class="prestige__head">
+          <span class="section__title" style={{ margin: 0 }}>
+            {t('prestige.title')}
+          </span>
+          <span class="prestige__bonus num">
+            {t('prestige.bonus', { multiplier: derived.reputationMultiplier.toFixed(2) })}
+          </span>
+        </div>
+
+        <div class="market__summary" style={{ padding: 0 }}>
+          <span class="stat">
+            <span class="stat__label">{t('prestige.rep')}</span>
+            <b class="stat__value num">{count(state.reputation)}</b>
+          </span>
+          <span class="stat">
+            <span class="stat__label">{t('prestige.runs')}</span>
+            <b class="stat__value num">{count(state.runs)}</b>
+          </span>
+          <span class="stat">
+            <span class="stat__label">{t('prestige.record')}</span>
+            <b class="stat__value num">{money(state.bestNetWorth)}</b>
+          </span>
+        </div>
+
+        <span class="row__meta" style={{ whiteSpace: 'normal' }}>
+          {t('prestige.note')}
+        </span>
+
+        {derived.pendingReputation > 0 ? (
+          <button
+            class="btn btn--wide btn--primary"
+            onClick={() => {
+              const amount = count(derived.pendingReputation);
+              if (window.confirm(t('prestige.confirm', { amount }))) game.prestige();
+            }}
+          >
+            {t('prestige.title')} · +{count(derived.pendingReputation)} {t('prestige.rep')}
+          </button>
+        ) : (
+          <button class="btn btn--wide" disabled>
+            {state.bestNetWorth < PRESTIGE_UNLOCK
+              ? t('prestige.locked', { amount: money(PRESTIGE_UNLOCK) })
+              : t('prestige.wait')}
+          </button>
+        )}
       </section>
 
       <section class="panel" style={{ padding: '14px', display: 'grid', gap: '12px' }}>

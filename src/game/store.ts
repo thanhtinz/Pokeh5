@@ -35,7 +35,8 @@ import {
 import { t as tr } from '../i18n';
 import { CARD_LIFETIME, drawCard, jobById } from './jobs';
 import { bonusesFrom, newlyReached, type LifeBonuses, type LifeMilestone } from './life';
-import { Rng } from './rng';
+import { pendingReputation, reputationMultiplier } from './prestige';
+import { Rng, randomSeed } from './rng';
 import { loadSave, saveNow, wipeSave } from './save';
 import {
   STARTING_BALANCE,
@@ -101,9 +102,13 @@ export interface Derived {
   tapValue: number;
   oreCapacity: number;
   bonuses: LifeBonuses;
-  /** Combined income multiplier from milestones and any live boost. */
+  /** Nhân vĩnh viễn từ uy tín, tách riêng để màn Cuộc đời còn hiện được. */
+  reputationMultiplier: number;
+  /** Nhân tổng: mốc cuộc đời × uy tín × buff đang chạy. */
   globalMultiplier: number;
   boostMultiplier: number;
+  /** Uy tín sẽ nhận nếu làm lại ngay bây giờ. */
+  pendingReputation: number;
   creditLine: number;
   creditFloor: number;
   /** What can actually be spent right now. */
@@ -139,7 +144,8 @@ export function portfolioValue(state: PlayerState): number {
 export function derive(state: PlayerState, now = Date.now()): Derived {
   const bonuses = bonusesFrom(state.claimed);
   const boostMultiplier = state.boost && state.boost.endsAt > now ? state.boost.multiplier : 1;
-  const globalMultiplier = bonuses.income * boostMultiplier;
+  const repMultiplier = reputationMultiplier(state.reputation);
+  const globalMultiplier = bonuses.income * repMultiplier * boostMultiplier;
 
   const assets = businessAssets(state) + portfolioValue(state);
   const netWorth = state.cash + assets;
@@ -169,8 +175,10 @@ export function derive(state: PlayerState, now = Date.now()): Derived {
     tapValue: tapOre * oreValue,
     oreCapacity: ORE_CAPACITY_PER_LEVEL * state.refineryLevel * state.tapLevel,
     bonuses,
+    reputationMultiplier: repMultiplier,
     globalMultiplier,
     boostMultiplier,
+    pendingReputation: pendingReputation(state.peakNetWorth, state.reputation),
     creditLine: line,
     creditFloor: floor,
     spendable: Math.max(0, state.cash - floor),
@@ -262,9 +270,13 @@ export class Store {
   private earn(amount: number): void {
     if (!Number.isFinite(amount) || amount <= 0) return;
     this.state.cash += amount;
-    if (this.state.cash + businessAssets(this.state) > this.state.peakNetWorth) {
-      this.state.peakNetWorth = this.state.cash + businessAssets(this.state);
-    }
+    this.raisePeak(this.state.cash + businessAssets(this.state));
+  }
+
+  /** Đỉnh của lượt và kỷ lục mọi thời luôn đi cùng nhau. */
+  private raisePeak(netWorth: number): void {
+    if (netWorth > this.state.peakNetWorth) this.state.peakNetWorth = netWorth;
+    if (netWorth > this.state.bestNetWorth) this.state.bestNetWorth = netWorth;
   }
 
   /** True when the purchase went through. */
@@ -434,7 +446,7 @@ export class Store {
   }
 
   private checkMilestones(d: Derived): void {
-    if (d.netWorth > this.state.peakNetWorth) this.state.peakNetWorth = d.netWorth;
+    this.raisePeak(d.netWorth);
   }
 
   /** Milestones reached but not yet acknowledged. */
@@ -672,6 +684,37 @@ export class Store {
   /** Forces a redraw when something outside the save changed, like language. */
   refresh(): void {
     this.emit();
+  }
+
+  /**
+   * Bán sạch cơ ngơi để đổi lấy uy tín.
+   *
+   * Cái gì mua được thì mất: cơ sở, quản lý, cổ phiếu, cấp cuốc, cấp xưởng.
+   * Cái gì đã chuộc lại thì ở lại — mốc cuộc đời không phải hàng hoá. Sàn cũng
+   * được gieo hạt mới, vì lượt sau là một thị trường khác.
+   */
+  prestige(): number {
+    const gain = pendingReputation(this.state.peakNetWorth, this.state.reputation);
+    if (gain <= 0) return 0;
+
+    const kept = {
+      createdAt: this.state.createdAt,
+      claimed: this.state.claimed,
+      bestNetWorth: Math.max(this.state.bestNetWorth, this.state.peakNetWorth),
+      reputation: this.state.reputation + gain,
+      runs: this.state.runs + 1,
+      autoTrader: this.state.autoTrader,
+    };
+
+    this.state = { ...createNewSave(randomSeed()), ...kept };
+    this.rng = new Rng(this.state.rngSeed);
+    this.marketCarry = 0;
+    this.offline = null;
+
+    this.notice({ kind: 'info', label: tr('notice.prestige', { amount: gain }) });
+    this.persist();
+    this.emit();
+    return gain;
   }
 
   dismissOffline(): void {

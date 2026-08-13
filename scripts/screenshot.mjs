@@ -39,6 +39,9 @@ function richSave(now) {
     nextCardAt: now + 600_000,
     boost: { multiplier: 3, endsAt: now + 41_000 },
     claimed: ['phone', 'dog', 'car', 'room', 'mother', 'zero', 'friends', 'kids'],
+    bestNetWorth: 6.1e12,
+    reputation: 40,
+    runs: 2,
     rngSeed: 777,
   };
 }

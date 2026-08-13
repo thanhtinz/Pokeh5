@@ -17,8 +17,8 @@
  *    lo viện dưỡng lão có vườn.
  *  - Câu ở mốc cuộc đời giữ nhịp bản gốc: ngắn, hiện tại, không chấm than.
  *
- * Bối cảnh vẫn là thành phố Mỹ, tiền vẫn là đô la, nên tên khu và tên cổ phiếu
- * lấy nghĩa và lấy giọng châm biếm chứ không dời bối cảnh về Việt Nam.
+ * Bối cảnh và tiền tệ là Việt Nam, nên tên khu, tên cơ sở và tên cổ phiếu là
+ * chuyện đời sống mình chứ không phải bản dịch của một cái tên nước ngoài.
  */
 export const vi: Record<string, string> = {
   // ------------------------------------------------------------------ chung --
@@ -79,7 +79,7 @@ export const vi: Record<string, string> = {
   'market.sellAll': 'Bán sạch',
 
   // ------------------------------------------------------- màn Cuộc đời ----
-  'life.peak': 'Đỉnh',
+  'life.peak': 'Kỷ lục',
   'life.reclaimed': 'Đã chuộc',
   'life.climbing': 'Đã cày',
   'life.locked': 'Mốc {amount}',
@@ -88,7 +88,7 @@ export const vi: Record<string, string> = {
     'Tắt game vẫn ăn tiền, tối đa {hours} tiếng. Bản lưu nằm trong máy, mất máy là mất.',
   'life.language': 'Ngôn ngữ',
   'life.reset': 'Chơi lại từ đầu',
-  'life.resetConfirm': 'Xoá sạch, quay lại vạch âm một triệu?',
+  'life.resetConfirm': 'Xoá sạch, quay lại vạch âm một tỷ?',
 
   // ------------------------------------------------------------ hộp thoại --
   'card.header': 'Cơ hội · {seconds}s',
@@ -122,6 +122,17 @@ export const vi: Record<string, string> = {
   'bonus.offlineHours': 'Offline thêm {hours} tiếng',
 
   // ------------------------------------------------------------- thời gian --
+  'prestige.title': 'Làm lại',
+  'prestige.rep': 'Uy tín',
+  'prestige.runs': 'Số lần',
+  'prestige.record': 'Kỷ lục',
+  'prestige.bonus': 'Thu nhập ×{multiplier}',
+  'prestige.gain': 'Làm lại lúc này được **+{amount} uy tín**',
+  'prestige.locked': 'Mở khi tài sản lên {amount}',
+  'prestige.wait': 'Leo cao hơn lượt trước thì mới có thêm uy tín',
+  'prestige.note': 'Bán sạch cơ ngơi, quay lại Xóm Nước Đen. Uy tín và những gì đã chuộc thì ở lại.',
+  'prestige.confirm': 'Bán hết, làm lại từ đầu để lấy {amount} uy tín?',
+  'notice.prestige': 'Làm lại xong. +{amount} uy tín.',
   'time.hoursMinutes': '{hours} tiếng {minutes} phút',
   'time.hours': '{hours} tiếng',
   'time.minutes': '{minutes} phút',

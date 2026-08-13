@@ -1152,3 +1152,26 @@ button.row__icon:not(:disabled):active {
   --art-ink: hsl(var(--hue) 60% 8%);
   --art-lite: hsl(var(--hue) 30% 88%);
 }
+
+/* --------------------------------------------------------------- làm lại -- */
+
+.prestige {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  /* Viền sáng hơn panel thường: đây là thứ đắt nhất trên màn hình. */
+  border-color: var(--panel-edge-lit);
+}
+
+.prestige__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.prestige__bonus {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent-bright);
+}

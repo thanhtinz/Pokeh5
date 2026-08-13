@@ -103,6 +103,17 @@ export function sanitise(raw: unknown): PlayerState | null {
     // Cash may legitimately be negative; only the magnitude is bounded.
     cash: clampNum(data.cash, -Number.MAX_SAFE_INTEGER, Number.MAX_SAFE_INTEGER, 0),
     peakNetWorth: clampNum(data.peakNetWorth, -Number.MAX_SAFE_INTEGER, Number.MAX_SAFE_INTEGER, 0),
+    // Bản lưu ghi trước khi có "làm lại" không có kỷ lục riêng; đỉnh của lượt
+    // đang chơi chính là kỷ lục của nó.
+    bestNetWorth: clampNum(
+      data.bestNetWorth,
+      -Number.MAX_SAFE_INTEGER,
+      Number.MAX_SAFE_INTEGER,
+      clampNum(data.peakNetWorth, -Number.MAX_SAFE_INTEGER, Number.MAX_SAFE_INTEGER, 0),
+    ),
+
+    reputation: clampInt(data.reputation, 0, 1e9, 0),
+    runs: clampInt(data.runs, 0, 1e6, 0),
 
     ore: clampNum(data.ore, 0, Number.MAX_SAFE_INTEGER, 0),
     tapLevel: clampInt(data.tapLevel, 1, 100_000, 1),

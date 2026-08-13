@@ -10,14 +10,14 @@ Bối cảnh và tiền tệ là Việt Nam. Chơi bằng **tiếng Việt**, đ
 
 TypeScript, Preact and Vite, wrapped in Capacitor for Android and iOS.
 No canvas, no engine, no runtime dependencies beyond Preact — the whole bundle
-is **36 kB gzipped**.
+is **37 kB gzipped**.
 
 ## Running it
 
 ```bash
 npm install
 npm run dev        # http://localhost:5173
-npm test           # 42 tests over the rule layer and the dictionaries
+npm test           # 50 tests over the rule layer and the dictionaries
 npm run build      # typecheck, then a production bundle in dist/
 npm run shot       # screenshots every screen at both ends of the palette
 ```
@@ -161,6 +161,29 @@ Text length is a layout constraint, not a translation detail: Vietnamese with
 diacritics runs wider than the English it replaced, which is what pushed the
 tap-target label out of its circle until it was sized for the longest language
 rather than the shortest.
+
+## Làm lại — the long loop
+
+`src/game/prestige.ts`. Once a run clears a hundred tỷ, you can sell the whole
+empire, go back to Xóm Nước Đen and climb again. What carries over is **uy tín**
+— standing, the thing that is actually worth having in business — and every
+point adds 2% to all income, permanently.
+
+Two decisions are load-bearing:
+
+**Standing is the difference, not a sum.** A run pays `reputationFrom(peak)`
+minus what you already hold, so resetting repeatedly at a low peak earns
+nothing; the only way to more standing is a higher peak than last time.
+
+**Claimed milestones survive.** The businesses are things money bought, so money
+can take them back. The dog, the motorbike, the call from your mother are not
+merchandise, and making the player lose them again to buy a multiplier would
+sell out the entire premise of the game. That single rule then forces a change
+on the Life screen: a milestone reads as won when it is *claimed*, not when this
+run's peak happens to clear its threshold.
+
+`tests/prestige.test.ts` covers the curve, the difference rule, and — the one
+that matters — exactly what a reset takes and what it leaves.
 
 ## How the money works
 

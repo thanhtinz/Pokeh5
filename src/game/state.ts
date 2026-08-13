@@ -33,8 +33,15 @@ export interface PlayerState {
 
   /** Cash on hand. Negative for most of the first act. */
   cash: number;
-  /** Highest net worth ever reached, which is what milestones read. */
+  /** Đỉnh tài sản của lượt này; làm lại thì về mốc đầu. */
   peakNetWorth: number;
+  /** Đỉnh mọi thời, không bao giờ về — chỉ để khoe và để hiện mốc đã chuộc. */
+  bestNetWorth: number;
+
+  /** Uy tín tích được qua các lần làm lại. */
+  reputation: number;
+  /** Đã làm lại bao nhiêu lần. */
+  runs: number;
 
   /** Ore mined by tapping, spent by the refinery. */
   ore: number;
@@ -77,6 +84,10 @@ export function createNewSave(seed: number): PlayerState {
 
     cash: STARTING_BALANCE,
     peakNetWorth: STARTING_BALANCE,
+    bestNetWorth: STARTING_BALANCE,
+
+    reputation: 0,
+    runs: 0,
 
     ore: 0,
     tapLevel: 1,
