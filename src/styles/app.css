@@ -1126,6 +1126,36 @@ button.row__icon:not(:disabled):active {
   padding-top: 46px;
 }
 
+/*
+ * Dải phố đầu mỗi khu.
+ *
+ * Vẽ ở hệ toạ độ gốc rồi phóng cả khối cho vừa bề ngang, y như cái sân ở màn
+ * Cày — đặt từng ô theo phần trăm thì mỗi ô làm tròn một kiểu và giữa các ô
+ * hiện ra khe hở một pixel.
+ */
+.strip {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 42px;
+  overflow: hidden;
+  border-radius: 10px;
+  /* Nhoè dần ở hai đầu để nó là một dải phố chạy tiếp, không phải một tấm ảnh
+     bị cắt cụt hai bên. */
+  mask-image: linear-gradient(90deg, transparent, #000 10%, #000 84%, transparent);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 10%, #000 84%, transparent);
+  opacity: 0.72;
+}
+
+.strip__inner {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  transform-origin: 0 100%;
+  /* Dải cao 42px, cảnh cao hai ô tức 32px. Phóng đúng tỷ lệ đó, và để bề
+     ngang tràn ra ngoài — hai đầu đã có lớp nhoè che. */
+  transform: scale(1.3125);
+}
+
 .district-art {
   position: absolute;
   inset: 0 0 auto;

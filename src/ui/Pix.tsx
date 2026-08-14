@@ -18,24 +18,40 @@
  * thì là 486 lượt tải; giữ nguyên một tấm rồi dịch `background-position` thì là
  * một lượt, và trình duyệt vốn sinh ra để làm đúng việc đó.
  */
-import tilesUrl from '../assets/kenney/rpg-urban/tiles.png';
+import urbanUrl from '../assets/kenney/rpg-urban/tiles.png';
+import cityUrl from '../assets/kenney/city/tiles.png';
 
-/** Bộ tile: 27 ô ngang, 18 ô dọc. */
-export const TILE_COLS = 27;
-export const TILE_ROWS = 18;
+/**
+ * Hai bộ tile, hai hình dạng bảng.
+ *
+ * Bộ thứ hai — Roguelike Modern City — có **một pixel viền giữa các ô**, khác
+ * bộ đầu xếp sát nhau. Bỏ qua chi tiết đó thì mọi ô lệch dần đi một pixel về
+ * phía phải và phía dưới, và tới cột thứ mười thì cái đang vẽ là góc của bốn ô
+ * khác nhau. Nên khoảng cách nằm ngay trong bảng mô tả bộ.
+ */
+const SHEETS = {
+  urban: { url: urbanUrl, cols: 27, rows: 18, gap: 0 },
+  city: { url: cityUrl, cols: 37, rows: 28, gap: 1 },
+} as const;
+
+export type SheetName = keyof typeof SHEETS;
 
 interface Props {
   /** Số thứ tự ô, đếm từ trái sang phải rồi xuống dòng. */
   i: number;
   /** Một ô vẽ ra to bao nhiêu pixel. */
   size: number;
+  sheet?: SheetName;
   class?: string;
   style?: Record<string, string | number>;
 }
 
-export function Pix({ i, size, class: cls, style }: Props) {
-  const col = i % TILE_COLS;
-  const row = Math.floor(i / TILE_COLS);
+export function Pix({ i, size, sheet = 'urban', class: cls, style }: Props) {
+  const { url, cols, rows, gap } = SHEETS[sheet];
+  const step = size * (1 + gap / 16);
+
+  const col = i % cols;
+  const row = Math.floor(i / cols);
 
   return (
     <span
@@ -43,9 +59,9 @@ export function Pix({ i, size, class: cls, style }: Props) {
       style={{
         width: `${size}px`,
         height: `${size}px`,
-        backgroundImage: `url(${tilesUrl})`,
-        backgroundSize: `${TILE_COLS * size}px ${TILE_ROWS * size}px`,
-        backgroundPosition: `${-col * size}px ${-row * size}px`,
+        backgroundImage: `url(${url})`,
+        backgroundSize: `${cols * step}px ${rows * step}px`,
+        backgroundPosition: `${-col * step}px ${-row * step}px`,
         ...style,
       }}
     />

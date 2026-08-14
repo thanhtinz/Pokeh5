@@ -16,8 +16,8 @@ import { hasManager, ownedOf, upgradeOf, type PlayerState } from '../../game/sta
 import { TIERS, isMaxed, nextUpgrade, upgradeMultiplier } from '../../game/upgrades';
 import type { Derived, Store } from '../../game/store';
 import { t } from '../../i18n';
+import { DistrictStrip } from '../DistrictStrip';
 import { Art } from '../Art';
-import { DistrictArt } from '../Scene';
 
 interface Props {
   game: Store;
@@ -89,7 +89,7 @@ export function Empire({ game, state, derived }: Props) {
         return (
           <section key={district}>
             <div class="district">
-              <DistrictArt district={district} />
+              <DistrictStrip district={district} />
               <h2 class="section__title district__title">
                 <span>{t(`district.${district}`)}</span>
                 <span class="num">{rate(districtIncome)}</span>
