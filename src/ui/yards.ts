@@ -66,7 +66,7 @@ export const YARD_SCENES: readonly Yard[] = [
   {
     ground: { sheet: 'urban', x: 7, y: 16, w: 1, h: 1 },
     props: [
-      u(16, 9, 2, 2, SLOT.top),
+      u(16, 8, 2, 2, SLOT.top),
       u(8, 9, 2, 2, SLOT.left),
       u(6, 10, 2, 2, SLOT.right),
       u(15, 16, 2, 2, SLOT.lowLeft),
@@ -105,7 +105,7 @@ export const YARD_SCENES: readonly Yard[] = [
   {
     ground: { sheet: 'city', x: 7, y: 19, w: 1, h: 1 },
     props: [
-      u(16, 9, 2, 2, SLOT.top),
+      u(16, 8, 2, 2, SLOT.top),
       u(8, 11, 2, 1, [0, 2]),
       u(8, 11, 2, 1, [0, 3]),
       c(32, 20, 2, 2, SLOT.right),
@@ -116,16 +116,30 @@ export const YARD_SCENES: readonly Yard[] = [
     ],
   },
 
+  /*
+   * Uptown — bãi cỏ, cây, ô che, xe đẹp.
+   *
+   * Cây ở bộ Urban cao **hai ô**: hàng 8 là tán, hàng 9 là thân và chậu. Lấy
+   * riêng hàng 9 thì được cái cây bị **cắt phẳng nóc**; lấy riêng hàng 8 thì
+   * được cái tán **lơ lửng không có gốc**. Cả sáu cái sân từng dính đủ cả hai
+   * kiểu, và ở cỡ mười sáu pixel thì cái nào cũng vẫn "trông như cái cây" —
+   * chỉ khi bày sáu cái cạnh nhau mới thấy có cái nóc bằng, có cái không gốc.
+   * Cây trọn vẹn là hàng 8–9 lấy chung, hoặc hàng 10 đứng một mình.
+   */
   // Uptown — bãi cỏ, cây, bụi, ô che, xe đẹp.
   {
     ground: { sheet: 'city', x: 0, y: 24, w: 1, h: 1 },
     props: [
-      c(31, 12, 3, 1, SLOT.top),
-      u(16, 9, 2, 2, SLOT.left),
+      // Cây của bộ City là **xanh lá trên nền cỏ xanh lá** — ở đây nó gần như
+      // tàng hình, mà soi riêng một mình thì lại rất rõ. Cây mùa thu của bộ
+      // Urban thì nổi bật hẳn. (Cột 21 cũng là cây, nhưng là cây **ba ô**, lấy
+      // hai ô thì cụt mất nóc — nhìn ra một cái tán bị bạt phẳng.)
+      u(16, 11, 2, 2, SLOT.top),
+      u(16, 8, 2, 2, SLOT.left),
       c(31, 18, 2, 2, SLOT.right),
-      u(16, 8, 2, 1, SLOT.lowLeft),
+      u(16, 10, 2, 1, SLOT.lowLeft),
       c(34, 14, 2, 2, SLOT.lowMid),
-      u(16, 9, 2, 2, SLOT.lowRight),
+      u(16, 8, 2, 2, SLOT.lowRight),
     ],
   },
 
@@ -133,14 +147,18 @@ export const YARD_SCENES: readonly Yard[] = [
   {
     ground: { sheet: 'city', x: 4, y: 19, w: 1, h: 1 },
     props: [
-      u(0, 6, 1, 2, [3, 0]),
-      u(3, 6, 1, 2, [4, 0]),
-      u(16, 9, 2, 2, SLOT.left),
+      // Hai cây cao trên sân thượng. Chỗ này từng là hai cái cột của bộ Urban,
+      // định làm ăng-ten phát sóng — nhưng một cột chắn đường và một cột đèn
+      // chữ T thì đọc ra **cái búa và cái xẻng**, không ra ăng-ten. Bộ này
+      // không có ăng-ten, và lấy một thứ khác gán cho nó thì lại đúng cái lỗi
+      // đã sửa ở `tiles.ts`.
+      c(31, 10, 1, 2, [3, 0]),
+      c(31, 10, 1, 2, [4, 0]),
+      u(16, 8, 2, 2, SLOT.left),
       c(31, 22, 2, 2, SLOT.right),
       c(12, 15, 2, 2, SLOT.lowLeft),
       c(34, 14, 2, 2, SLOT.lowMid),
-      u(16, 8, 2, 1, [6, 4]),
-      u(16, 8, 2, 1, [6, 5]),
+      u(16, 10, 2, 1, [6, 5]),
     ],
   },
 ];
