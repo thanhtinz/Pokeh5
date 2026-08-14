@@ -261,6 +261,7 @@ export const vi: Record<string, string> = {
   'rival.next': 'Còn {amount} nữa là qua mặt',
   'rival.top': 'Trên cả bảng',
   'rival.passed': 'Qua mặt {name}',
+  'yard.moved': 'Dọn sang {name}',
   'rival.you': 'Mình',
   'rival.note': 'Bán sạch làm lại là tụt về chót bảng — nhưng leo lại nhanh hơn nhiều.',
   'rival.veso': 'Bà Tám vé số',

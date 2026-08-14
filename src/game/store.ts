@@ -77,6 +77,7 @@ import {
   unrealised,
 } from './stocks';
 import { TIERS, nextUpgrade, upgradeMultiplier } from './upgrades';
+import { YARDS, yardOf } from './yard';
 
 /** Dollars a single unit of ore is worth at refinery level one. */
 export const ORE_BASE_VALUE = 8_000;
@@ -132,6 +133,14 @@ export interface Derived {
   rootMultiplier: number;
   /** Bậc cắm rễ của từng khu, cho màn Cơ ngơi. */
   roots: RootState[];
+  /**
+   * Sân nào ở màn Cày, 0–5.
+   *
+   * Nằm trong `Derived` chứ không tính ở lớp vẽ: nó là một luật của trò chơi
+   * ("giàu tới đâu thì đứng ở đâu"), và luật thì thuộc về `src/game/`, nơi
+   * chạy được test mà không cần trình duyệt.
+   */
+  yard: number;
   /** Tổng bậc cắm rễ đã có. */
   rootTiers: number;
   /** Số đo cộng dồn cho thành tựu. */
@@ -226,6 +235,7 @@ export function derive(state: PlayerState, now = Date.now()): Derived {
     rootMultiplier: roots,
     roots: rootsOf(state.businesses),
     rootTiers: totalRootTiers(state.businesses),
+    yard: yardOf(state.peakNetWorth),
     metrics,
     daily: dailyState(state.dailyClaimedAt, state.dailyStreak, now),
     rivals: rivalState(state.peakNetWorth),
@@ -300,6 +310,8 @@ export class Store {
 
   /** Drained by the UI each frame; never grows unbounded. */
   private notices: Notice[] = [];
+  /** Sân của lần kiểm gần nhất, để chỉ báo lúc đổi. Không lưu xuống đĩa. */
+  private lastYard = 0;
   private cues: CueId[] = [];
   private listeners = new Set<Listener>();
   private dirty = false;
@@ -322,6 +334,7 @@ export class Store {
   async boot(ownerId: number): Promise<boolean> {
     const { state, isNew } = await loadSave(ownerId);
     this.state = state;
+    this.lastYard = yardOf(this.state.peakNetWorth);
     this.rng = new Rng(state.rngSeed);
     if (!isNew) this.offline = this.catchUp();
     this.ready = true;
@@ -338,6 +351,7 @@ export class Store {
     this.offline = null;
     this.notices = [];
     this.state = createNewSave(this.state.marketSeed);
+    this.lastYard = yardOf(this.state.peakNetWorth);
     this.emit();
   }
 
@@ -348,6 +362,7 @@ export class Store {
     this.offline = null;
     this.notices = [];
     this.state = createNewSave(this.state.marketSeed);
+    this.lastYard = yardOf(this.state.peakNetWorth);
     this.emit();
   }
 
@@ -453,6 +468,7 @@ export class Store {
     this.checkMilestones(d);
     this.checkAchievements();
     this.checkRivals(d);
+    this.checkYard(d);
     this.rollQuests(now);
 
     if (this.state.boost && this.state.boost.endsAt <= now) this.state.boost = null;
@@ -638,6 +654,30 @@ export class Store {
       }) });
     }
     this.persist();
+  }
+
+  /**
+   * Đổi sân thì báo một câu, đúng một lần.
+   *
+   * Mốc so sánh **không** nằm trong bản lưu: nó khởi tạo bằng đúng cái sân của
+   * ván vừa nạp, nên mở lại game không bắn ra một tràng thông báo cho sáu cái
+   * sân đã đi qua từ đời nào. Đổi lại, mốc mất khi đóng app — mà mất cũng
+   * không sao, vì thứ duy nhất nó điều khiển là một dòng chữ.
+   *
+   * Chỉ báo khi **leo lên**. Làm lại từ đầu thì sân tụt về xóm liều, và lúc đó
+   * người chơi đã bấm một cái nút to ghi rõ là mình chọn thế — báo thêm một
+   * câu nữa chỉ là nói lại điều họ vừa làm.
+   */
+  private checkYard(d: Derived): void {
+    if (d.yard <= this.lastYard) {
+      this.lastYard = d.yard;
+      return;
+    }
+    this.lastYard = d.yard;
+    this.notice({
+      kind: 'info',
+      label: tr('yard.moved', { name: tr(`district.${YARDS[d.yard]}`) }),
+    });
   }
 
   /**
@@ -1064,6 +1104,8 @@ export class Store {
     if (!clean) return false;
 
     this.state = clean;
+
+    this.lastYard = yardOf(this.state.peakNetWorth);
     this.rng = new Rng(clean.rngSeed);
     this.marketCarry = 0;
     this.offline = this.catchUp();
@@ -1108,6 +1150,8 @@ export class Store {
     };
 
     this.state = { ...createNewSave(randomSeed()), ...kept };
+
+    this.lastYard = yardOf(this.state.peakNetWorth);
     // Tiền mồi từ đặc quyền: lượt sau không phải bắt đầu bằng đúng con số không.
     this.state.cash += effectsFrom(kept.perks).seedCash;
     this.rng = new Rng(this.state.rngSeed);
@@ -1131,6 +1175,7 @@ export class Store {
     // đổi chủ, và bỏ dấu chủ ở đây là để lại một ván vô thừa nhận trong máy.
     const owner = this.state.ownerId;
     this.state = { ...createNewSave(this.state.marketSeed), ownerId: owner };
+    this.lastYard = yardOf(this.state.peakNetWorth);
     this.rng = new Rng(this.state.rngSeed);
     this.offline = null;
     this.notices = [];

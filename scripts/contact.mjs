@@ -35,7 +35,7 @@ for (let row = r0; row < r1; row += 1) {
   for (let col = c0; col < c1; col += 1) {
     const i = row * sheet.cols + col;
     cells.push(
-      `<span class="c"><i style="background-size:${sheet.cols * step}px ${sheet.rows * step}px;` +
+      `<span class="c"><i style="background-size:${(sheet.cols * (16 + sheet.gap) - sheet.gap) * (SIZE / 16)}px ${(sheet.rows * (16 + sheet.gap) - sheet.gap) * (SIZE / 16)}px;` +
         `background-position:${-col * step}px ${-row * step}px"></i><b>${i}</b></span>`,
     );
   }

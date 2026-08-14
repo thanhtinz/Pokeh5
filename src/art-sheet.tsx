@@ -18,6 +18,8 @@ import { JOBS } from './game/jobs';
 import { BUSINESS_ART, JOB_ART } from './ui/tiles';
 import { PixScene } from './ui/Pix';
 import { DistrictStrip } from './ui/DistrictStrip';
+import { YARD_SCENES, yardScene } from './ui/yards';
+import { YARDS } from './game/yard';
 import { t } from './i18n';
 import { applyTheme } from './ui/theme';
 
@@ -77,6 +79,19 @@ function Sheet() {
               {JOB_ART[job.id] && <PixScene scene={JOB_ART[job.id]!} unit={unit} />}
             </span>
             <b style={{ color: '#8fd' }}>{t(`job.${job.id}`)}</b>
+          </span>
+        ))}
+      </div>
+
+      {/* Sáu cái sân của màn Cày, bày cạnh nhau. Bày cạnh nhau mới kiểm được
+          thứ duy nhất chúng phải làm: khác nhau đủ để nhìn phát biết vừa đổi,
+          mà vẫn cùng một bố cục để so được với nhau. */}
+      <h1>Sáu cái sân</h1>
+      <div class="yardsheet" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 264px)', gap: '12px', marginBottom: '20px' }}>
+        {YARD_SCENES.map((_, tier) => (
+          <span key={tier} style={{ display: 'grid', gap: '4px', fontSize: '11px' }}>
+            <PixScene scene={yardScene(tier)} unit={32} />
+            <b>{t(`district.${YARDS[tier]!}`)}</b>
           </span>
         ))}
       </div>

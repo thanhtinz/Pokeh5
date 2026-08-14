@@ -36,7 +36,7 @@ const cells = specs.map((spec) => {
       tiles.push(
         `<i style="left:${dx * SIZE}px;top:${dy * SIZE}px;width:${SIZE}px;height:${SIZE}px;` +
           `background-image:url('http://localhost:5195/${sheet.file}');` +
-          `background-size:${sheet.cols * step}px ${sheet.rows * step}px;` +
+          `background-size:${(sheet.cols * (16 + sheet.gap) - sheet.gap) * (SIZE / 16)}px ${(sheet.rows * (16 + sheet.gap) - sheet.gap) * (SIZE / 16)}px;` +
           `background-position:${-(col + dx) * step}px ${-(row + dy) * step}px"></i>`,
       );
     }

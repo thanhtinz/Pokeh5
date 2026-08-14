@@ -6,7 +6,8 @@ import { Particles, fade } from '../engine/particles';
 import { onFrame } from '../engine/loop';
 import type { Derived, Store } from '../game/store';
 import { t } from '../i18n';
-import { Pix, PixScene, type Scene } from './Pix';
+import { Pix, PixScene } from './Pix';
+import { yardScene } from './yards';
 
 interface Props {
   game: Store;
@@ -30,45 +31,6 @@ const CHIPS_PER_TAP = 9;
 
 /** Một ô của bộ tile vẽ ra bao nhiêu pixel trong hệ toạ độ của cảnh. */
 const TILE = 16;
-
-/** Mặt đường: nhựa ở xa, vỉa hè ở gần. */
-const GROUND: readonly (readonly number[])[] = [
-  [439, 439, 439, 439, 439, 439, 439, 439],
-  [439, 439, 439, 439, 439, 439, 439, 439],
-  [439, 439, 439, 439, 439, 439, 439, 439],
-  [439, 439, 439, 439, 439, 439, 439, 439],
-  [439, 439, 439, 439, 439, 439, 439, 439],
-  [439, 439, 439, 439, 439, 439, 439, 439],
-];
-
-/**
- * Đồ đạc trong sân, khai theo **khối** chứ không theo ô.
- *
- * Vòng trước khai từng ô một, và cái sân trả giá đúng như danh sách cơ sở đã
- * trả: cái cây mất gốc vì gốc nằm ở ô bên dưới mà ô ấy bị đặt sang chỗ khác,
- * còn cái xe chỉ hiện ra **nửa trước** vì nửa sau là một ô riêng không ai lấy.
- * Xe hơi trong bộ này chiếm hai nhân hai; lấy một ô thì được nửa cái xe, và
- * nửa cái xe nằm giữa sân thì nhìn như một vệt màu đỏ.
- *
- * Hai góc trên để trống: chữ "8k mỗi chạm" và "×1,8" nằm đè lên đó.
- */
-const PROPS: Scene = {
-  w: 8,
-  h: 6,
-  layers: [
-    // Hàng sau: cột đèn và cái cây — để mép trên không phải một đường thẳng.
-    // Cái cây rộng **hai** ô: lấy một ô thì được đúng nửa tán lá, và nửa tán
-    // lá đứng giữa sân nhìn như một vệt xanh dựng đứng.
-    { sheet: 'urban', x: 3, y: 6, w: 1, h: 2, at: [2, 0] },
-    { sheet: 'urban', x: 16, y: 9, w: 2, h: 2, at: [4, 0] },
-    // Bên trái: thùng rác và cái xe cũ — thứ nhân vật sống bằng nó.
-    { sheet: 'urban', x: 8, y: 9, w: 1, h: 2, at: [0, 2] },
-    { sheet: 'urban', x: 15, y: 16, w: 2, h: 2, at: [0, 4] },
-    // Bên phải: sạp rau và đống đồ cũ, tức là chỗ tiền sẽ tới sau này.
-    { sheet: 'urban', x: 6, y: 10, w: 2, h: 2, at: [6, 2] },
-    { sheet: 'urban', x: 3, y: 10, w: 2, h: 2, at: [6, 4] },
-  ],
-};
 
 /** Nhân vật: công nhân đội mũ bảo hộ, hai tư thế. */
 const HERO_UP = 266;
@@ -438,14 +400,10 @@ export function TapStage({ game, derived }: Props) {
       */}
       <div class="stage__rock" ref={rock}>
         <span class="yard">
-          {GROUND.map((row, y) =>
-            row.map((tile, x) => (
-              <Pix key={`g${x}-${y}`} i={tile} size={TILE} style={spot(x * TILE, y * TILE)} />
-            )),
-          )}
-
+          {/* Cảnh dựng lại mỗi khi đổi sân, và chỉ khi đó: `yardScene` là hàm
+              thuần, còn `derived.yard` là một số nguyên chạy từ 0 tới 5. */}
           <span class="yard__frame">
-            <PixScene scene={PROPS} unit={TILE} />
+            <PixScene scene={yardScene(derived.yard)} unit={TILE} />
           </span>
 
           {/* Hai khung hình của nhân vật: đứng thẳng và cúi xuống làm. Chồng

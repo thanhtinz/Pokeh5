@@ -234,6 +234,7 @@ export const en: Record<string, string> = {
   'rival.next': '{amount} short of passing them',
   'rival.top': 'Top of the board',
   'rival.passed': 'Passed {name}',
+  'yard.moved': 'Moved up to {name}',
   'rival.you': 'You',
   'rival.note': 'Selling up drops you to the bottom again — but the climb back is much faster.',
   'rival.veso': 'Bà Tám, lottery tickets',

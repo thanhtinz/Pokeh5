@@ -48,7 +48,22 @@ interface Props {
 
 export function Pix({ i, size, sheet = 'urban', class: cls, style }: Props) {
   const { url, cols, rows, gap } = SHEETS[sheet];
-  const step = size * (1 + gap / 16);
+  const scale = size / 16;
+  const step = 16 * scale + gap * scale;
+
+  /*
+   * Bề rộng tấm sheet **không** phải `cols × step`.
+   *
+   * Viền một pixel nằm *giữa* các ô, nên tấm ảnh thiếu đúng một viền cuối:
+   * 37 ô 16 pixel với 36 viền là 628, không phải 629. Nhân `cols × step` thì
+   * trình duyệt phóng ảnh theo hệ số 1258/628 = 2,0032 thay vì đúng 2, và mọi
+   * ô trôi dần — tới cột cuối là lệch một pixel nguồn. Lệch một pixel nguồn
+   * hiện ra thành một **vệt tối chạy ngang** ở đáy mỗi ô, vì cái lọt vào khung
+   * là một mẩu của viền. Nhìn thì tưởng ô nền vẽ sẵn cái vệt ấy; thật ra là
+   * phép nhân này.
+   */
+  const sheetW = (cols * (16 + gap) - gap) * scale;
+  const sheetH = (rows * (16 + gap) - gap) * scale;
 
   const col = i % cols;
   const row = Math.floor(i / cols);
@@ -60,7 +75,7 @@ export function Pix({ i, size, sheet = 'urban', class: cls, style }: Props) {
         width: `${size}px`,
         height: `${size}px`,
         backgroundImage: `url(${url})`,
-        backgroundSize: `${cols * step}px ${rows * step}px`,
+        backgroundSize: `${sheetW}px ${sheetH}px`,
         backgroundPosition: `${-col * step}px ${-row * step}px`,
         ...style,
       }}
