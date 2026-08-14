@@ -34,6 +34,14 @@ interface Facade {
   /** Ô mái hoặc mái hiên, chạy suốt bề ngang. */
   top: number;
   /** Ô cửa ra vào, đặt ở tầng dưới. */
+  /**
+   * Ô cửa ra vào.
+   *
+   * Phải là một ô *nhìn ra cửa*. Lấy một ô tường trơn thì cả dãy thành một bức
+   * tường liền và mất hết nhịp mặt tiền — đó là lỗi của vòng đầu. Lấy nhầm một
+   * ô thùng gỗ thì tệ hơn nữa: giữa mặt tiền cao ốc kính hiện ra một cái thùng
+   * hàng. Cả hai lần đều vì chọn ô từ một bảng soi dựng sai hình học.
+   */
   door: number;
   /** Rộng mấy ô. */
   w: number;
@@ -60,12 +68,12 @@ const STREETS: Record<District, readonly Facade[]> = {
   ],
   // Bê tông và sọc cảnh báo: khu công nghiệp.
   docks: [
-    { wall: 9, window: 312, top: 645, door: 204, w: 4 },
-    { wall: 204, window: 312, top: 682, door: 204, w: 3 },
-    { wall: 9, window: 312, top: 645, door: 204, w: 4 },
-    { wall: 204, window: 312, top: 682, door: 204, w: 3 },
-    { wall: 9, window: 312, top: 645, door: 204, w: 4 },
-    { wall: 204, window: 312, top: 682, door: 204, w: 3 },
+    { wall: 9, window: 312, top: 645, door: 201, w: 4 },
+    { wall: 204, window: 312, top: 682, door: 571, w: 3 },
+    { wall: 9, window: 312, top: 645, door: 201, w: 4 },
+    { wall: 204, window: 312, top: 682, door: 571, w: 3 },
+    { wall: 9, window: 312, top: 645, door: 201, w: 4 },
+    { wall: 204, window: 312, top: 682, door: 571, w: 3 },
   ],
   // Mái hiên sọc: mặt phố buôn bán.
   midtown: [
@@ -78,25 +86,25 @@ const STREETS: Record<District, readonly Facade[]> = {
   ],
   // Kính suốt, không mái hiên: nhà làm việc.
   financial: [
-    { wall: 19, window: 349, top: 19, door: 204, w: 4 },
-    { wall: 9, window: 386, top: 9, door: 204, w: 3 },
-    { wall: 19, window: 349, top: 19, door: 204, w: 4 },
-    { wall: 9, window: 386, top: 9, door: 204, w: 3 },
-    { wall: 19, window: 349, top: 19, door: 204, w: 4 },
+    { wall: 19, window: 349, top: 19, door: 201, w: 4 },
+    { wall: 9, window: 386, top: 9, door: 201, w: 3 },
+    { wall: 19, window: 349, top: 19, door: 201, w: 4 },
+    { wall: 9, window: 386, top: 9, door: 201, w: 3 },
+    { wall: 19, window: 349, top: 19, door: 201, w: 4 },
   ],
   uptown: [
-    { wall: 28, window: 349, top: 467, door: 204, w: 4 },
-    { wall: 19, window: 386, top: 19, door: 204, w: 3 },
-    { wall: 28, window: 349, top: 504, door: 204, w: 4 },
-    { wall: 19, window: 386, top: 19, door: 204, w: 3 },
-    { wall: 28, window: 349, top: 467, door: 204, w: 4 },
+    { wall: 28, window: 349, top: 467, door: 201, w: 4 },
+    { wall: 19, window: 386, top: 19, door: 201, w: 3 },
+    { wall: 28, window: 349, top: 504, door: 201, w: 4 },
+    { wall: 19, window: 386, top: 19, door: 201, w: 3 },
+    { wall: 28, window: 349, top: 467, door: 201, w: 4 },
   ],
   // Mái sẫm, kính cao: cao ốc.
   heights: [
-    { wall: 9, window: 386, top: 793, door: 204, w: 5 },
-    { wall: 19, window: 423, top: 830, door: 204, w: 4 },
-    { wall: 9, window: 386, top: 793, door: 204, w: 5 },
-    { wall: 19, window: 423, top: 830, door: 204, w: 4 },
+    { wall: 9, window: 386, top: 793, door: 201, w: 5 },
+    { wall: 19, window: 423, top: 830, door: 201, w: 4 },
+    { wall: 9, window: 386, top: 793, door: 201, w: 5 },
+    { wall: 19, window: 423, top: 830, door: 201, w: 4 },
   ],
 };
 

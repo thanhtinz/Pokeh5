@@ -13,6 +13,8 @@
 import { render } from 'preact';
 
 import { ART_NAMES, Art } from './ui/Art';
+import { DISTRICTS } from './game/businesses';
+import { DistrictStrip } from './ui/DistrictStrip';
 import { applyTheme } from './ui/theme';
 
 import './styles/base.css';
@@ -25,6 +27,17 @@ applyTheme(wealth > 0.5 ? 1e18 : -1e9, document.documentElement);
 function Sheet() {
   return (
     <div class="sheet-page">
+      {/* Sáu dải phố bày cạnh nhau: chúng phải khác nhau đủ để nhìn phát biết
+          đang ở khu nào, và đó là thứ chỉ thấy được khi xếp chồng lên nhau. */}
+      <h1>Dải phố sáu khu</h1>
+      <div style={{ display: 'grid', gap: '10px', width: '360px' }}>
+        {DISTRICTS.map((district) => (
+          <div key={district} style={{ position: 'relative', height: '42px' }}>
+            <DistrictStrip district={district} />
+          </div>
+        ))}
+      </div>
+
       <h1>
         {ART_NAMES.length} asset · {wealth > 0.5 ? 'giàu' : 'nợ'}
       </h1>
