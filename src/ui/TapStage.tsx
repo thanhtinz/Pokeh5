@@ -52,11 +52,11 @@ const CHIPS_PER_TAP = 9;
  * ## Vẽ phản hồi bằng canvas, giữ nguyên phần art bằng CSS
  *
  * Cả dự án này vẽ mọi thứ bằng CSS, và chỗ này không phá luật đó: **tấm hình
- * vẫn là mấy cái `<span>` trong DOM**, cắt ra từ tấm sprite bằng
- * `background-position`. Canvas nằm *trên* nó và
- * chỉ lo mấy thứ mà DOM làm không nổi — trăm mảnh vụn bay cùng lúc, mỗi mảnh
- * một vận tốc, sáu mươi lần một giây. Làm chuyện đó bằng `<span>` là tạo và
- * xoá hàng nghìn node mỗi giây, và trình duyệt sẽ trả lời bằng cách khựng.
+ * vẫn là một cái `<span>` trong DOM**, cắt ra từ tấm sprite bằng
+ * `background-position`. Canvas nằm *trên* nó và chỉ lo mấy thứ mà DOM làm
+ * không nổi — trăm mảnh vụn bay cùng lúc, mỗi mảnh một vận tốc, sáu mươi lần
+ * một giây. Làm chuyện đó bằng `<span>` là tạo và xoá hàng nghìn node mỗi
+ * giây, và trình duyệt sẽ trả lời bằng cách khựng.
  *
  * Ranh giới: **canvas cho cái sống một giây, CSS cho cái luôn ở đó.**
  */
@@ -355,7 +355,7 @@ export function TapStage({ game, derived }: Props) {
       </svg>
 
       {/*
-        Tấm hình: ba cơ sở của khu đang đứng. Dựng lại đúng khi đổi khu và
+        Tấm hình: cơ sở đầu của khu đang đứng. Dựng lại đúng khi đổi khu và
         không lúc nào khác — `yardScene` là hàm thuần, còn `derived.yard` là
         một số nguyên chạy từ 0 tới 5. Giữa hai lần đổi khu thì đây là một khối
         DOM đứng im; cái duy nhất chạm vào nó mỗi khung hình là `transform` của

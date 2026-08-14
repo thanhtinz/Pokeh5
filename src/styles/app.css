@@ -281,7 +281,7 @@
 }
 
 /*
- * Hàng ba hình của khu đang đứng.
+ * Hình của khu đang đứng, đặt giữa khung.
  *
  * Bản trước chỗ này là một hộp 128×80 pixel cố định, phóng lên bằng
  * `transform: scale` với một hệ số mà JavaScript phải đo bề ngang rồi ghi vào
@@ -292,17 +292,21 @@
 .yard {
   position: absolute;
   inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  /* Cỡ hình tính theo bề ngang khung, không theo pixel: khung này rộng bằng
-     màn hình, và ba con số cố định thì trên máy hẹp là tràn, trên máy rộng là
-     ba cái hình bé tí giữa một khoảng trống. */
-  gap: 7%;
+  display: grid;
+  place-items: center;
 }
 
+/*
+ * Cỡ tính theo **chiều cao** khung, không theo bề ngang.
+ *
+ * Khung là 2:1, nên bề ngang của nó gấp đôi chiều cao — lấy phần trăm bề ngang
+ * thì cùng một con số ra hai cỡ rất khác nhau tuỳ hướng đo, và cái hình vuông
+ * này bị chặn bởi chiều cao chứ không phải bề ngang. Bảy mươi hai phần trăm
+ * chiều cao là to hết mức mà vẫn chừa được khoảng cho giá mỗi lần chạm ở góc
+ * trái trên và bội số nhiệt ở góc phải trên.
+ */
 .yard__item {
-  width: 23%;
+  height: 72%;
   aspect-ratio: 1;
 }
 

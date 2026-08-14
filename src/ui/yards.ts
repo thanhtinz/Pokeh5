@@ -1,5 +1,5 @@
 /**
- * Tấm hình của màn Cày: ba cơ sở của khu đang đứng, xếp thành hàng.
+ * Tấm hình của màn Cày: một cơ sở của khu đang đứng.
  *
  * ## Vì sao không còn là cái sân lát tile
  *
@@ -18,18 +18,30 @@
  * Bản trước của nó dài trăm rưỡi dòng: khai chỗ đặt, tính khoảng cách, canh
  * đáy, kẹp cho khỏi tràn khung. Toàn bộ chỗ ấy tồn tại vì hình cũ **to nhỏ
  * khác nhau** — cái hai ô, cái ba ô, cái cao ba ô. Hình mới thì cái nào cũng
- * là một ô vuông, nên xếp hàng là việc của ba dòng CSS `flex`, và cái file này
- * chỉ còn phải trả lời đúng một câu: khu này thì lấy ba cơ sở nào.
+ * là một ô vuông, nên đặt nó vào giữa khung là việc của hai dòng CSS, và cái
+ * file này chỉ còn phải trả lời đúng một câu: khu này thì lấy cơ sở nào.
  *
- * Ba cơ sở *đầu* của khu, chứ không phải ba cái đắt nhất: đó là những thứ
- * người chơi mua trước, nên tấm hình khớp với cái họ vừa bấm mua chứ không
- * phải cái còn cách vài giờ nữa.
+ * Cơ sở *đầu* của khu, chứ không phải cái đắt nhất: đó là thứ người chơi mua
+ * trước, nên tấm hình khớp với cái họ vừa bấm mua chứ không phải cái còn cách
+ * vài giờ nữa.
  */
 import { BUSINESSES, DISTRICTS } from '../game/businesses';
 import { ICONS } from './icons';
 
-/** Mỗi tấm bày bấy nhiêu hình. Quá số này thì mỗi hình bé đi mà chẳng nói thêm gì. */
-export const YARD_ITEMS = 3;
+/**
+ * Mỗi tấm bày bấy nhiêu hình — **một**.
+ *
+ * Vòng trước là ba, và ba thì sai theo hai hướng cùng lúc. Ba hình xếp ngang
+ * trong một khung 2:1 thì mỗi hình chỉ còn rộng chưa tới một phần tư khung,
+ * tức là bé hơn cái hình cùng nó nằm trong hàng danh sách ngay bên dưới — cái
+ * khung to nhất màn hình mà đựng hình nhỏ hơn chỗ khác. Và ba hình đứng ngang
+ * hàng nhau thì không hình nào là chủ: mắt phải quét cả ba rồi tự ghép lại
+ * thành "à, khu này", trong khi thứ cần nói chỉ là *đang ở khu nào*.
+ *
+ * Một hình thì to gấp ba, và nó là chủ. Muốn xem cả khu thì đã có danh sách
+ * bên màn Cơ ngơi, đúng chỗ của nó.
+ */
+export const YARD_ITEMS = 1;
 
 /** Sáu tấm, mỗi tấm là mấy id cơ sở. Dựng đúng một lần lúc nạp module. */
 export const YARD_SCENES: readonly (readonly string[])[] = DISTRICTS.map((district) =>

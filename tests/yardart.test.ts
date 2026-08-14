@@ -48,7 +48,7 @@ describe('tấm hình màn Cày', () => {
     expect(YARD_SCENES).toHaveLength(DISTRICTS.length);
   });
 
-  it('tấm nào cũng đủ ba hình', () => {
+  it('tấm nào cũng đúng một hình', () => {
     YARD_SCENES.forEach((ids, tier) => {
       expect({ tier, count: ids.length }).toEqual({ tier, count: YARD_ITEMS });
     });
