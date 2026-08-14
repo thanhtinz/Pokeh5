@@ -13,6 +13,7 @@
 import { render } from 'preact';
 
 import { ART_NAMES, Art } from './ui/Art';
+import { Yard } from './ui/art/Yard';
 import { applyTheme } from './ui/theme';
 
 import './styles/base.css';
@@ -25,6 +26,13 @@ applyTheme(wealth > 0.5 ? 1e18 : -1e9, document.documentElement);
 function Sheet() {
   return (
     <div class="sheet-page">
+      {/* Cảnh lớn để trên cùng: một cái hình cỡ 40px sai chỗ nào thì còn giấu
+          được, cỡ 560px thì không. */}
+      <h1>Bãi phế liệu — cỡ soi</h1>
+      <div style={{ width: '560px', background: 'hsl(24 26% 9%)', borderRadius: '16px' }}>
+        <Yard />
+      </div>
+
       <h1>
         {ART_NAMES.length} asset · {wealth > 0.5 ? 'giàu' : 'nợ'}
       </h1>

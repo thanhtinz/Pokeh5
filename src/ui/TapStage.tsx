@@ -6,7 +6,7 @@ import { Particles, fade } from '../engine/particles';
 import { onFrame } from '../engine/loop';
 import type { Derived, Store } from '../game/store';
 import { t } from '../i18n';
-import { Scrapper } from './art/Scrapper';
+import { Yard } from './art/Yard';
 
 interface Props {
   game: Store;
@@ -373,7 +373,7 @@ export function TapStage({ game, derived }: Props) {
       </svg>
 
       <div class="stage__rock" ref={rock}>
-        <Scrapper armRef={(el) => (arm.current = el)} />
+        <Yard armRef={(el) => (arm.current = el)} />
       </div>
 
       <span class="stage__value num">{money(derived.tapValue)}</span>
