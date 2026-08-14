@@ -308,6 +308,16 @@ for (const stage of ['broke', 'rich']) {
     await page.screenshot({ path: `${OUT}/${stage}-${tab}.png` });
   }
 
+  // Công tắc tiếng nằm cuối màn Thêm, tức là dưới màn hình ở mọi ảnh chụp theo
+  // tab. Cuộn xuống tận đáy rồi chụp riêng một tấm.
+  if (stage === 'rich') {
+    await page.locator('.tab').nth(TABS.indexOf('more')).click();
+    await page.waitForTimeout(400);
+    await page.locator('.screen').evaluate((el) => el.scrollTo(0, el.scrollHeight));
+    await page.waitForTimeout(500);
+    await page.screenshot({ path: `${OUT}/settings.png` });
+  }
+
   // Bảng mọi thời phải bấm mới ra, nên vòng lặp trên không bao giờ chụp được
   // nó — và một màn hình không ai nhìn là một màn hình hỏng mà không ai biết.
   if (stage === 'rich') {

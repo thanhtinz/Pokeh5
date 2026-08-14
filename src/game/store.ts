@@ -269,6 +269,19 @@ export type Notice =
   | { kind: 'info'; label: string }
   | { kind: 'milestone'; milestone: LifeMilestone };
 
+/**
+ * Việc vừa xảy ra, để lớp trên kêu một tiếng.
+ *
+ * Đây là **id, không phải âm thanh** — cùng đúng cái luật mà `Notice` đang
+ * theo. Tầng luật chơi không biết Web Audio là gì, không biết cái nào kêu to
+ * hơn cái nào, và chạy được trong Node như trước.
+ *
+ * Chỉ có mấy việc *người chơi tự bấm* mới sinh cue. Tiền chảy về mỗi giây,
+ * quản lý tự quay vòng, người máy tự mua bán — mấy thứ đó mà kêu thì cái game
+ * này không đặt xuống bàn được.
+ */
+export type CueId = 'tap' | 'buy' | 'deny' | 'cash' | 'info' | 'card' | 'milestone';
+
 export interface OfflineReport {
   seconds: number;
   earned: number;
@@ -286,6 +299,7 @@ export class Store {
 
   /** Drained by the UI each frame; never grows unbounded. */
   private notices: Notice[] = [];
+  private cues: CueId[] = [];
   private listeners = new Set<Listener>();
   private dirty = false;
   private rng = new Rng(0);
@@ -367,6 +381,24 @@ export class Store {
     this.notices.push(notice);
   }
 
+  /**
+   * Lấy hàng đợi cue và xoá.
+   *
+   * Giữ đúng bốn cái cuối. Bấm nhanh hơn tốc độ vẽ lại màn hình là chuyện bình
+   * thường ở game này, và phát bù đủ mười lăm tiếng bấm dồn vào một khung hình
+   * thì không nghe ra tiếng bấm nữa, nghe ra tiếng rè.
+   */
+  drainCues(): CueId[] {
+    if (this.cues.length === 0) return [];
+    const out = this.cues.slice(-4);
+    this.cues = [];
+    return out;
+  }
+
+  private cue(cue: CueId): void {
+    this.cues.push(cue);
+  }
+
   private earn(amount: number): void {
     if (!Number.isFinite(amount) || amount <= 0) return;
     this.state.cash += amount;
@@ -383,8 +415,12 @@ export class Store {
   private spend(cost: number): boolean {
     if (!Number.isFinite(cost) || cost < 0) return false;
     const floor = STARTING_BALANCE - creditLine(this.state.peakNetWorth);
-    if (this.state.cash - cost < floor) return false;
+    if (this.state.cash - cost < floor) {
+      this.cue('deny');
+      return false;
+    }
     this.state.cash -= cost;
+    this.cue('buy');
     return true;
   }
 
@@ -491,6 +527,9 @@ export class Store {
     const card = drawCard(this.rng, d.income + d.refineryIncome * 0.25, d.tapValue);
     this.state.rngSeed = this.rng.seed;
     this.state.card = { ...card, expiresAt: now + CARD_LIFETIME * 1000 };
+    // Ngoại lệ của luật "chỉ việc người chơi bấm mới kêu". Thẻ cơ hội tự hiện
+    // ra và tự hết hạn, nên nó là thứ duy nhất cần gọi người chơi nhìn lên.
+    this.cue('card');
   }
 
   private scheduleCard(now: number, d: Derived): void {
@@ -654,6 +693,7 @@ export class Store {
     // a player does by hand should ever be worth literally nothing.
     if (this.state.ore >= d.oreCapacity) this.earn(mined * d.oreValue * 0.5);
 
+    this.cue('tap');
     this.emit();
     return mined;
   }
@@ -684,6 +724,9 @@ export class Store {
     const d = derive(this.state);
     const seconds = def.seconds / d.bonuses.jobSpeed;
     this.state.job = { jobId, endsAt: Date.now() + seconds * 1000 };
+    // Nhận việc không tốn đồng nào nên không đi qua `spend`, nhưng nó vẫn là
+    // một quyết định: nhận rồi thì mấy phút tới không nhận việc khác được.
+    this.cue('info');
     this.emit();
     return true;
   }
@@ -697,7 +740,10 @@ export class Store {
     const d = derive(this.state);
     const units =
       amount === 'max' ? affordableUnits(def, owned, d.spendable) : Math.max(0, Math.floor(amount));
-    if (units <= 0) return 0;
+    if (units <= 0) {
+      this.cue('deny');
+      return 0;
+    }
 
     const cost = bulkCost(def, owned, units);
     if (!this.spend(cost)) return 0;
@@ -890,9 +936,13 @@ export class Store {
     const cost = price * shares;
 
     // Shares are bought with money, not credit — a broker does not lend.
-    if (this.state.cash < cost) return false;
+    if (this.state.cash < cost) {
+      this.cue('deny');
+      return false;
+    }
 
     this.state.cash -= cost;
+    this.cue('buy');
     this.state.holdings[id] = applyBuy(holdingOf(this.state, id), shares, price);
     this.state.stats.trades += 1;
     this.persist();
@@ -912,6 +962,7 @@ export class Store {
     if (left.shares <= 0) delete this.state.holdings[id];
     else this.state.holdings[id] = left;
     this.state.stats.trades += 1;
+    this.cue('cash');
 
     this.persist();
     this.emit();

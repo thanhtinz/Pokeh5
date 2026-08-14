@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
 
+import { sound } from '../audio/sound';
 import { BUSINESSES } from '../game/businesses';
 import type { LifeMilestone } from '../game/life';
 import { money } from '../game/money';
@@ -47,11 +48,17 @@ export function App() {
   // Runs after every render, which is also every flush; the queue is normally
   // empty and draining it is a length check.
   useEffect(() => {
+    // Tiếng đi trước phần chữ, vì tiếng phải kịp cú bấm vừa rồi còn cái toast
+    // thì đằng nào cũng nằm đó hai giây rưỡi.
+    for (const cue of game.drainCues()) sound.play(cue);
+
     const notices = game.drainNotices();
     if (notices.length === 0) return;
 
     const fresh: Toast[] = [];
     for (const notice of notices) {
+      sound.play(notice.kind === 'cash' ? 'cash' : notice.kind === 'info' ? 'info' : 'milestone');
+
       if (notice.kind === 'milestone') {
         setCelebrated(notice.milestone);
         continue;

@@ -10,6 +10,9 @@ ios/
 undefined/
 *.sqlite
 *.sqlite-journal
+# WAL để lại hai file nữa cạnh kho, và chúng sống lâu hơn cả tiến trình.
+*.sqlite-wal
+*.sqlite-shm
 
 # Bản sao lưu kho tài khoản.
 backups/

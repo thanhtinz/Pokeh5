@@ -191,6 +191,10 @@ export const en: Record<string, string> = {
   'sync.busy': 'Sending',
   'sync.error': 'Sync failed',
 
+  'sound.title': 'Sound and haptics',
+  'sound.on': 'On',
+  'sound.off': 'Off',
+  'sound.note': 'The tap tone climbs with your rhythm, and phones that can buzz will buzz with it. This switch turns off both.',
   'board.title.week': 'This week',
   'board.title.all': 'All time',
   'board.mode.week': 'This week',

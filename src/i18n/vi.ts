@@ -217,6 +217,10 @@ export const vi: Record<string, string> = {
   'sync.error': 'Lỗi đồng bộ',
 
   // -------------------------------------------------------- bảng xếp hạng --
+  'sound.title': 'Tiếng và rung',
+  'sound.on': 'Đang bật',
+  'sound.off': 'Đang tắt',
+  'sound.note': 'Tiếng bấm lên dần theo nhịp tay, và máy nào có rung thì rung nhẹ theo. Tắt ở đây là tắt cả hai.',
   'board.title.week': 'Bảng tuần này',
   'board.title.all': 'Bảng mọi thời',
   'board.mode.week': 'Tuần này',

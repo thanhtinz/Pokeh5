@@ -158,6 +158,37 @@ rather than reading like a heading.
 **The milestone payoff.** A sun clearing a horizon behind the thing you just won
 back. It is the only screen in the game allowed to be mostly picture.
 
+### The sound is drawn too
+
+Nothing in this game ships as an asset file, and the audio follows the same rule
+as the artwork: it is generated. Six cues, a few hundred bytes of source, no
+download, and no silent first tap while a sprite of a coin sound is still coming
+over the wire.
+
+The one decision worth naming is the **tap ladder**. Tapping is the thing a
+player does thousands of times an hour, so the tap tone rises as they speed up
+and resets after a pause. Rising by a semitone each time turns that into a siren.
+Rising through a **pentatonic scale** means no two notes in the run can clash —
+that scale has no interval in it that sounds wrong — so hammering the button
+produces a phrase rather than a noise. Same mechanism, completely different
+thing to sit next to for an hour.
+
+Two rules hold the rest of it together:
+
+- **Only what the player did makes a sound.** Income arrives every second,
+  managers cycle on their own, the auto-trader trades while you are on another
+  screen. If any of that had a sound the game could not be left running, which is
+  the one thing an idle game has to allow. The exception is the opportunity card,
+  which appears on its own and expires on its own — it is the only thing in the
+  game that needs to ask for attention.
+- **The rule layer emits ids, not audio.** `store.ts` pushes a `CueId` the same
+  way it pushes a `Notice`; it has never heard of Web Audio and still runs under
+  node. `src/audio/cues.ts` turns an id into notes and is tested like any other
+  pure module; only `sound.ts` touches the browser.
+
+And one switch turns off both the sound and the buzz, because a tapping game
+played on a bus has to be silenceable in one move.
+
 ### Setting and language
 
 The game is set in Vietnam and denominated in đồng. That is not a coat of paint
@@ -685,6 +716,9 @@ src/game/     the rules — runs in plain node, no DOM, fully tested
   save.ts         sanitising, localStorage, native mirror
   store.ts        the mutable world and every action on it
   rng.ts          mulberry32 + Box–Muller
+src/audio/    the sound, synthesised — no asset files
+  cues.ts         which notes a cue is, in plain numbers; runs in node
+  sound.ts        the Web Audio wiring, the mute switch, the buzz
 src/net/      the account client and save sync — optional, never required
 src/i18n/     every string the player reads, in vi and en
 src/ui/       Preact components, the theme engine, icons, assets and scenes

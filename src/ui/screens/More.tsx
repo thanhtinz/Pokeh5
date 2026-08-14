@@ -1,3 +1,6 @@
+import { useState } from 'preact/hooks';
+
+import { sound } from '../../audio/sound';
 import { ACHIEVEMENTS, nextInLadder } from '../../game/achievements';
 import { CYCLE, REWARD_SECONDS } from '../../game/daily';
 import { count, money } from '../../game/money';
@@ -224,7 +227,51 @@ export function More({ game, state, derived }: Props) {
           </>
         )}
       </section>
+
+      <Settings />
     </>
+  );
+}
+
+/**
+ * Cái công tắc duy nhất của game.
+ *
+ * Nằm cuối màn Thêm chứ không nằm trên đầu: người chơi đi tìm nút tắt tiếng
+ * đúng một lần trong đời, còn ba thứ ở trên thì mở ra là để xem.
+ *
+ * `useState` ở đây không giữ trạng thái — trạng thái nằm trong `sound`, vì
+ * tiếng còn kêu cả ở những màn không có cái nút này. Nó chỉ để bắt Preact vẽ
+ * lại sau khi bấm.
+ */
+function Settings() {
+  const [, redraw] = useState(0);
+  const on = !sound.muted;
+
+  return (
+    <section class="panel panel--inset">
+      <div class="prestige__head">
+        <span class="section__title" style={{ margin: 0 }}>
+          {t('sound.title')}
+        </span>
+        <button
+          class={`btn btn--sm ${on ? 'btn--primary' : ''}`}
+          onClick={() => {
+            sound.toggle();
+            redraw((n) => n + 1);
+            // Bật lên thì kêu một tiếng ngay: đó là câu trả lời cho "bật rồi
+            // thì nghe thế nào", và nó cũng là cú chạm mở khoá âm thanh của
+            // trình duyệt.
+            if (!sound.muted) sound.play('buy');
+          }}
+        >
+          {on ? t('sound.on') : t('sound.off')}
+        </button>
+      </div>
+
+      <span class="row__meta" style={{ whiteSpace: 'normal' }}>
+        {t('sound.note')}
+      </span>
+    </section>
   );
 }
 
