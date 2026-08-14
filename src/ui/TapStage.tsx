@@ -6,7 +6,7 @@ import { Particles, fade } from '../engine/particles';
 import { onFrame } from '../engine/loop';
 import type { Derived, Store } from '../game/store';
 import { t } from '../i18n';
-import { Pix, PixScene } from './Pix';
+import { Sprite } from './Sprite';
 import { yardScene } from './yards';
 
 interface Props {
@@ -29,18 +29,6 @@ interface Float {
 const FLOATS = 14;
 const CHIPS_PER_TAP = 9;
 
-/** Một ô của bộ tile vẽ ra bao nhiêu pixel trong hệ toạ độ của cảnh. */
-const TILE = 16;
-
-/** Nhân vật: công nhân đội mũ bảo hộ, hai tư thế. */
-const HERO_UP = 266;
-const HERO_DOWN = 293;
-
-/** Đặt một ô vào đúng chỗ trong cảnh. */
-function spot(x: number, y: number): Record<string, string> {
-  return { position: 'absolute', left: `${x}px`, top: `${y}px` };
-}
-
 /**
  * Chỗ chạm.
  *
@@ -49,33 +37,34 @@ function spot(x: number, y: number): Record<string, string> {
  * có vật lý, không có gì phản ứng lại — bấm vào một hộp chữ nhật rồi chữ hiện
  * ra. Đó là một trang web.
  *
- * ## Vẽ hiệu ứng bằng canvas, giữ nguyên phần art bằng CSS
+ * ## Hình thì đứng yên, chỉ có cú chạm là động
  *
- * Cả dự án này vẽ mọi thứ bằng CSS, và chỗ này không phá luật đó: **cục quặng
- * vẫn là `OreArt`**, vẫn ăn theo bảng màu chung, vẫn là DOM. Canvas nằm *sau*
- * nó và chỉ lo mấy thứ mà DOM làm không nổi — trăm mảnh vụn bay cùng lúc, mỗi
- * mảnh một vận tốc, sáu mươi lần một giây. Làm chuyện đó bằng `<span>` là tạo
- * và xoá hàng nghìn node mỗi giây, và trình duyệt sẽ trả lời bằng cách khựng.
+ * Đây từng có một nhân vật hai khung hình đứng giữa cảnh, đổi tư thế theo mỗi
+ * nhịp vung búa. Bỏ rồi, và bỏ có lý do: hình trong game này là **hình tĩnh**,
+ * và một nhân vật cử động giữa một màn hình toàn số với thanh tiến độ thì nó
+ * không nâng chỗ nào lên — nó chỉ làm cái khung to nhất màn hình hứa hẹn một
+ * thứ trò chơi khác. Cái đứng trong khung giờ là một tấm hình, và nó đứng yên.
+ *
+ * Cái còn động lại là **phản hồi của cú chạm**, không phải phần art: bấm xuống
+ * thì tấm hình nén một cái rồi bật về, mảnh vụn bắn ra, con số bay lên. Đó là
+ * cách giao diện trả lời ngón tay — bỏ nốt thì cú chạm thành bấm vào tường.
+ *
+ * ## Vẽ phản hồi bằng canvas, giữ nguyên phần art bằng CSS
+ *
+ * Cả dự án này vẽ mọi thứ bằng CSS, và chỗ này không phá luật đó: **tấm hình
+ * vẫn là mấy cái `<span>` trong DOM**, cắt ra từ tấm sprite bằng
+ * `background-position`. Canvas nằm *trên* nó và
+ * chỉ lo mấy thứ mà DOM làm không nổi — trăm mảnh vụn bay cùng lúc, mỗi mảnh
+ * một vận tốc, sáu mươi lần một giây. Làm chuyện đó bằng `<span>` là tạo và
+ * xoá hàng nghìn node mỗi giây, và trình duyệt sẽ trả lời bằng cách khựng.
  *
  * Ranh giới: **canvas cho cái sống một giây, CSS cho cái luôn ở đó.**
- *
- * ## Ba thứ làm cú chạm có sức nặng
- *
- *  - **Nén và bật lại.** Cục quặng bị đè xuống rồi nảy về theo lò xo, không
- *    phải theo transition. Lò xo thì bấm nhanh hai lần liên tiếp sẽ cộng dồn;
- *    transition thì lần sau huỷ lần trước, và cảm giác là "đơ".
- *  - **Mảnh vụn có trọng lực.** Bay ra theo hướng ngón tay chạm, rơi xuống,
- *    nảy một cái. Mắt biết ngay chỗ nào vừa bị đập.
- *  - **Rung màn hình theo nhiệt.** Nhẹ thôi, và chỉ khi đang nóng — nếu lúc nào
- *    cũng rung thì nó không còn nói lên điều gì.
  */
 export function TapStage({ game, derived }: Props) {
   const host = useRef<HTMLDivElement>(null);
   const canvas = useRef<HTMLCanvasElement>(null);
   const rock = useRef<HTMLDivElement>(null);
   const ring = useRef<SVGRectElement>(null);
-  const heroUp = useRef<HTMLSpanElement>(null);
-  const heroDown = useRef<HTMLSpanElement>(null);
   const label = useRef<HTMLSpanElement>(null);
 
   // Mọi thứ đổi theo từng khung hình sống ở đây, không sống trong state của
@@ -94,9 +83,6 @@ export function TapStage({ game, derived }: Props) {
       big: false,
     })) as Float[],
     nextFloat: 0,
-    /** Góc vung búa, 0 là buông tay, 1 là giơ cao nhất. */
-    swing: 0,
-    swingV: 0,
     squash: 0,
     squashV: 0,
     shake: 0,
@@ -125,9 +111,6 @@ export function TapStage({ game, derived }: Props) {
       surface.width = Math.round(width * dpr);
       surface.height = Math.round(height * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-
-      // Cảnh dựng ở 128 pixel bề ngang; đây là hệ số phóng để nó vừa khung.
-      box.style.setProperty('--yard-scale', String(width / 128));
     };
 
     resize();
@@ -170,8 +153,6 @@ export function TapStage({ game, derived }: Props) {
        */
       const busy =
         heat > 0 ||
-        Math.abs(w.swing) > 0.001 ||
-        Math.abs(w.swingV) > 0.001 ||
         w.shake > 0 ||
         w.flash > 0 ||
         Math.abs(w.squash) > 0.001 ||
@@ -182,8 +163,6 @@ export function TapStage({ game, derived }: Props) {
       if (!busy) {
         if (w.dirty) {
           ctx.clearRect(0, 0, width, height);
-          if (heroUp.current) heroUp.current.style.opacity = '1';
-          if (heroDown.current) heroDown.current.style.opacity = '0';
           if (rock.current) {
             rock.current.style.transform = '';
             rock.current.style.filter = '';
@@ -203,11 +182,6 @@ export function TapStage({ game, derived }: Props) {
       // phải cộng dồn được, chứ không phải cú sau huỷ cú trước.
       w.squashV += (-w.squash * 220 - w.squashV * 18) * dt;
       w.squash += w.squashV * dt;
-
-      // Cánh tay: cùng một cái lò xo, nhưng nặng hơn và ít cản hơn, nên nó
-      // *vung* — giơ lên nhanh, rơi xuống có đà, quá đà một chút rồi mới về.
-      w.swingV += (-w.swing * 150 - w.swingV * 12) * dt;
-      w.swing += w.swingV * dt;
 
       w.shake = Math.max(0, w.shake - dt * 3.2);
       w.flash = Math.max(0, w.flash - dt * 2.4);
@@ -265,15 +239,6 @@ export function TapStage({ game, derived }: Props) {
 
       // ------------------------------------------------------- phần DOM -----
 
-      // Đổi khung hình theo pha vung: đang giơ lên thì khung giơ, đang bổ
-      // xuống thì khung bổ. Ngưỡng đặt ở giữa nên nó lật đúng một lần mỗi nhịp
-      // chứ không rung qua rung lại quanh vạch.
-      if (heroUp.current && heroDown.current) {
-        const down = w.swing < 0.35;
-        heroUp.current.style.opacity = down ? '0' : '1';
-        heroDown.current.style.opacity = down ? '1' : '0';
-      }
-
       if (rock.current) {
         const jolt = w.shake * 5;
         const x = w.shake > 0 ? (Math.random() - 0.5) * jolt : 0;
@@ -320,10 +285,6 @@ export function TapStage({ game, derived }: Props) {
 
     // Nén mạnh dần theo nhiệt: bấm càng nóng thì cú đập càng nặng tay.
     w.squashV -= 9 + hot * 5;
-    // Giơ búa lên ngay, rồi để lò xo quật nó xuống. Đánh nhanh thì cú sau bắt
-    // được cú trước đang trên đường xuống, và cánh tay cộng dồn thành một nhịp
-    // liên tục thay vì giật cục.
-    w.swingV += 8 + hot * 3;
     w.shake = Math.min(1, w.shake + 0.1 + hot * 0.35);
     w.flash = Math.min(1, w.flash + 0.35);
 
@@ -394,30 +355,17 @@ export function TapStage({ game, derived }: Props) {
       </svg>
 
       {/*
-        Cảnh dựng từ tile của Kenney, xếp bằng một danh sách toạ độ chứ không
-        ghép sẵn thành một tấm ảnh. Xếp bằng danh sách thì đổi bố cục là sửa
-        một dòng số, và nhân vật đổi khung hình chỉ là đổi một chỉ số ô.
+        Tấm hình: ba cơ sở của khu đang đứng. Dựng lại đúng khi đổi khu và
+        không lúc nào khác — `yardScene` là hàm thuần, còn `derived.yard` là
+        một số nguyên chạy từ 0 tới 5. Giữa hai lần đổi khu thì đây là một khối
+        DOM đứng im; cái duy nhất chạm vào nó mỗi khung hình là `transform` của
+        cú nén, ghi ở lớp ngoài.
       */}
       <div class="stage__rock" ref={rock}>
         <span class="yard">
-          {/* Cảnh dựng lại mỗi khi đổi sân, và chỉ khi đó: `yardScene` là hàm
-              thuần, còn `derived.yard` là một số nguyên chạy từ 0 tới 5. */}
-          <span class="yard__frame">
-            <PixScene scene={yardScene(derived.yard)} unit={TILE} />
-          </span>
-
-          {/* Hai khung hình của nhân vật: đứng thẳng và cúi xuống làm. Chồng
-              lên nhau, vòng lặp chỉ bật tắt độ mờ — đổi `i` mỗi khung hình thì
-              trình duyệt phải tính lại style, còn đổi opacity thì không. */}
-          <span class="yard__frame" ref={heroUp}>
-            <Pix i={HERO_UP} size={TILE} style={spot(48, 40)} />
-          </span>
-          {/* Khung thứ hai bắt đầu ở trạng thái ẩn: vòng lặp chỉ ghi độ mờ khi
-              có gì đang động, nên nếu không khai sẵn thì lúc màn hình đứng yên
-              cả hai khung cùng hiện và nhân vật hoá ra hai người chồng nhau. */}
-          <span class="yard__frame" ref={heroDown} style={{ opacity: 0 }}>
-            <Pix i={HERO_DOWN} size={TILE} style={spot(48, 42)} />
-          </span>
+          {yardScene(derived.yard).map((id) => (
+            <Sprite key={id} id={id} class="yard__item" />
+          ))}
         </span>
       </div>
 

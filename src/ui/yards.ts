@@ -1,181 +1,44 @@
 /**
- * Sáu cái sân của màn Cày, một cái cho mỗi khu.
+ * Tấm hình của màn Cày: ba cơ sở của khu đang đứng, xếp thành hàng.
  *
- * ## Bố cục có chỗ cấm, và chỗ cấm ấy là lý do cả sáu sân cùng một khung
+ * ## Vì sao không còn là cái sân lát tile
  *
- * Trên cảnh có ba thứ **không phải cảnh** đè lên: giá mỗi lần chạm ở góc trái
- * trên, dòng "mỗi chạm" ngay dưới nó, và bội số nhiệt ở góc phải trên. Cộng
- * thêm nhân vật đứng giữa, ở ô cột 3 hàng 2–3.
+ * Vòng trước chỗ này là một lưới tám nhân sáu ô lát kín nền, có một nhân vật
+ * hai khung hình đứng giữa và đổi tư thế theo từng cú chạm. Ba thứ đó cộng lại
+ * đọc ra một **màn chơi**: có mặt đất, có đường kẻ ô, có người đi trên đó. Mắt
+ * nhìn vào là chờ được điều khiển cái người ấy, chờ đi sang ô bên cạnh.
  *
- * Nên chỗ đặt được đồ chỉ còn sáu ô hai nhân hai, và cả sáu sân dùng chung
- * đúng sáu chỗ đó. Nghe như gò bó, nhưng nó giải quyết được thứ khó nhất của
- * việc này: **người chơi phải nhận ra sân vừa đổi**. Giữ nguyên bố cục và chỉ
- * đổi vật liệu thì mắt so sánh được ngay — cùng một chỗ, hôm qua là thùng rác,
- * hôm nay là container. Đổi cả bố cục thì thành hai bức tranh khác nhau, và
- * hai bức tranh khác nhau thì không so được với nhau.
+ * Nhưng game này là idle tycoon. Người chơi mở lên, đọc số, bấm vài nút, tắt
+ * máy, rồi tiền tự chạy tiếp. Không có ai đi đâu cả. Cái lưới ấy vừa không nói
+ * thêm được gì, vừa hứa một thứ trò chơi mà phần còn lại của game không có —
+ * và một lời hứa hụt thì tệ hơn là không hứa.
  *
- * ## Cái thang đọc bằng vật liệu
+ * ## Vì sao file này giờ chỉ còn một bảng tên
  *
- *   nhựa đường nứt  → bê tông cảng  → vỉa hè sạch
- *   → nền lát       → bãi cỏ        → sàn gỗ
+ * Bản trước của nó dài trăm rưỡi dòng: khai chỗ đặt, tính khoảng cách, canh
+ * đáy, kẹp cho khỏi tràn khung. Toàn bộ chỗ ấy tồn tại vì hình cũ **to nhỏ
+ * khác nhau** — cái hai ô, cái ba ô, cái cao ba ô. Hình mới thì cái nào cũng
+ * là một ô vuông, nên xếp hàng là việc của ba dòng CSS `flex`, và cái file này
+ * chỉ còn phải trả lời đúng một câu: khu này thì lấy ba cơ sở nào.
  *
- *   rác và xe hỏng  → container     → sạp và ô che
- *   → cây chậu, ATM → cây và ghế    → ăng-ten và ô che
- *
- * Không dòng chữ nào giải thích, và không cần.
+ * Ba cơ sở *đầu* của khu, chứ không phải ba cái đắt nhất: đó là những thứ
+ * người chơi mua trước, nên tấm hình khớp với cái họ vừa bấm mua chứ không
+ * phải cái còn cách vài giờ nữa.
  */
-import type { Block, Scene } from './Pix';
+import { BUSINESSES, DISTRICTS } from '../game/businesses';
+import { ICONS } from './icons';
 
-function c(x: number, y: number, w: number, h: number, at: readonly [number, number]): Block {
-  return { sheet: 'city', x, y, w, h, at };
-}
+/** Mỗi tấm bày bấy nhiêu hình. Quá số này thì mỗi hình bé đi mà chẳng nói thêm gì. */
+export const YARD_ITEMS = 3;
 
-function u(x: number, y: number, w: number, h: number, at: readonly [number, number]): Block {
-  return { sheet: 'urban', x, y, w, h, at };
-}
+/** Sáu tấm, mỗi tấm là mấy id cơ sở. Dựng đúng một lần lúc nạp module. */
+export const YARD_SCENES: readonly (readonly string[])[] = DISTRICTS.map((district) =>
+  BUSINESSES.filter((def) => def.district === district && ICONS[def.id] !== undefined)
+    .slice(0, YARD_ITEMS)
+    .map((def) => def.id),
+);
 
-/** Sân rộng tám ô, cao sáu ô — đúng 128×96 pixel gốc của khung cảnh. */
-export const YARD_COLS = 8;
-export const YARD_ROWS = 6;
-
-/**
- * Sáu chỗ đặt đồ.
- *
- * Cột 0–2 và 6–7 ở hàng 0–1 bị chữ đè, cột 3–4 hàng 2–3 là chỗ nhân vật đứng.
- * Sáu ô còn lại là đây, viết ra thành hằng số để mỗi sân khỏi tự đoán lại — và
- * để lúc chữ trên màn hình đổi chỗ thì chỉ phải sửa đúng một nơi.
- */
-const SLOT = {
-  top: [3, 0],
-  left: [0, 2],
-  right: [6, 2],
-  lowLeft: [0, 4],
-  lowMid: [3, 4],
-  lowRight: [6, 4],
-} as const;
-
-export interface Yard {
-  /** Ô nền, lát kín cả sân. */
-  ground: Block;
-  /** Đồ đạc, đặt vào sáu chỗ trên. */
-  props: readonly Block[];
-}
-
-export const YARD_SCENES: readonly Yard[] = [
-  // Xóm Liều — nhựa đường nứt, rác, một chiếc xe hỏng.
-  {
-    ground: { sheet: 'urban', x: 7, y: 16, w: 1, h: 1 },
-    props: [
-      u(16, 8, 2, 2, SLOT.top),
-      u(8, 9, 2, 2, SLOT.left),
-      u(6, 10, 2, 2, SLOT.right),
-      u(15, 16, 2, 2, SLOT.lowLeft),
-      c(12, 14, 2, 1, SLOT.lowMid),
-      u(3, 10, 2, 2, SLOT.lowRight),
-    ],
-  },
-
-  // Cảng — bê tông, container, thùng phuy, xe tải công trường.
-  {
-    ground: { sheet: 'city', x: 2, y: 24, w: 1, h: 1 },
-    props: [
-      c(31, 24, 3, 2, SLOT.top),
-      c(26, 26, 2, 2, SLOT.left),
-      c(20, 26, 2, 2, SLOT.right),
-      c(15, 13, 3, 1, SLOT.lowLeft),
-      c(12, 14, 2, 1, SLOT.lowMid),
-      c(13, 15, 2, 2, SLOT.lowRight),
-    ],
-  },
-
-  // Phố Thị — vỉa hè sạch, ô che, sạp hàng, xe giao hàng.
-  {
-    ground: { sheet: 'urban', x: 9, y: 1, w: 1, h: 1 },
-    props: [
-      c(34, 14, 2, 2, SLOT.top),
-      u(6, 8, 2, 2, SLOT.left),
-      u(4, 10, 2, 2, SLOT.right),
-      c(31, 18, 2, 2, SLOT.lowLeft),
-      u(3, 11, 2, 1, SLOT.lowMid),
-      u(6, 10, 2, 2, SLOT.lowRight),
-    ],
-  },
-
-  // Tài Chính — nền lát, cây chậu, một tường ATM, két, xe con.
-  {
-    ground: { sheet: 'city', x: 7, y: 19, w: 1, h: 1 },
-    props: [
-      u(16, 8, 2, 2, SLOT.top),
-      u(8, 11, 2, 1, [0, 2]),
-      u(8, 11, 2, 1, [0, 3]),
-      c(33, 22, 2, 2, SLOT.right),
-      u(10, 12, 1, 1, [0, 4]),
-      u(10, 12, 1, 1, [1, 4]),
-      u(4, 6, 2, 2, SLOT.lowMid),
-      c(12, 15, 2, 2, SLOT.lowRight),
-    ],
-  },
-
-  /*
-   * Uptown — bãi cỏ, cây, ô che, xe đẹp.
-   *
-   * Cây ở bộ Urban cao **hai ô**: hàng 8 là tán, hàng 9 là thân và chậu. Lấy
-   * riêng hàng 9 thì được cái cây bị **cắt phẳng nóc**; lấy riêng hàng 8 thì
-   * được cái tán **lơ lửng không có gốc**. Cả sáu cái sân từng dính đủ cả hai
-   * kiểu, và ở cỡ mười sáu pixel thì cái nào cũng vẫn "trông như cái cây" —
-   * chỉ khi bày sáu cái cạnh nhau mới thấy có cái nóc bằng, có cái không gốc.
-   * Cây trọn vẹn là hàng 8–9 lấy chung, hoặc hàng 10 đứng một mình.
-   */
-  // Uptown — bãi cỏ, cây, bụi, ô che, xe đẹp.
-  {
-    ground: { sheet: 'city', x: 0, y: 24, w: 1, h: 1 },
-    props: [
-      // Cây của bộ City là **xanh lá trên nền cỏ xanh lá** — ở đây nó gần như
-      // tàng hình, mà soi riêng một mình thì lại rất rõ. Cây mùa thu của bộ
-      // Urban thì nổi bật hẳn. (Cột 21 cũng là cây, nhưng là cây **ba ô**, lấy
-      // hai ô thì cụt mất nóc — nhìn ra một cái tán bị bạt phẳng.)
-      u(16, 11, 2, 2, SLOT.top),
-      u(16, 8, 2, 2, SLOT.left),
-      c(33, 18, 2, 2, SLOT.right),
-      u(16, 10, 2, 1, SLOT.lowLeft),
-      c(34, 14, 2, 2, SLOT.lowMid),
-      u(16, 8, 2, 2, SLOT.lowRight),
-    ],
-  },
-
-  // Heights — sàn gỗ, ăng-ten, cây chậu, ô che, xe đen.
-  {
-    ground: { sheet: 'city', x: 4, y: 19, w: 1, h: 1 },
-    props: [
-      // Hai cây cao trên sân thượng. Chỗ này từng là hai cái cột của bộ Urban,
-      // định làm ăng-ten phát sóng — nhưng một cột chắn đường và một cột đèn
-      // chữ T thì đọc ra **cái búa và cái xẻng**, không ra ăng-ten. Bộ này
-      // không có ăng-ten, và lấy một thứ khác gán cho nó thì lại đúng cái lỗi
-      // đã sửa ở `tiles.ts`.
-      c(31, 10, 1, 2, [3, 0]),
-      c(31, 10, 1, 2, [4, 0]),
-      u(16, 8, 2, 2, SLOT.left),
-      // Xe nhìn ngang rộng ba ô, nên lùi sang cột 5 chứ không đặt ở cột 6 —
-      // đặt ở cột 6 thì ô thứ ba rơi ra ngoài sân và cái xe cụt đuôi.
-      c(34, 20, 3, 2, [5, 2]),
-      c(12, 15, 2, 2, SLOT.lowLeft),
-      c(34, 14, 2, 2, SLOT.lowMid),
-      u(16, 10, 2, 1, [6, 5]),
-    ],
-  },
-];
-
-/** Một sân dựng thành `Scene` để `PixScene` vẽ được. */
-export function yardScene(tier: number): Scene {
-  const yard = YARD_SCENES[Math.min(Math.max(tier, 0), YARD_SCENES.length - 1)]!;
-  const layers: Block[] = [];
-
-  for (let y = 0; y < YARD_ROWS; y += 1) {
-    for (let x = 0; x < YARD_COLS; x += 1) {
-      layers.push({ ...yard.ground, w: 1, h: 1, at: [x, y] });
-    }
-  }
-
-  layers.push(...yard.props);
-  return { w: YARD_COLS, h: YARD_ROWS, layers };
+/** Tấm hình của một bậc. Bậc ngoài khoảng thì kẹp về hai đầu. */
+export function yardScene(tier: number): readonly string[] {
+  return YARD_SCENES[Math.min(Math.max(tier, 0), YARD_SCENES.length - 1)]!;
 }

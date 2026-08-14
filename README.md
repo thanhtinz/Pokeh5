@@ -22,7 +22,8 @@ npm run dev:all    # both at once
 npm test           # 110 tests over the rule layer, the dictionaries and the server
 npm run build      # typecheck, then a production bundle in dist/
 npm run shot       # screenshots every screen at both ends of the palette
-npm run art        # all 58 drawn assets on one sheet, large enough to judge
+npm run art        # every drawn asset and sprite on one sheet, large enough to judge
+npm run sprite     # re-bake the business/job sprite sheet from scripts/icon-map.json
 npm run icons      # re-render the app icon PNGs from public/icon.svg
 npm run backup     # a live, consistent copy of the account database
 ```
@@ -56,14 +57,10 @@ The climb out of debt is deliberately given *half* the whole scale, even though
 it is a rounding error in absolute terms, because it is most of the emotional
 distance and all of the first session.
 
-### Two visual systems, and the line between them
+### Three visual systems, and the lines between them
 
-There is not a single emoji in the game, and that follows from the palette
-rather than from taste. An emoji is a small picture with its own fixed colours;
-put sixty of them on a screen whose entire hue is a function of net worth and
-they are the only thing that refuses to move with it.
-
-What replaced them is two systems, split by what a thing *is*:
+The palette is the organising constraint, and it sorts the art into three kinds
+by one question: *does this thing have to move with net worth?*
 
 **Icons** (`src/ui/Icon.tsx`) are for the interface, and only for the
 interface — a tab, a lock, a state. Five of them. Line drawings on a 24×24 grid
@@ -102,6 +99,16 @@ spacing is what keeps sixty drawings looking like one set.
 
 An asset that declares nothing falls back to the theme hue and still warms from
 debt-red to gold, as everything did before.
+
+**Sprites** (`src/ui/Sprite.tsx`) are the third kind, and they are the one that
+opts out. Thirty-six businesses and five jobs, cut from a vendored Fluent Emoji
+sheet; their colours are baked into a PNG and do not follow the hue at all. That
+is a real cost — on a screen where everything else warms from red to gold, forty
+list rows hold their own colour — and it buys something worth more: a list that
+is *readable*. Recognising "washing machine" from a three-tone silhouette at
+forty pixels is harder than it sounds, and the two rounds spent trying to draw
+these by hand and the two more spent cropping them out of pixel tiles are the
+receipts. The next section is the whole story.
 
 On a bright tile — a milestone disc, a card header — a light asset used to
 disappear, and the old fix replaced all four tones with a brown ramp. That fixed
@@ -158,28 +165,61 @@ rather than reading like a heading.
 **The milestone payoff.** A sun clearing a horizon behind the thing you just won
 back. It is the only screen in the game allowed to be mostly picture.
 
-### The art is Kenney's, and that is on purpose
+### The art is Microsoft's Fluent Emoji, and getting there took two wrong turns
 
 Four attempts at drawing this game's assets by hand — flat vector, shaded SVG,
 isometric constructions, hand-authored pixel maps — all landed somewhere between
 "icon" and "amateur". Drawing a decent game art set is its own profession, and
-no amount of care in a text editor substitutes for one.
+no amount of care in a text editor substitutes for one. So: use someone else's.
 
-So the art comes from [Kenney](https://kenney.nl), released under **CC0**: all
-rights waived, free for commercial use, attribution welcome but not required.
-The pack is *RPG Urban*, 486 tiles of 16×16 modern-city pixel art — market
-stalls, bins, vehicles, street furniture, and people. It is vendored at
-`src/assets/kenney/rpg-urban/` with its licence file beside it, and credited
-here because crediting is the decent thing even when the licence does not ask.
+**Wrong turn one: Flaticon.** It is the obvious place to look, and it does not
+work. The free tier requires visible attribution *at every point of use* and
+forbids redistributing the source files — which is exactly what vendoring 41
+icons into a Git repo is. Clean use means buying Premium.
 
-Two notes on how it is used:
+**Wrong turn two: pixel tiles.** The first pick was [Kenney](https://kenney.nl)'s
+CC0 tile packs, and the licence was never the problem. The geometry was. Those
+sets draw objects **spanning several 16×16 cells** — a car is three wide, a tree
+two tall, a shutter row three by two — so pulling one object out means declaring
+a column, a row, a width and a height, and *none of those four numbers is
+checkable by eye at sixteen pixels*. The commit log is the evidence: a car with
+its tail cut off, then the same car with its nose cut off, a tree with a flat
+roof, a canopy floating with no trunk, a roof that turned out to be a road
+marking, a door that turned out to be a wooden crate. Every fix took a round to
+find, and half of them introduced the opposite error.
 
-- **One image, cut by CSS.** The whole set is a single 432×288 sheet. Slicing it
-  into 486 files would be 486 requests; shifting `background-position` is one,
-  and that is what browsers were built for. `src/ui/Pix.tsx` is that component.
-- **The scene is a list of coordinates**, not a pre-composed picture. Changing
-  the layout is editing a row of numbers, and the character changing pose is
-  swapping one tile index.
+**Where it landed: [Fluent Emoji](https://github.com/microsoft/fluentui-emoji)**,
+Microsoft's set, **MIT** — commercial use fine, redistribution fine, only the
+copyright notice has to travel with it. It is vendored at `src/assets/fluent/`
+with its licence beside it. One icon is **one square**, and the square is laid
+out by a script rather than typed by hand, so there is no width to declare wrong
+and no column to miscount. A whole class of bug disappeared — not by being more
+careful, but by removing the place to be careless.
+
+The trade is the pixel look. Worth it here: this is an idle tycoon, and the
+player reads a forty-row list. Flat colour art is legible at forty pixels;
+16×16 pixel art scaled up is not.
+
+Three notes on how it is used:
+
+- **One image, cut by CSS.** `scripts/sprite.mjs` bakes the mapped icons into a
+  single grid PNG plus a lookup table, both committed. 41 files would be 41
+  requests and 41 more service-worker entries; one sheet is one request. The
+  grid is uniform with no gutters, so slicing it is two percentage formulas —
+  see `src/ui/Sprite.tsx`. Edit `scripts/icon-map.json`, re-run `npm run sprite`,
+  commit the result.
+- **Sized by CSS, not by a prop.** Cutting with percentages means the same icon
+  works at any box size. Passing pixel sizes around means every call site
+  recomputes `background-size`, and a site that computes it wrong still renders
+  an icon — just the neighbouring one.
+- **The pictures hold still.** The grind screen used to be an eight-by-six tiled
+  yard with a two-frame character swapping pose on every tap. Between the floor
+  grid, the ground, and the person walking on it, that frame read as a *level* —
+  and this is an idle tycoon, where nobody walks anywhere. It is now three icons
+  in a row: the first businesses of the district you are standing in. The only
+  thing that still moves is the tap feedback — a squash, some debris, a number
+  floating up — because that is the interface answering a finger, not the art
+  performing.
 
 ### Why there is a game loop at all
 

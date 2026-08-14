@@ -16,9 +16,7 @@ import { hasManager, ownedOf, upgradeOf, type PlayerState } from '../../game/sta
 import { TIERS, isMaxed, nextUpgrade, upgradeMultiplier } from '../../game/upgrades';
 import type { Derived, Store } from '../../game/store';
 import { t } from '../../i18n';
-import { DistrictStrip } from '../DistrictStrip';
-import { BUSINESS_ART } from '../tiles';
-import { PixScene } from '../Pix';
+import { Sprite } from '../Sprite';
 
 interface Props {
   game: Store;
@@ -89,8 +87,12 @@ export function Empire({ game, state, derived }: Props) {
 
         return (
           <section key={district}>
+            {/* Đầu khu là tên khu và số tiền khu đó đẻ ra, không có tấm phông
+                phía sau. Chỗ này từng là một dải mặt tiền ghép từ tile, chạy
+                suốt bề ngang — nó đẹp, nhưng nó là *phông của một màn chơi*
+                đặt trên đầu một danh sách số, và hai thứ đó không cùng một
+                trò chơi. Danh sách thì cần đọc nhanh, không cần khung cảnh. */}
             <div class="district">
-              <DistrictStrip district={district} />
               <h2 class="section__title district__title">
                 <span>{t(`district.${district}`)}</span>
                 <span class="num">{rate(districtIncome)}</span>
@@ -142,7 +144,7 @@ export function Empire({ game, state, derived }: Props) {
                     onClick={() => game.runBusiness(def.id)}
                     aria-label={t('empire.run', { name: t(`biz.${def.id}`) })}
                   >
-                    <BusinessArt id={def.id} />
+                    <Sprite id={def.id} />
                   </button>
 
                   <span class="row__body">
@@ -232,17 +234,3 @@ export function Empire({ game, state, derived }: Props) {
   );
 }
 
-/**
- * Hình của một cơ sở.
- *
- * Cỡ ô để đúng mười sáu pixel, tức tỷ lệ gốc, và đó không phải chuyện thẩm mỹ.
- * Bộ City có **một pixel viền giữa các ô**, nên bước nhảy là `size × 17/16`;
- * chọn mười bốn thì bước thành 14,875 pixel và trình duyệt lấy mẫu lệch — mọi
- * ô của bộ đó nhoè đi và dính một vệt của ô bên cạnh, trong khi bộ Urban
- * (viền 0) vẫn nét. Nhìn thì tưởng chọn nhầm ô, thật ra là chọn nhầm cỡ.
- */
-function BusinessArt({ id }: { id: string }) {
-  const art = BUSINESS_ART[id];
-  if (!art) return null;
-  return <PixScene scene={art} />;
-}

@@ -191,25 +191,39 @@
 /* -------------------------------------------------------------- chỗ chạm -- */
 
 /*
- * Cái sân.
+ * Khung hình của màn Cày.
  *
  * Trước đây nó là một hình tròn, vì thứ nằm giữa là một viên kim cương — một
- * ký hiệu, và ký hiệu thì hợp với một cái huy hiệu tròn. Giờ nằm giữa là một
- * cảnh có người, có đống sắt, có mặt đất; cảnh thì nằm ngang, nên cái khung
- * cũng nằm ngang.
+ * ký hiệu, và ký hiệu thì hợp với một cái huy hiệu tròn. Giờ nằm trong đó là
+ * ba cơ sở của khu xếp thành hàng; hàng thì nằm ngang, nên cái khung cũng nằm
+ * ngang.
+ *
+ * Tỷ lệ 2:1 chứ không phải 4:3 như vòng trước. Vòng trước cái khung phải cao
+ * để chứa sáu hàng ô lát nền; hết lát nền thì mấy hàng trên chỉ còn là khoảng
+ * trống, và một khoảng trống cao bằng nửa màn hình trong game idle là chỗ lẽ
+ * ra để được thêm hai dòng danh sách.
  */
 .stage {
   position: relative;
   width: 100%;
-  aspect-ratio: 128 / 96;
+  aspect-ratio: 2 / 1;
   border-radius: calc(var(--radius) - 2px);
   overflow: hidden;
   cursor: pointer;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
+  /*
+   * Một quầng sáng sau ba cái hình, không có vạch nền.
+   *
+   * Vòng trước ở đây có một đường chân trời, vì lúc ấy trong khung là mấy món
+   * đồ pixel *đặt xuống đất* — thiếu vạch thì chúng lơ lửng. Hình bây giờ là
+   * icon phẳng, mà icon thì không đứng trên gì cả: kẻ một mặt đất dưới cái ô
+   * kính hiển vi hay cái biểu đồ thì thành ra hỏi "cái nhà băng ấy đang đứng ở
+   * đâu", một câu hỏi mà tấm hình không định trả lời.
+   */
   background:
-    radial-gradient(ellipse 70% 55% at 50% 42%, hsl(var(--hue) var(--sat) 46% / 0.32), transparent),
+    radial-gradient(ellipse 74% 62% at 50% 52%, hsl(var(--hue) var(--sat) 46% / 0.3), transparent),
     linear-gradient(180deg, hsl(var(--hue) 26% 11%), hsl(var(--hue) 30% 6%));
   box-shadow:
     inset 0 0 0 1px hsl(var(--hue) var(--sat) 62% / 0.22),
@@ -267,43 +281,54 @@
 }
 
 /*
- * Cảnh vẽ ở hệ toạ độ gốc 128×96 rồi phóng cả khối lên cho vừa khung.
+ * Hàng ba hình của khu đang đứng.
  *
- * Phóng bằng `transform: scale` trên một hộp có kích thước cố định, chứ không
- * đặt từng ô theo phần trăm: theo phần trăm thì mỗi ô làm tròn một kiểu và
- * giữa các ô hiện ra những khe hở một pixel chạy dọc cả cảnh.
+ * Bản trước chỗ này là một hộp 128×80 pixel cố định, phóng lên bằng
+ * `transform: scale` với một hệ số mà JavaScript phải đo bề ngang rồi ghi vào
+ * biến CSS mỗi lần khung đổi cỡ. Hết rồi: hình mới cắt bằng phần trăm nên nó
+ * tự co giãn, và cả cái vòng "đo — tính — ghi biến" ấy biến mất cùng với chỗ
+ * để nó lệch nhịp một khung hình sau khi xoay máy.
  */
 .yard {
   position: absolute;
-  left: 0;
-  top: 0;
-  width: 128px;
-  height: 96px;
-  transform-origin: 0 0;
-  transform: scale(var(--yard-scale, 1));
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Cỡ hình tính theo bề ngang khung, không theo pixel: khung này rộng bằng
+     màn hình, và ba con số cố định thì trên máy hẹp là tràn, trên máy rộng là
+     ba cái hình bé tí giữa một khoảng trống. */
+  gap: 7%;
 }
 
-/* Khung của một cảnh ghép từ nhiều ô: các ô nằm tuyệt đối bên trong nó.
+.yard__item {
+  width: 23%;
+  aspect-ratio: 1;
+}
+
+/*
+ * Một hình cắt ra từ tấm sprite.
  *
- * Tên phải có tiền tố `pix-`: `.scene` trần đã là cảnh thành phố ở màn mở đầu,
- * và cái đó khai `position: absolute`. Trùng tên thì mọi cảnh tile bị hút ra
- * góc trang và biến mất khỏi chỗ nó phải nằm — mất nửa tiếng mới ra vì DOM
- * nhìn hoàn toàn đúng, chỉ có `getComputedStyle` mới nói thật. */
-.pix-scene {
-  position: relative;
+ * Không có `image-rendering: pixelated` ở đây, và đó là chủ ý: bản trước là
+ * pixel art 16×16 *phóng to lên*, nên phải chặn trình duyệt làm mịn, không thì
+ * mỗi ô thành một vệt nhoè. Bộ này là hình phẳng vẽ ở 192 pixel rồi **thu nhỏ
+ * xuống** 40–100, nên phải để trình duyệt làm mịn — bật `pixelated` vào đây
+ * thì mọi đường cong hoá ra răng cưa.
+ *
+ * Cỡ do chỗ dùng đặt, không đặt ở đây: cùng một hình sống ở ba cỡ khác nhau
+ * (hàng danh sách, tấm hình màn Cày, bảng soi).
+ */
+.sprite {
   display: block;
-}
-
-.pix {
-  display: block;
-  image-rendering: pixelated;
   background-repeat: no-repeat;
   pointer-events: none;
 }
 
-.yard__frame {
-  position: absolute;
-  inset: 0;
+/* Trong một hàng danh sách. Khung `.row__icon` là 48, chừa mỗi bên bốn pixel
+   để hình không dính vào bo góc của khung. */
+.row__icon .sprite {
+  width: 40px;
+  height: 40px;
 }
 
 /* Giá mỗi lần chạm: một cái nhãn nhỏ ở góc, không phải một dòng chữ giữa cảnh. */
@@ -496,9 +521,6 @@
 .row__icon {
   display: grid;
   place-items: center;
-  /* Bốn mươi tám, không phải bốn mươi sáu: cảnh cao nhất là ba ô mười sáu
-     pixel, và cỡ ô phải là mười sáu để bộ City (viền một pixel) rơi đúng vào
-     lưới pixel. Thu khung lại thì phải thu cỡ ô, mà thu cỡ ô thì nhoè. */
   width: 48px;
   height: 48px;
   border-radius: 13px;
@@ -1133,41 +1155,11 @@ button.row__icon:not(:disabled):active {
   opacity: 0.65;
 }
 
-/* A header strip per district, sitting on the section title's baseline. */
+/* Đầu mỗi khu: chỉ có tên khu và mấy con số của nó. Cái dải mặt tiền ghép từ
+   tile từng nằm đây đã bỏ, nên hết luôn chỗ đệm dành cho nó. */
 .district {
   position: relative;
   margin-bottom: 8px;
-  padding-top: 46px;
-}
-
-/*
- * Dải phố đầu mỗi khu.
- *
- * Vẽ ở hệ toạ độ gốc rồi phóng cả khối cho vừa bề ngang, y như cái sân ở màn
- * Cày — đặt từng ô theo phần trăm thì mỗi ô làm tròn một kiểu và giữa các ô
- * hiện ra khe hở một pixel.
- */
-.strip {
-  position: absolute;
-  inset: 0 0 auto;
-  height: 42px;
-  overflow: hidden;
-  border-radius: 10px;
-  /* Nhoè dần ở hai đầu để nó là một dải phố chạy tiếp, không phải một tấm ảnh
-     bị cắt cụt hai bên. */
-  mask-image: linear-gradient(90deg, transparent, #000 10%, #000 84%, transparent);
-  -webkit-mask-image: linear-gradient(90deg, transparent, #000 10%, #000 84%, transparent);
-  opacity: 0.72;
-}
-
-.strip__inner {
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  transform-origin: 0 100%;
-  /* Dải cao 42px, cảnh cao hai ô tức 32px. Phóng đúng tỷ lệ đó, và để bề
-     ngang tràn ra ngoài — hai đầu đã có lớp nhoè che. */
-  transform: scale(1.3125);
 }
 
 .district-art {

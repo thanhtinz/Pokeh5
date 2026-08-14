@@ -13,11 +13,9 @@
 import { render } from 'preact';
 
 import { ART_NAMES, Art } from './ui/Art';
-import { BUSINESSES, DISTRICTS } from './game/businesses';
+import { BUSINESSES } from './game/businesses';
 import { JOBS } from './game/jobs';
-import { BUSINESS_ART, JOB_ART } from './ui/tiles';
-import { PixScene } from './ui/Pix';
-import { DistrictStrip } from './ui/DistrictStrip';
+import { Sprite } from './ui/Sprite';
 import { YARD_SCENES, yardScene } from './ui/yards';
 import { YARDS } from './game/yard';
 import { t } from './i18n';
@@ -31,77 +29,58 @@ const params = new URLSearchParams(location.search);
 /** Đọc `?wealth=` để soi cả hai đầu của thang màu chủ đề. */
 const wealth = Number(params.get('wealth') ?? 1);
 
-/**
- * `?unit=` phóng to cảnh tile.
- *
- * Ở cỡ thật mười sáu pixel thì một cái cảnh cụt mất một ô trông y hệt một cái
- * cảnh đúng — mắt không phân biệt nổi ở cỡ đó. Phóng lên bốn tám thì cái cụt
- * tự lộ ra. Nên bảng soi phải xem được ở cả hai cỡ, không chỉ cỡ thật.
- */
-const unit = Number(params.get('unit') ?? 16);
-const cell = `${unit * 3 + 4}px`;
+/** `?unit=` đổi cỡ hình, để soi được cả ở cỡ thật lẫn phóng to. */
+const unit = Number(params.get('unit') ?? 64);
 applyTheme(wealth > 0.5 ? 1e18 : -1e9, document.documentElement);
+
+const box = { width: `${unit}px`, height: `${unit}px`, flex: `0 0 ${unit}px` };
 
 function Sheet() {
   return (
     <div class="sheet-page">
-      {/* Sáu dải phố bày cạnh nhau: chúng phải khác nhau đủ để nhìn phát biết
-          đang ở khu nào, và đó là thứ chỉ thấy được khi xếp chồng lên nhau. */}
-      {/* Icon đúng cỡ nó sống trong danh sách, kèm tên: cái nào không ra hình
-          thì đọc tên xong nhìn hình là biết ngay. */}
+      {/* Icon kèm tên: cái nào không ra hình thì đọc tên xong nhìn hình là
+          biết ngay đã ghép nhầm chỗ nào trong `scripts/icon-map.json`. */}
       <h1>Hình cơ sở và việc làm</h1>
       <div
-        class="iconsheet"
         style={{
           display: 'grid',
-          gridTemplateColumns: `repeat(6, ${unit * 3 + 130}px)`,
-          gap: '8px',
+          gridTemplateColumns: `repeat(4, ${unit + 150}px)`,
+          gap: '10px',
           marginBottom: '20px',
         }}
       >
         {BUSINESSES.map((def) => (
           <span
             key={def.id}
-            style={{ display: 'flex', gap: '8px', alignItems: 'center', fontSize: '11px' }}
+            style={{ display: 'flex', gap: '10px', alignItems: 'center', fontSize: '12px' }}
           >
-            <span style={{ width: cell, height: cell, display: 'grid', placeItems: 'center' }}>
-              {BUSINESS_ART[def.id] && <PixScene scene={BUSINESS_ART[def.id]!} unit={unit} />}
-            </span>
+            <Sprite id={def.id} class="sheet-sprite" />
             <b>{t(`biz.${def.id}`)}</b>
           </span>
         ))}
         {JOBS.map((job) => (
           <span
             key={job.id}
-            style={{ display: 'flex', gap: '8px', alignItems: 'center', fontSize: '11px' }}
+            style={{ display: 'flex', gap: '10px', alignItems: 'center', fontSize: '12px' }}
           >
-            <span style={{ width: cell, height: cell, display: 'grid', placeItems: 'center' }}>
-              {JOB_ART[job.id] && <PixScene scene={JOB_ART[job.id]!} unit={unit} />}
-            </span>
+            <Sprite id={job.id} class="sheet-sprite" />
             <b style={{ color: '#8fd' }}>{t(`job.${job.id}`)}</b>
           </span>
         ))}
       </div>
 
-      {/* Sáu cái sân của màn Cày, bày cạnh nhau. Bày cạnh nhau mới kiểm được
-          thứ duy nhất chúng phải làm: khác nhau đủ để nhìn phát biết vừa đổi,
-          mà vẫn cùng một bố cục để so được với nhau. */}
-      <h1>Sáu cái sân</h1>
-      <div class="yardsheet" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 264px)', gap: '12px', marginBottom: '20px' }}>
+      {/* Sáu tấm hình của màn Cày, bày cạnh nhau. Bày cạnh nhau mới kiểm được
+          thứ duy nhất chúng phải làm: khác nhau đủ để nhìn phát biết vừa đổi
+          khu, mà không tấm nào lặp lại hình của tấm bên cạnh. */}
+      <h1>Sáu tấm hình màn Cày</h1>
+      <div style={{ display: 'grid', gap: '10px', marginBottom: '20px' }}>
         {YARD_SCENES.map((_, tier) => (
-          <span key={tier} style={{ display: 'grid', gap: '4px', fontSize: '11px' }}>
-            <PixScene scene={yardScene(tier)} unit={32} />
-            <b>{t(`district.${YARDS[tier]!}`)}</b>
+          <span key={tier} style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+            {yardScene(tier).map((id) => (
+              <Sprite key={id} id={id} class="sheet-sprite" />
+            ))}
+            <b style={{ fontSize: '12px' }}>{t(`district.${YARDS[tier]!}`)}</b>
           </span>
-        ))}
-      </div>
-
-      <h1>Dải phố sáu khu</h1>
-      <div style={{ display: 'grid', gap: '10px', width: '360px' }}>
-        {DISTRICTS.map((district) => (
-          <div key={district} style={{ position: 'relative', height: '42px' }}>
-            <DistrictStrip district={district} />
-          </div>
         ))}
       </div>
 
@@ -140,6 +119,8 @@ function Sheet() {
           <Art key={name} name={name} />
         ))}
       </div>
+
+      <style>{`.sheet-sprite { width: ${box.width}; height: ${box.height}; flex: ${box.flex} }`}</style>
     </div>
   );
 }

@@ -1,0 +1,57 @@
+{
+  "Xóm Nước Đen": {
+    "cans": "wastebasket",
+    "cart": "shopping-cart",
+    "wash": "sponge",
+    "busk": "microphone",
+    "scrap": "nut-and-bolt",
+    "flip": "shopping-bags"
+  },
+  "Bến Bãi": {
+    "forklift": "tractor",
+    "crate": "package",
+    "fish": "fish",
+    "tug": "anchor",
+    "customs": "receipt",
+    "yard": "articulated-lorry"
+  },
+  "Phố Thị": {
+    "food": "delivery-truck",
+    "laundry": "t-shirt",
+    "gym": "person-lifting-weights",
+    "cafe": "hot-beverage",
+    "cinema": "clapper-board",
+    "hotel": "hotel"
+  },
+  "Tài Chính": {
+    "fund": "chart-increasing",
+    "bank": "bank",
+    "insure": "shield",
+    "broker": "briefcase",
+    "ratings": "star",
+    "exchange": "balance-scale"
+  },
+  "Uptown": {
+    "gallery": "framed-picture",
+    "auction": "hammer",
+    "yacht": "motor-boat",
+    "jet": "airplane",
+    "vineyard": "grapes",
+    "island": "desert-island"
+  },
+  "Heights": {
+    "tower": "office-building",
+    "media": "television",
+    "space": "satellite",
+    "fusion": "atom-symbol",
+    "bank2": "classical-building",
+    "empire": "crown"
+  },
+  "Việc làm": {
+    "flyers": "rolled-up-newspaper",
+    "dishes": "fork-and-knife-with-plate",
+    "moving": "pickup-truck",
+    "night": "flashlight",
+    "rig": "oil-drum"
+  }
+}
