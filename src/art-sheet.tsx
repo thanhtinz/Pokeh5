@@ -24,8 +24,20 @@ import { applyTheme } from './ui/theme';
 import './styles/base.css';
 import './styles/app.css';
 
+const params = new URLSearchParams(location.search);
+
 /** Đọc `?wealth=` để soi cả hai đầu của thang màu chủ đề. */
-const wealth = Number(new URLSearchParams(location.search).get('wealth') ?? 1);
+const wealth = Number(params.get('wealth') ?? 1);
+
+/**
+ * `?unit=` phóng to cảnh tile.
+ *
+ * Ở cỡ thật mười sáu pixel thì một cái cảnh cụt mất một ô trông y hệt một cái
+ * cảnh đúng — mắt không phân biệt nổi ở cỡ đó. Phóng lên bốn tám thì cái cụt
+ * tự lộ ra. Nên bảng soi phải xem được ở cả hai cỡ, không chỉ cỡ thật.
+ */
+const unit = Number(params.get('unit') ?? 16);
+const cell = `${unit * 3 + 4}px`;
 applyTheme(wealth > 0.5 ? 1e18 : -1e9, document.documentElement);
 
 function Sheet() {
@@ -40,7 +52,7 @@ function Sheet() {
         class="iconsheet"
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(6, 150px)',
+          gridTemplateColumns: `repeat(6, ${unit * 3 + 130}px)`,
           gap: '8px',
           marginBottom: '20px',
         }}
@@ -50,8 +62,8 @@ function Sheet() {
             key={def.id}
             style={{ display: 'flex', gap: '8px', alignItems: 'center', fontSize: '11px' }}
           >
-            <span style={{ width: '48px', height: '48px', display: 'grid', placeItems: 'center' }}>
-              {BUSINESS_ART[def.id] && <PixScene scene={BUSINESS_ART[def.id]!} />}
+            <span style={{ width: cell, height: cell, display: 'grid', placeItems: 'center' }}>
+              {BUSINESS_ART[def.id] && <PixScene scene={BUSINESS_ART[def.id]!} unit={unit} />}
             </span>
             <b>{t(`biz.${def.id}`)}</b>
           </span>
@@ -61,8 +73,8 @@ function Sheet() {
             key={job.id}
             style={{ display: 'flex', gap: '8px', alignItems: 'center', fontSize: '11px' }}
           >
-            <span style={{ width: '48px', height: '48px', display: 'grid', placeItems: 'center' }}>
-              {JOB_ART[job.id] && <PixScene scene={JOB_ART[job.id]!} />}
+            <span style={{ width: cell, height: cell, display: 'grid', placeItems: 'center' }}>
+              {JOB_ART[job.id] && <PixScene scene={JOB_ART[job.id]!} unit={unit} />}
             </span>
             <b style={{ color: '#8fd' }}>{t(`job.${job.id}`)}</b>
           </span>
