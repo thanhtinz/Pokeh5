@@ -158,6 +158,29 @@ rather than reading like a heading.
 **The milestone payoff.** A sun clearing a horizon behind the thing you just won
 back. It is the only screen in the game allowed to be mostly picture.
 
+### The art is Kenney's, and that is on purpose
+
+Four attempts at drawing this game's assets by hand — flat vector, shaded SVG,
+isometric constructions, hand-authored pixel maps — all landed somewhere between
+"icon" and "amateur". Drawing a decent game art set is its own profession, and
+no amount of care in a text editor substitutes for one.
+
+So the art comes from [Kenney](https://kenney.nl), released under **CC0**: all
+rights waived, free for commercial use, attribution welcome but not required.
+The pack is *RPG Urban*, 486 tiles of 16×16 modern-city pixel art — market
+stalls, bins, vehicles, street furniture, and people. It is vendored at
+`src/assets/kenney/rpg-urban/` with its licence file beside it, and credited
+here because crediting is the decent thing even when the licence does not ask.
+
+Two notes on how it is used:
+
+- **One image, cut by CSS.** The whole set is a single 432×288 sheet. Slicing it
+  into 486 files would be 486 requests; shifting `background-position` is one,
+  and that is what browsers were built for. `src/ui/Pix.tsx` is that component.
+- **The scene is a list of coordinates**, not a pre-composed picture. Changing
+  the layout is editing a row of numbers, and the character changing pose is
+  swapping one tile index.
+
 ### Why there is a game loop at all
 
 For most of this project's life the tap target was a `<button>` that pushed a

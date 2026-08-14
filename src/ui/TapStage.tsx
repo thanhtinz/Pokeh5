@@ -6,9 +6,7 @@ import { Particles, fade } from '../engine/particles';
 import { onFrame } from '../engine/loop';
 import type { Derived, Store } from '../game/store';
 import { t } from '../i18n';
-import yardUrl from '../assets/sprites/yard.png';
-import heroUpUrl from '../assets/sprites/hero-up.png';
-import heroDownUrl from '../assets/sprites/hero-down.png';
+import { Pix } from './Pix';
 
 interface Props {
   game: Store;
@@ -29,6 +27,50 @@ interface Float {
 
 const FLOATS = 14;
 const CHIPS_PER_TAP = 9;
+
+/** Một ô của bộ tile vẽ ra bao nhiêu pixel trong hệ toạ độ của cảnh. */
+const TILE = 16;
+
+/** Mặt đường: nhựa ở xa, vỉa hè ở gần. */
+const GROUND: readonly (readonly number[])[] = [
+  [439, 439, 439, 439, 439, 439, 439, 439],
+  [439, 439, 439, 439, 439, 439, 439, 439],
+  [439, 439, 439, 439, 439, 439, 439, 439],
+  [439, 439, 439, 439, 439, 439, 439, 439],
+  [439, 439, 439, 439, 439, 439, 439, 439],
+  [439, 439, 439, 439, 439, 439, 439, 439],
+];
+
+/** Đồ đạc trong sân: [ô, x, y] tính bằng pixel của cảnh. */
+const PROPS: readonly (readonly [number, number, number])[] = [
+  // Hàng sau: cây và mái che, để mép trên của sân không phải một đường thẳng.
+  // Hai góc trên để trống: chữ "8k mỗi chạm" và "×1,8" nằm đè lên đó, và một
+  // cái cây dưới chữ thì cả hai đều không đọc được.
+  [259, 24, 2],
+  [286, 92, 2],
+  [222, 56, 0],
+  [162, 42, 4],
+  // Bên trái: thùng rác và đống phế liệu — thứ nhân vật sống bằng nó.
+  [253, 6, 26],
+  [251, 20, 28],
+  [254, 12, 58],
+  [426, 2, 74],
+  // Bên phải: sạp hàng, tức là chỗ tiền sẽ tới sau này.
+  [304, 88, 24],
+  [303, 106, 24],
+  [277, 88, 44],
+  [301, 106, 44],
+  [223, 92, 66],
+];
+
+/** Nhân vật: công nhân đội mũ bảo hộ, hai tư thế. */
+const HERO_UP = 266;
+const HERO_DOWN = 293;
+
+/** Đặt một ô vào đúng chỗ trong cảnh. */
+function spot(x: number, y: number): Record<string, string> {
+  return { position: 'absolute', left: `${x}px`, top: `${y}px` };
+}
 
 /**
  * Chỗ chạm.
@@ -63,8 +105,8 @@ export function TapStage({ game, derived }: Props) {
   const canvas = useRef<HTMLCanvasElement>(null);
   const rock = useRef<HTMLDivElement>(null);
   const ring = useRef<SVGRectElement>(null);
-  const heroUp = useRef<HTMLImageElement>(null);
-  const heroDown = useRef<HTMLImageElement>(null);
+  const heroUp = useRef<HTMLSpanElement>(null);
+  const heroDown = useRef<HTMLSpanElement>(null);
   const label = useRef<HTMLSpanElement>(null);
 
   // Mọi thứ đổi theo từng khung hình sống ở đây, không sống trong state của
@@ -114,6 +156,9 @@ export function TapStage({ game, derived }: Props) {
       surface.width = Math.round(width * dpr);
       surface.height = Math.round(height * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      // Cảnh dựng ở 128 pixel bề ngang; đây là hệ số phóng để nó vừa khung.
+      box.style.setProperty('--yard-scale', String(width / 128));
     };
 
     resize();
@@ -379,14 +424,36 @@ export function TapStage({ game, derived }: Props) {
         <rect class="stage__ring-heat" x="0" y="0" width="0" height="4" ref={ring} />
       </svg>
 
-      {/* Cảnh và nhân vật là ảnh pixel thật, phóng to bằng nearest-neighbour.
-          Nhân vật có hai khung hình — giơ búa và bổ búa — và vòng lặp đổi khung
-          theo pha của cú vung. Hai khung là đủ: ở nhịp này mắt đọc ra động tác
-          từ điểm đầu và điểm cuối, thêm khung giữa chỉ làm nó nhoè đi. */}
+      {/*
+        Cảnh dựng từ tile của Kenney, xếp bằng một danh sách toạ độ chứ không
+        ghép sẵn thành một tấm ảnh. Xếp bằng danh sách thì đổi bố cục là sửa
+        một dòng số, và nhân vật đổi khung hình chỉ là đổi một chỉ số ô.
+      */}
       <div class="stage__rock" ref={rock}>
-        <img class="yard__bg" src={yardUrl} alt="" />
-        <img class="yard__hero" src={heroUpUrl} ref={heroUp} alt="" />
-        <img class="yard__hero" src={heroDownUrl} ref={heroDown} alt="" />
+        <span class="yard">
+          {GROUND.map((row, y) =>
+            row.map((tile, x) => (
+              <Pix key={`g${x}-${y}`} i={tile} size={TILE} style={spot(x * TILE, y * TILE)} />
+            )),
+          )}
+
+          {PROPS.map(([tile, x, y], n) => (
+            <Pix key={`p${n}`} i={tile} size={TILE} style={spot(x, y)} />
+          ))}
+
+          {/* Hai khung hình của nhân vật: đứng thẳng và cúi xuống làm. Chồng
+              lên nhau, vòng lặp chỉ bật tắt độ mờ — đổi `i` mỗi khung hình thì
+              trình duyệt phải tính lại style, còn đổi opacity thì không. */}
+          <span class="yard__frame" ref={heroUp}>
+            <Pix i={HERO_UP} size={TILE} style={spot(48, 40)} />
+          </span>
+          {/* Khung thứ hai bắt đầu ở trạng thái ẩn: vòng lặp chỉ ghi độ mờ khi
+              có gì đang động, nên nếu không khai sẵn thì lúc màn hình đứng yên
+              cả hai khung cùng hiện và nhân vật hoá ra hai người chồng nhau. */}
+          <span class="yard__frame" ref={heroDown} style={{ opacity: 0 }}>
+            <Pix i={HERO_DOWN} size={TILE} style={spot(48, 42)} />
+          </span>
+        </span>
       </div>
 
       <span class="stage__value num">{money(derived.tapValue)}</span>

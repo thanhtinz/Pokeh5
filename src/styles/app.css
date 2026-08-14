@@ -201,7 +201,7 @@
 .stage {
   position: relative;
   width: 100%;
-  aspect-ratio: 128 / 88;
+  aspect-ratio: 128 / 96;
   border-radius: calc(var(--radius) - 2px);
   overflow: hidden;
   cursor: pointer;
@@ -267,31 +267,32 @@
 }
 
 /*
- * Ảnh pixel phải phóng to bằng nearest-neighbour.
+ * Cảnh vẽ ở hệ toạ độ gốc 128×96 rồi phóng cả khối lên cho vừa khung.
  *
- * Mặc định trình duyệt nội suy trơn, và một sprite 34 pixel kéo lên gấp mười
- * lần với phép nội suy trơn thì thành một vệt nhoè — đúng thứ mà cả lối vẽ này
- * sinh ra để tránh.
+ * Phóng bằng `transform: scale` trên một hộp có kích thước cố định, chứ không
+ * đặt từng ô theo phần trăm: theo phần trăm thì mỗi ô làm tròn một kiểu và
+ * giữa các ô hiện ra những khe hở một pixel chạy dọc cả cảnh.
  */
-.yard__bg,
-.yard__hero {
+.yard {
   position: absolute;
+  left: 0;
+  top: 0;
+  width: 128px;
+  height: 96px;
+  transform-origin: 0 0;
+  transform: scale(var(--yard-scale, 1));
+}
+
+.pix {
+  display: block;
   image-rendering: pixelated;
+  background-repeat: no-repeat;
   pointer-events: none;
 }
 
-.yard__bg {
+.yard__frame {
+  position: absolute;
   inset: 0;
-  width: 100%;
-  height: 100%;
-}
-
-/* Nhân vật đặt theo phần trăm của cảnh, đúng chỗ đã căn lúc ghép sprite:
-   34 pixel rộng trên nền 128, đặt ở (28, 34). */
-.yard__hero {
-  left: 21.875%;
-  top: 38.6%;
-  width: 26.5625%;
 }
 
 /* Giá mỗi lần chạm: một cái nhãn nhỏ ở góc, không phải một dòng chữ giữa cảnh. */
