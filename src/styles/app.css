@@ -188,42 +188,132 @@
   padding: 22px 16px 20px;
 }
 
-.refinery__tap {
+/* -------------------------------------------------------------- chỗ chạm -- */
+
+/* Cái sân: canvas hiệu ứng nằm dưới, cục quặng và mấy con số nằm trên. Bo tròn
+   để mảnh vụn bay ra bị cắt gọn ở mép, thành ra trông như văng khỏi cái lò chứ
+   không phải khỏi một hình chữ nhật. */
+.stage {
   position: relative;
-  width: min(210px, 56vw);
+  width: min(230px, 62vw);
   aspect-ratio: 1;
   border-radius: 50%;
   display: grid;
   place-items: center;
+  overflow: hidden;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
   background:
     radial-gradient(circle at 50% 32%, hsl(var(--hue) var(--sat) 62% / 0.5), transparent 62%),
     conic-gradient(from 210deg, var(--accent-deep), var(--accent-bright), var(--accent-deep));
   box-shadow:
     0 0 0 1px hsl(var(--hue) var(--sat) 70% / 0.35),
     0 0 60px var(--glow),
-    inset 0 -14px 34px hsl(var(--hue) 60% 6% / 0.65);
-  transition:
-    transform 0.09s var(--ease),
-    box-shadow 0.2s var(--ease);
+    inset 0 -8px 24px hsl(var(--hue) 60% 6% / 0.6);
 }
 
-.refinery__tap:active {
-  transform: scale(0.955);
+.stage:active {
   box-shadow:
     0 0 0 1px hsl(var(--hue) var(--sat) 70% / 0.5),
     0 0 90px var(--glow),
     inset 0 -8px 24px hsl(var(--hue) 60% 6% / 0.7);
 }
 
-.refinery__face {
-  display: grid;
-  place-items: center;
-  gap: 2px;
-  width: 78%;
-  aspect-ratio: 1;
+/* Mặt lò. Là nền của cả sân chứ không còn là một hộp riêng, vì mảnh vụn phải
+   bay được ra ngoài nó. */
+.stage::before {
+  content: '';
+  position: absolute;
+  inset: 11%;
   border-radius: 50%;
   background: radial-gradient(circle at 50% 30%, hsl(var(--hue) 20% 13%), hsl(var(--hue) 30% 6%));
   box-shadow: inset 0 1px 0 hsl(0 0% 100% / 0.08);
+}
+
+.stage__fx {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* Vòng nhiệt chạy quanh mép sân. Xoay ngược để nó rút từ đỉnh xuống, vì đó là
+   hướng người ta đọc một cái đồng hồ đếm ngược. */
+.stage__ring {
+  position: absolute;
+  inset: 1.5%;
+  width: 97%;
+  height: 97%;
+  transform: rotate(-90deg);
+  pointer-events: none;
+}
+
+.stage__ring circle {
+  fill: none;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+}
+
+.stage__ring-track {
+  stroke: hsl(var(--hue) 40% 6% / 0.5);
+}
+
+/* Sáng hơn hẳn viền, không phải đậm hơn.
+   Viền cái sân vốn đã là màu chủ đạo ở độ bão hoà cao; vẽ thêm một vòng cùng
+   màu lên trên thì hai cái nhập làm một và cái vòng thôi mang tin. Kéo lên gần
+   trắng thì nó tách ra ngay, và vẫn nằm trong bảng màu. */
+.stage__ring-heat {
+  stroke: hsl(var(--hue) calc(var(--sat) * 0.55) 88%);
+  opacity: 0;
+  transition: opacity 0.25s var(--ease);
+}
+
+/* `transform` của cái này do vòng lặp ghi mỗi khung hình, nên ở đây không được
+   có transition — hai bên sẽ giành nhau và kết quả là chuyển động bị trễ. */
+.stage__rock {
+  position: relative;
+  display: grid;
+  place-items: center;
+  will-change: transform;
+}
+
+/* Hai nhãn tĩnh tụt hẳn xuống mép dưới. Ở giữa là chỗ vụn bay và số nhảy, và
+   chữ đứng yên nằm dưới chữ đang bay thì cả hai đều không đọc được. */
+.stage__value {
+  position: absolute;
+  top: 71%;
+  font-size: 19px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  pointer-events: none;
+}
+
+.stage__hint {
+  position: absolute;
+  top: 81%;
+  max-width: 70%;
+  font-size: 9.5px;
+  letter-spacing: 0.08em;
+  text-align: center;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  pointer-events: none;
+}
+
+/* Con số nhân. Nằm trên cùng, và chỉ hiện khi đang nóng. */
+.stage__heat {
+  position: absolute;
+  top: 11%;
+  font-size: 15px;
+  font-weight: 800;
+  color: hsl(var(--hue) var(--sat) 78%);
+  text-shadow: 0 2px 10px hsl(var(--hue) 60% 5% / 0.9);
+  opacity: 0;
+  transition: opacity 0.2s var(--ease);
+  pointer-events: none;
 }
 
 /* The ore crystal. Flat facets in one colour at three opacities — enough to
@@ -280,22 +370,6 @@
   }
 }
 
-.refinery__value {
-  font-size: 19px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-}
-
-.refinery__hint {
-  /* Sized for the longest label any language puts here, not the shortest. */
-  max-width: 86%;
-  font-size: 9.5px;
-  letter-spacing: 0.08em;
-  text-align: center;
-  text-transform: uppercase;
-  color: var(--ink-faint);
-}
-
 .refinery__ore {
   width: 100%;
   display: grid;
@@ -310,33 +384,6 @@
 }
 
 /* Numbers that fly off the tap target. */
-.spark {
-  position: absolute;
-  left: 50%;
-  top: 34%;
-  font-size: 17px;
-  font-weight: 700;
-  color: var(--ink);
-  text-shadow: 0 2px 12px hsl(var(--hue) 60% 5% / 0.9);
-  pointer-events: none;
-  animation: fly 0.85s var(--ease) forwards;
-}
-
-@keyframes fly {
-  from {
-    opacity: 0;
-    transform: translate(-50%, 0) scale(0.7);
-  }
-  25% {
-    opacity: 1;
-    transform: translate(-50%, -18px) scale(1.08);
-  }
-  to {
-    opacity: 0;
-    transform: translate(-50%, -74px) scale(0.95);
-  }
-}
-
 .upgrades {
   display: grid;
   grid-template-columns: 1fr 1fr;

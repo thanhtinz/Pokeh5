@@ -35,6 +35,7 @@ import {
 } from './businesses';
 import { t as tr } from '../i18n';
 import { dailyReward, dailyState, dayIndex, type DailyState } from './daily';
+import { cooled, heatMultiplier, heated } from './combo';
 import { CARD_LIFETIME, drawCard, jobById } from './jobs';
 import { bonusesFrom, newlyReached, type LifeBonuses, type LifeMilestone } from './life';
 import { effectsFrom, perkById, perkCost, type PerkEffects } from './perks';
@@ -303,6 +304,9 @@ export class Store {
   private listeners = new Set<Listener>();
   private dirty = false;
   private rng = new Rng(0);
+  /** Nhiệt tại lần chạm cuối, và lúc đó là khi nào. Không vào bản lưu. */
+  private heat = 0;
+  private lastTapAt = 0;
   private marketCarry = 0;
   private tradeCooldown = 0;
   private saveCooldown = 0;
@@ -683,10 +687,20 @@ export class Store {
   // --------------------------------------------------------------- actions --
 
   /** One tap on the refinery. Returns the ore mined, for the floating number. */
+  /**
+   * Một lần chạm. Trả về số quặng ra được, đã tính nhiệt.
+   *
+   * Nhiệt nằm ở đây chứ không nằm trong bản lưu: nó đo nhịp tay của mấy giây
+   * vừa rồi, và một thứ đo nhịp tay thì không có nghĩa gì sau khi tắt game.
+   */
   tap(): number {
+    const now = Date.now();
+    this.heat = heated(this.heat, (now - this.lastTapAt) / 1000);
+    this.lastTapAt = now;
+
     const d = derive(this.state);
     this.state.stats.taps += 1;
-    const mined = d.tapOre;
+    const mined = d.tapOre * heatMultiplier(this.heat);
     this.state.ore = Math.min(d.oreCapacity, this.state.ore + mined);
 
     // With the buffer full the tap still pays, just straight through — nothing
@@ -696,6 +710,17 @@ export class Store {
     this.cue('tap');
     this.emit();
     return mined;
+  }
+
+  /**
+   * Nhiệt lúc này, đã trừ phần nguội từ lần chạm cuối.
+   *
+   * Đọc chứ không phải lấy: `this.heat` là giá trị *tại lần chạm cuối*, và giữa
+   * hai lần chạm thì không có ai chạy để trừ dần nó. Vòng lặp vẽ hỏi hàm này
+   * mỗi khung hình, nên con số luôn đúng mà không cần một cái hẹn giờ nào.
+   */
+  heatNow(now = Date.now()): number {
+    return cooled(this.heat, (now - this.lastTapAt) / 1000);
   }
 
   upgradeTap(): boolean {

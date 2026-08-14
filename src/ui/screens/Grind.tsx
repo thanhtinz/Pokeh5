@@ -1,11 +1,10 @@
-import { useRef, useState } from 'preact/hooks';
-
 import { JOBS, unlockedJobs } from '../../game/jobs';
 import { clock, count, money, rate } from '../../game/money';
 import { t } from '../../i18n';
 import type { PlayerState } from '../../game/state';
-import { Art, OreArt } from '../Art';
+import { Art } from '../Art';
 import { Icon } from '../Icon';
+import { TapStage } from '../TapStage';
 import {
   refineryUpgradeCost,
   tapUpgradeCost,
@@ -20,35 +19,15 @@ interface Props {
   now: number;
 }
 
-interface Spark {
-  id: number;
-  text: string;
-  offset: number;
-}
-
 /**
  * The refinery and the job board — everything the player does with their hands.
  *
  * This is the whole game for the first few minutes, so it has to feel good
- * before it is efficient: the tap target is large, responds on pointer-down
- * rather than click, and throws a number every time.
+ * before it is efficient. Chỗ chạm nằm hẳn trong `TapStage`: nó có vòng lặp,
+ * có vật lý và có nhiệt, và không thứ nào trong ba thứ đó nên trộn chung với
+ * cái danh sách công việc bên dưới.
  */
 export function Grind({ game, state, derived, now }: Props) {
-  const [sparks, setSparks] = useState<Spark[]>([]);
-  const nextId = useRef(0);
-
-  function onTap() {
-    const mined = game.tap();
-    const id = nextId.current++;
-
-    setSparks((current) => [
-      // Only the last few are ever visible; the rest is memory nobody sees.
-      ...current.slice(-5),
-      { id, text: t('grind.oreSpark', { amount: count(mined) }), offset: (id % 5) * 14 - 28 },
-    ]);
-    window.setTimeout(() => setSparks((current) => current.filter((s) => s.id !== id)), 850);
-  }
-
   const oreFill = Math.min(1, state.ore / derived.oreCapacity);
   const tapCost = tapUpgradeCost(state.tapLevel);
   const refineryCost = refineryUpgradeCost(state.refineryLevel);
@@ -56,18 +35,7 @@ export function Grind({ game, state, derived, now }: Props) {
   return (
     <>
       <section class="panel refinery">
-        <button class="refinery__tap" onPointerDown={onTap} aria-label={t('grind.mine')}>
-          <span class="refinery__face">
-            <OreArt />
-            <span class="refinery__value num">{money(derived.tapValue)}</span>
-            <span class="refinery__hint">{t('grind.perTap')}</span>
-          </span>
-          {sparks.map((spark) => (
-            <span key={spark.id} class="spark" style={{ marginLeft: `${spark.offset}px` }}>
-              {spark.text}
-            </span>
-          ))}
-        </button>
+        <TapStage game={game} derived={derived} />
 
         <div class="refinery__ore">
           <div class="refinery__ore-row">

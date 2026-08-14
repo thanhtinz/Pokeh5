@@ -308,6 +308,32 @@ for (const stage of ['broke', 'rich']) {
     await page.screenshot({ path: `${OUT}/${stage}-${tab}.png` });
   }
 
+  // Chỗ chạm lúc đang có chuyện xảy ra.
+  //
+  // Ảnh chụp một cái sân đứng yên không nói được gì về nó: mảnh vụn, con số bay
+  // và vòng nhiệt đều chỉ tồn tại trong khoảng một giây sau cú chạm. Nên bấm
+  // thật một loạt rồi chụp ngay giữa lúc mọi thứ còn đang bay.
+  {
+    await page.locator('.tab').nth(TABS.indexOf('grind')).click();
+    await page.waitForTimeout(400);
+
+    const pit = page.locator('.stage');
+    const box = await pit.boundingBox();
+    for (let i = 0; i < 12; i += 1) {
+      await page.mouse.move(
+        box.x + box.width * (0.36 + 0.28 * Math.abs(Math.sin(i))),
+        box.y + box.height * 0.52,
+      );
+      await page.mouse.down();
+      await page.mouse.up();
+      await page.waitForTimeout(55);
+    }
+
+    // Đủ lâu để vụn bay lên tới đỉnh, chưa đủ lâu để rơi hết.
+    await page.waitForTimeout(140);
+    await page.screenshot({ path: `${OUT}/${stage}-tap.png` });
+  }
+
   // Công tắc tiếng nằm cuối màn Thêm, tức là dưới màn hình ở mọi ảnh chụp theo
   // tab. Cuộn xuống tận đáy rồi chụp riêng một tấm.
   if (stage === 'rich') {

@@ -18,6 +18,7 @@ export const en: Record<string, string> = {
   'tab.market': 'Market',
   'tab.life': 'Life',
 
+  'grind.heatMax': 'RED HOT!',
   'grind.perTap': 'per tap',
   'grind.mine': 'Mine ore',
   'grind.ore': 'Ore',

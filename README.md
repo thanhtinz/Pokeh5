@@ -158,6 +158,57 @@ rather than reading like a heading.
 **The milestone payoff.** A sun clearing a horizon behind the thing you just won
 back. It is the only screen in the game allowed to be mostly picture.
 
+### Why there is a game loop at all
+
+For most of this project's life the tap target was a `<button>` that pushed a
+`<span>` into state and removed it with `setTimeout`. That is how you build a
+web page, and it is exactly what it looked like: press a rectangle, text
+appears. Nothing had weight, nothing reacted, and the only thing separating a
+fast tapper from a slow one was how many times per second they could fire the
+same event.
+
+Three things changed, and they are separable on purpose.
+
+**One loop, delta-timed.** `src/engine/loop.ts` owns a single
+`requestAnimationFrame` and hands every subscriber the seconds elapsed since the
+last frame. Anything animating off frame *counts* instead of elapsed time runs
+at double speed on a 120 Hz screen; anything that trusts an uncapped delta
+explodes the first time the player switches tabs and comes back to a ten-second
+step. Both are handled once, here, rather than in each effect.
+
+**A pool, not an array.** `src/engine/particles.ts` allocates its particles at
+construction and never again. Ten chips per tap at ten taps a second is a
+thousand short-lived objects a second; letting the collector clean those up mid-
+play produces exactly what it sounds like — a small, regular hitch, forever. A
+full pool overwrites its *oldest* particle rather than dropping the new one,
+because the moment the pool is full is the moment the player is tapping hardest,
+and that is the worst possible time for the screen to stop responding.
+
+**Canvas for what lives a second, CSS for what is always there.** The ore is
+still `OreArt`, still drawn in CSS, still following the palette. The canvas sits
+behind it and carries only the debris, the coins and the numbers — the things
+DOM cannot do a hundred at a time at 60 fps.
+
+### Nhiệt: the mechanic that makes tapping a decision
+
+Feedback alone would still leave tapping a formality. `src/game/combo.ts` adds
+the missing half: every tap adds a point of heat, heat multiplies what a tap
+mines up to ×3, and heat **cools in real time** the moment you stop. Now there
+is a question on the screen — keep the rhythm going, or let it fall and go do
+something else — and that question is the difference between a button and a
+game.
+
+Three constraints keep it from breaking anything:
+
+- **It cools against the clock, not against taps.** Counting taps would let a
+  player bank thirty taps, wander off, and come back still hot. Heat measures
+  tempo, and tempo only means anything next to a clock.
+- **It is never saved.** Heat lives in memory for the session. Persisting it
+  would turn a live tension into a number to top up after every reload.
+- **It only multiplies hand-mined ore.** Not idle income, not wages, not
+  dividends. Letting heat touch idle income would make constant tapping optimal
+  at all times, and an idle game that demands constant tapping is a broken one.
+
 ### The sound is drawn too
 
 Nothing in this game ships as an asset file, and the audio follows the same rule
@@ -716,6 +767,9 @@ src/game/     the rules — runs in plain node, no DOM, fully tested
   save.ts         sanitising, localStorage, native mirror
   store.ts        the mutable world and every action on it
   rng.ts          mulberry32 + Box–Muller
+src/engine/   the parts that make it a game rather than a page
+  loop.ts         one requestAnimationFrame loop, delta-timed, capped
+  particles.ts    a fixed pool of debris; allocates nothing after startup
 src/audio/    the sound, synthesised — no asset files
   cues.ts         which notes a cue is, in plain numbers; runs in node
   sound.ts        the Web Audio wiring, the mute switch, the buzz

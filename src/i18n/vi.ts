@@ -35,6 +35,7 @@ export const vi: Record<string, string> = {
   'tab.life': 'Cuộc đời',
 
   // -------------------------------------------------------------- màn Cày --
+  'grind.heatMax': 'NÓNG MÁY!',
   'grind.perTap': 'mỗi chạm',
   'grind.mine': 'Đào quặng',
   'grind.ore': 'Quặng',
