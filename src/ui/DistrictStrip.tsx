@@ -108,9 +108,48 @@ const STREETS: Record<District, readonly Facade[]> = {
   ],
 };
 
-/** Ô của dải, tính bằng pixel gốc. Ba tầng: mái, cửa sổ, cửa ra vào. */
+/** Ô của dải, tính bằng pixel gốc. Hai tầng: mái và mặt tiền. */
 const TILE = 16;
 const ROWS = 2;
+
+/**
+ * Vật liệu tiêu biểu của mỗi khu — căn nhà đầu dãy.
+ *
+ * Dùng cho những cơ sở không có món đồ nào tả được: một quỹ đầu tư, một hãng
+ * xếp hạng tín nhiệm. Ở cỡ bốn mươi pixel thì thứ tả đúng chúng nhất là **cái
+ * nhà chúng ngồi trong đó**, và cái nhà ấy phải cùng vật liệu với dải phố của
+ * khu — nên nó lấy thẳng từ đây, không khai lại lần nữa.
+ */
+export function materialOf(district: District): Facade {
+  return STREETS[district][0]!;
+}
+
+/** Một căn nhà nhỏ, dùng làm hình cho một dòng cơ sở. */
+export function MiniFacade({ district, size = 20 }: { district: District; size?: number }) {
+  const house = materialOf(district);
+  const cells: JSX.Element[] = [];
+
+  for (let col = 0; col < 2; col += 1) {
+    for (let row = 0; row < ROWS; row += 1) {
+      const tile = row === 0 ? house.top : col === 0 ? house.wall : house.door;
+      cells.push(
+        <Pix
+          key={`${col}-${row}`}
+          sheet="city"
+          i={tile}
+          size={size}
+          style={{ position: 'absolute', left: `${col * size}px`, top: `${row * size}px` }}
+        />,
+      );
+    }
+  }
+
+  return (
+    <span class="mini" style={{ width: `${size * 2}px`, height: `${size * ROWS}px` }}>
+      {cells}
+    </span>
+  );
+}
 
 export function DistrictStrip({ district }: { district: District }) {
   const street = STREETS[district];

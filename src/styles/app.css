@@ -283,6 +283,12 @@
   transform: scale(var(--yard-scale, 1));
 }
 
+/* Căn nhà nhỏ làm hình cho một dòng cơ sở. */
+.mini {
+  position: relative;
+  display: block;
+}
+
 .pix {
   display: block;
   image-rendering: pixelated;

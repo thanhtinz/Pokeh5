@@ -10,7 +10,7 @@
 export interface BusinessDef {
   id: string;
   /** District the business sits in; districts unlock in order. */
-  district: string;
+  district: District;
   /** Cost of the first unit. */
   baseCost: number;
   /** Payout per cycle at one unit. */

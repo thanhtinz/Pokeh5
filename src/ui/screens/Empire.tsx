@@ -3,6 +3,7 @@ import { useState } from 'preact/hooks';
 import {
   BUSINESSES,
   DISTRICTS,
+  type District,
   affordableUnits,
   bulkCost,
   cyclePayout,
@@ -16,8 +17,9 @@ import { hasManager, ownedOf, upgradeOf, type PlayerState } from '../../game/sta
 import { TIERS, isMaxed, nextUpgrade, upgradeMultiplier } from '../../game/upgrades';
 import type { Derived, Store } from '../../game/store';
 import { t } from '../../i18n';
-import { DistrictStrip } from '../DistrictStrip';
-import { Art } from '../Art';
+import { DistrictStrip, MiniFacade } from '../DistrictStrip';
+import { BUSINESS_ART } from '../tiles';
+import { Pix } from '../Pix';
 
 interface Props {
   game: Store;
@@ -141,7 +143,7 @@ export function Empire({ game, state, derived }: Props) {
                     onClick={() => game.runBusiness(def.id)}
                     aria-label={t('empire.run', { name: t(`biz.${def.id}`) })}
                   >
-                    <Art name={def.icon} />
+                    <BusinessArt id={def.id} district={def.district} />
                   </button>
 
                   <span class="row__body">
@@ -229,4 +231,15 @@ export function Empire({ game, state, derived }: Props) {
       })}
     </>
   );
+}
+
+/**
+ * Hình của một cơ sở: một món đồ, hoặc một căn nhà của khu.
+ *
+ * Bảng phân loại nằm ở `tiles.ts`; chỗ này chỉ là cái công tắc giữa hai lối.
+ */
+function BusinessArt({ id, district }: { id: string; district: District }) {
+  const art = BUSINESS_ART[id];
+  if (!art) return null;
+  return 'tile' in art ? <Pix i={art.tile} size={32} /> : <MiniFacade district={district} />;
 }
