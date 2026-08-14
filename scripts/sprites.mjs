@@ -75,12 +75,12 @@ const P = {
  */
 const BODY = new Sprite(P, [
   '......................',
-  '.......oooooo.........',
-  '......ohhhhhho........',
-  '....oohhhhhhhhoo......',
-  '...ohhhhhhhhhhhhho....',
-  '...oHHHHHHHHHHHHHo....',
-  '....oooooooooooooo....',
+  '........ooooooo.......',
+  '.......ohhhhhhho......',
+  '.....oohhhhhhhhhoo....',
+  '....ohhhhhhhhhhhhho...',
+  '....oHHHHHHHHHHHHHo...',
+  '....ooooooooooooooo...',
   '......ossssssssdo.....',
   '......ossssssssdo.....',
   '......ossessessdo.....',
@@ -96,14 +96,14 @@ const BODY = new Sprite(P, [
   '...obbbobbbbbbbbbbbo..',
   '...osssobbbbbbbbbbbo..',
   '...ooooonnnnnnnnnnno..',
-  '.....oppppppppppppo...',
-  '.....opppppoppppppo...',
-  '.....opppppoppppppo...',
-  '.....oPPPPPoPPPPPPo...',
-  '.....oPPPPPoPPPPPPo...',
-  '.....oPPPPPoPPPPPPo...',
-  '....okkkkkookkkkkkko..',
-  '....oooooooooooooooo..',
+  '....opppppppppppppo...',
+  '.....opppppopppppo....',
+  '.....opppppopppppo....',
+  '.....oPPPPPoPPPPPo....',
+  '.....oPPPPPoPPPPPo....',
+  '.....oPPPPPoPPPPPo....',
+  '....okkkkkkokkkkkko...',
+  '....ooooooooooooooo...',
 ]);
 
 /** Tay phải giơ búa lên. Dán vào vai, nên gốc toạ độ là khớp vai. */
@@ -251,9 +251,11 @@ function scene() {
   // Đất: hai dải, dải xa nhạt hơn dải gần — mẹo cũ để một mặt phẳng có chiều sâu.
   canvas.fill(0, 34, width, 12, rgb('#4a3c31'));
   canvas.fill(0, 46, width, height - 46, rgb('#5b4a3c'));
-  for (let x = 0; x < width; x += 1) {
-    // Mép giữa hai dải nhấp nhô một pixel, để nó không thành một đường kẻ.
-    if ((x * 7) % 11 < 4) canvas.set(x, 46, rgb('#4a3c31'));
+  // Mép giữa hai dải: vài vết lõm thưa và rộng, không phải chấm dày và đều.
+  // Chấm dày thì mắt đọc ra một hàng răng cưa chạy ngang cảnh — trông như hình
+  // bị lệch chứ không trông như đất.
+  for (const [x, w] of [[9, 5], [31, 4], [58, 6], [84, 4], [108, 5]]) {
+    canvas.fill(x, 46, w, 1, rgb('#4a3c31'));
   }
 
   // Hàng rào chạy ngang phía sau.
@@ -272,7 +274,7 @@ function scene() {
 
   // Bóng đổ dưới chân người và dưới cái đe: một dải mờ, không phải một hình bầu
   // dục — ở cỡ này một hình bầu dục chỉ còn là bốn pixel xám.
-  canvas.fill(30, 68, 24, 2, [0, 0, 0, 90]);
+  canvas.fill(32, 68, 15, 2, [0, 0, 0, 90]);
   canvas.fill(47, 70, 12, 2, [0, 0, 0, 80]);
 
   return canvas;
