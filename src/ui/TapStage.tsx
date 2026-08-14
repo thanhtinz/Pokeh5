@@ -6,7 +6,7 @@ import { Particles, fade } from '../engine/particles';
 import { onFrame } from '../engine/loop';
 import type { Derived, Store } from '../game/store';
 import { t } from '../i18n';
-import { OreArt } from './Art';
+import { Scrapper } from './art/Scrapper';
 
 interface Props {
   game: Store;
@@ -60,7 +60,8 @@ export function TapStage({ game, derived }: Props) {
   const host = useRef<HTMLDivElement>(null);
   const canvas = useRef<HTMLCanvasElement>(null);
   const rock = useRef<HTMLDivElement>(null);
-  const ring = useRef<SVGCircleElement>(null);
+  const ring = useRef<SVGRectElement>(null);
+  const arm = useRef<SVGGElement | null>(null);
   const label = useRef<HTMLSpanElement>(null);
 
   // Mọi thứ đổi theo từng khung hình sống ở đây, không sống trong state của
@@ -79,6 +80,9 @@ export function TapStage({ game, derived }: Props) {
       big: false,
     })) as Float[],
     nextFloat: 0,
+    /** Góc vung búa, 0 là buông tay, 1 là giơ cao nhất. */
+    swing: 0,
+    swingV: 0,
     squash: 0,
     squashV: 0,
     shake: 0,
@@ -149,6 +153,8 @@ export function TapStage({ game, derived }: Props) {
        */
       const busy =
         heat > 0 ||
+        Math.abs(w.swing) > 0.001 ||
+        Math.abs(w.swingV) > 0.001 ||
         w.shake > 0 ||
         w.flash > 0 ||
         Math.abs(w.squash) > 0.001 ||
@@ -159,6 +165,7 @@ export function TapStage({ game, derived }: Props) {
       if (!busy) {
         if (w.dirty) {
           ctx.clearRect(0, 0, width, height);
+          if (arm.current) arm.current.style.transform = '';
           if (rock.current) {
             rock.current.style.transform = '';
             rock.current.style.filter = '';
@@ -178,6 +185,11 @@ export function TapStage({ game, derived }: Props) {
       // phải cộng dồn được, chứ không phải cú sau huỷ cú trước.
       w.squashV += (-w.squash * 220 - w.squashV * 18) * dt;
       w.squash += w.squashV * dt;
+
+      // Cánh tay: cùng một cái lò xo, nhưng nặng hơn và ít cản hơn, nên nó
+      // *vung* — giơ lên nhanh, rơi xuống có đà, quá đà một chút rồi mới về.
+      w.swingV += (-w.swing * 150 - w.swingV * 12) * dt;
+      w.swing += w.swingV * dt;
 
       w.shake = Math.max(0, w.shake - dt * 3.2);
       w.flash = Math.max(0, w.flash - dt * 2.4);
@@ -235,6 +247,12 @@ export function TapStage({ game, derived }: Props) {
 
       // ------------------------------------------------------- phần DOM -----
 
+      // Xoay quanh khớp vai, không quanh giữa hình: quay quanh giữa hình thì
+      // cả cánh tay trượt đi chỗ khác thay vì vung.
+      if (arm.current) {
+        arm.current.style.transform = `rotate(${(w.swing * -62).toFixed(2)}deg)`;
+      }
+
       if (rock.current) {
         const jolt = w.shake * 5;
         const x = w.shake > 0 ? (Math.random() - 0.5) * jolt : 0;
@@ -245,11 +263,8 @@ export function TapStage({ game, derived }: Props) {
         rock.current.style.filter = w.flash > 0 ? `brightness(${1 + w.flash * 0.5})` : '';
       }
 
-      // Vòng nhiệt: chỉ hiện khi còn nóng, và nó rút ngắn đúng theo thời gian
-      // thật còn lại — đó là toàn bộ nội dung mà người chơi cần đọc từ nó.
       if (ring.current) {
-        const circumference = 2 * Math.PI * 46;
-        ring.current.style.strokeDasharray = `${(hot * circumference).toFixed(1)} ${circumference}`;
+        ring.current.setAttribute('width', (hot * 100).toFixed(2));
         ring.current.style.opacity = hot > 0.02 ? '1' : '0';
       }
 
@@ -284,6 +299,10 @@ export function TapStage({ game, derived }: Props) {
 
     // Nén mạnh dần theo nhiệt: bấm càng nóng thì cú đập càng nặng tay.
     w.squashV -= 9 + hot * 5;
+    // Giơ búa lên ngay, rồi để lò xo quật nó xuống. Đánh nhanh thì cú sau bắt
+    // được cú trước đang trên đường xuống, và cánh tay cộng dồn thành một nhịp
+    // liên tục thay vì giật cục.
+    w.swingV += 8 + hot * 3;
     w.shake = Math.min(1, w.shake + 0.1 + hot * 0.35);
     w.flash = Math.min(1, w.flash + 0.35);
 
@@ -346,13 +365,15 @@ export function TapStage({ game, derived }: Props) {
     >
       <canvas class="stage__fx" ref={canvas} aria-hidden="true" />
 
-      <svg class="stage__ring" viewBox="0 0 100 100" aria-hidden="true">
-        <circle class="stage__ring-track" cx="50" cy="50" r="46" />
-        <circle class="stage__ring-heat" cx="50" cy="50" r="46" ref={ring} />
+      {/* Thanh nhiệt chạy dọc đáy khung. Nó rút ngắn đúng theo số giây còn lại
+          trước khi nguội hết — đó là toàn bộ nội dung người chơi đọc từ nó. */}
+      <svg class="stage__ring" viewBox="0 0 100 4" preserveAspectRatio="none" aria-hidden="true">
+        <rect class="stage__ring-track" x="0" y="0" width="100" height="4" />
+        <rect class="stage__ring-heat" x="0" y="0" width="0" height="4" ref={ring} />
       </svg>
 
       <div class="stage__rock" ref={rock}>
-        <OreArt />
+        <Scrapper armRef={(el) => (arm.current = el)} />
       </div>
 
       <span class="stage__value num">{money(derived.tapValue)}</span>

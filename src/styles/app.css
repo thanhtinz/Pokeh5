@@ -190,46 +190,36 @@
 
 /* -------------------------------------------------------------- chỗ chạm -- */
 
-/* Cái sân: canvas hiệu ứng nằm dưới, cục quặng và mấy con số nằm trên. Bo tròn
-   để mảnh vụn bay ra bị cắt gọn ở mép, thành ra trông như văng khỏi cái lò chứ
-   không phải khỏi một hình chữ nhật. */
+/*
+ * Cái sân.
+ *
+ * Trước đây nó là một hình tròn, vì thứ nằm giữa là một viên kim cương — một
+ * ký hiệu, và ký hiệu thì hợp với một cái huy hiệu tròn. Giờ nằm giữa là một
+ * cảnh có người, có đống sắt, có mặt đất; cảnh thì nằm ngang, nên cái khung
+ * cũng nằm ngang.
+ */
 .stage {
   position: relative;
-  width: min(230px, 62vw);
-  aspect-ratio: 1;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
+  width: 100%;
+  aspect-ratio: 240 / 200;
+  border-radius: calc(var(--radius) - 2px);
   overflow: hidden;
   cursor: pointer;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
   background:
-    radial-gradient(circle at 50% 32%, hsl(var(--hue) var(--sat) 62% / 0.5), transparent 62%),
-    conic-gradient(from 210deg, var(--accent-deep), var(--accent-bright), var(--accent-deep));
+    radial-gradient(ellipse 70% 55% at 50% 42%, hsl(var(--hue) var(--sat) 46% / 0.32), transparent),
+    linear-gradient(180deg, hsl(var(--hue) 26% 11%), hsl(var(--hue) 30% 6%));
   box-shadow:
-    0 0 0 1px hsl(var(--hue) var(--sat) 70% / 0.35),
-    0 0 60px var(--glow),
-    inset 0 -8px 24px hsl(var(--hue) 60% 6% / 0.6);
+    inset 0 0 0 1px hsl(var(--hue) var(--sat) 62% / 0.22),
+    inset 0 -20px 40px hsl(var(--hue) 60% 4% / 0.55);
 }
 
 .stage:active {
   box-shadow:
-    0 0 0 1px hsl(var(--hue) var(--sat) 70% / 0.5),
-    0 0 90px var(--glow),
-    inset 0 -8px 24px hsl(var(--hue) 60% 6% / 0.7);
-}
-
-/* Mặt lò. Là nền của cả sân chứ không còn là một hộp riêng, vì mảnh vụn phải
-   bay được ra ngoài nó. */
-.stage::before {
-  content: '';
-  position: absolute;
-  inset: 11%;
-  border-radius: 50%;
-  background: radial-gradient(circle at 50% 30%, hsl(var(--hue) 20% 13%), hsl(var(--hue) 30% 6%));
-  box-shadow: inset 0 1px 0 hsl(0 0% 100% / 0.08);
+    inset 0 0 0 1px hsl(var(--hue) var(--sat) 66% / 0.34),
+    inset 0 -20px 40px hsl(var(--hue) 60% 4% / 0.6);
 }
 
 .stage__fx {
@@ -240,76 +230,88 @@
   pointer-events: none;
 }
 
-/* Vòng nhiệt chạy quanh mép sân. Xoay ngược để nó rút từ đỉnh xuống, vì đó là
-   hướng người ta đọc một cái đồng hồ đếm ngược. */
+/* Vòng nhiệt bám sát mép khung, không còn là một vòng tròn giữa màn. */
 .stage__ring {
   position: absolute;
-  inset: 1.5%;
-  width: 97%;
-  height: 97%;
-  transform: rotate(-90deg);
+  left: 10px;
+  right: 10px;
+  bottom: 9px;
+  width: auto;
+  height: 4px;
   pointer-events: none;
 }
 
-.stage__ring circle {
-  fill: none;
-  stroke-width: 1.6;
-  stroke-linecap: round;
+.stage__ring rect {
+  height: 4px;
+  rx: 2;
 }
 
 .stage__ring-track {
-  stroke: hsl(var(--hue) 40% 6% / 0.5);
+  fill: hsl(var(--hue) 40% 4% / 0.6);
 }
 
-/* Sáng hơn hẳn viền, không phải đậm hơn.
-   Viền cái sân vốn đã là màu chủ đạo ở độ bão hoà cao; vẽ thêm một vòng cùng
-   màu lên trên thì hai cái nhập làm một và cái vòng thôi mang tin. Kéo lên gần
-   trắng thì nó tách ra ngay, và vẫn nằm trong bảng màu. */
 .stage__ring-heat {
-  stroke: hsl(var(--hue) calc(var(--sat) * 0.55) 88%);
+  fill: hsl(var(--hue) calc(var(--sat) * 0.55) 88%);
   opacity: 0;
   transition: opacity 0.25s var(--ease);
 }
 
-/* `transform` của cái này do vòng lặp ghi mỗi khung hình, nên ở đây không được
-   có transition — hai bên sẽ giành nhau và kết quả là chuyển động bị trễ. */
+/* Cảnh chiếm hết khung. `transform` do vòng lặp ghi mỗi khung hình nên ở đây
+   không được có transition — hai bên sẽ giành nhau. */
 .stage__rock {
-  position: relative;
+  position: absolute;
+  inset: 0;
   display: grid;
-  place-items: center;
+  place-items: stretch;
   will-change: transform;
 }
 
-/* Hai nhãn tĩnh tụt hẳn xuống mép dưới. Ở giữa là chỗ vụn bay và số nhảy, và
-   chữ đứng yên nằm dưới chữ đang bay thì cả hai đều không đọc được. */
+.scrap {
+  /* `.art` đặt sẵn 40×40 cho icon; ở đây nó là cả một cảnh. */
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Cánh tay xoay quanh khớp vai, tính theo toạ độ của chính khung nhìn SVG.
+   Thiếu `transform-box` thì gốc xoay rơi vào hộp bao của riêng cánh tay và cả
+   cánh tay trượt đi chỗ khác thay vì vung. */
+.scrap__arm {
+  transform-box: view-box;
+  transform-origin: 126px 112px;
+  will-change: transform;
+}
+
+/* Giá mỗi lần chạm: một cái nhãn nhỏ ở góc, không phải một dòng chữ giữa cảnh. */
 .stage__value {
   position: absolute;
-  top: 71%;
-  font-size: 19px;
-  font-weight: 700;
+  left: 12px;
+  top: 11px;
+  font-size: 17px;
+  font-weight: 800;
   letter-spacing: -0.02em;
+  text-shadow: 0 2px 10px hsl(var(--hue) 60% 5% / 0.9);
   pointer-events: none;
 }
 
 .stage__hint {
   position: absolute;
-  top: 81%;
-  max-width: 70%;
-  font-size: 9.5px;
-  letter-spacing: 0.08em;
-  text-align: center;
+  left: 12px;
+  top: 32px;
+  font-size: 9px;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--ink-faint);
   pointer-events: none;
 }
 
-/* Con số nhân. Nằm trên cùng, và chỉ hiện khi đang nóng. */
 .stage__heat {
   position: absolute;
-  top: 11%;
-  font-size: 15px;
+  right: 12px;
+  top: 11px;
+  font-size: 16px;
   font-weight: 800;
-  color: hsl(var(--hue) var(--sat) 78%);
+  color: hsl(var(--hue) var(--sat) 80%);
   text-shadow: 0 2px 10px hsl(var(--hue) 60% 5% / 0.9);
   opacity: 0;
   transition: opacity 0.2s var(--ease);
