@@ -162,7 +162,20 @@ export const BUSINESS_ART: Record<string, Scene> = {
   flip: one(u(3, 10, 2, 2)),
 
   /* Cảng — xe, hàng, nước. */
-  forklift: one(c(32, 24, 2, 2)),
+  /*
+   * Xe nhìn ngang rộng **ba ô**, không phải hai.
+   *
+   * Chỗ này sai hai vòng liền theo hai hướng ngược nhau: vòng đầu lấy cột
+   * 31–32 nên mất cái đuôi, vòng sau "sửa" thành 32–33 nên mất cái đầu. Cả hai
+   * lần đều nhìn ra một chiếc xe, chỉ là một chiếc xe thiếu một phần — và ở cỡ
+   * ba mươi hai pixel thì thiếu đầu hay thiếu đuôi đều vẫn "trông như xe".
+   *
+   * Cách duy nhất thấy được là **vẽ nguyên cả vùng ra một khối lớn** rồi đếm
+   * ranh giới, chứ không soi từng ô rồi đoán ô nào ghép với ô nào:
+   *
+   *   node scripts/rects.mjs out.png 'city:30,16,7,12' 40
+   */
+  forklift: one(c(31, 24, 3, 2)),
   crate: one(c(13, 15, 2, 2)),
   // Không bộ nào có tàu. Gần nhất là **thùng hàng trên sàn ván giữa mặt nước**,
   // tức là mẻ cá vừa cập bến — đọc kèm cái tên thì ra, đọc trơ thì không.
@@ -213,11 +226,13 @@ export const BUSINESS_ART: Record<string, Scene> = {
   gallery: { w: 3, h: 2, layers: [u(11, 13, 3, 1, [0, 0]), u(11, 13, 3, 1, [0, 1])] },
   // Tranh đặt trên giá, cửa phòng phía dưới: gian đấu giá.
   auction: one(u(12, 14, 3, 2)),
-  // Không có tàu, nên là **sàn ván có ô che trên mặt nước**: cái boong.
+  // Không có tàu, nên là **sàn ván có ô che trên mặt nước**: cái boong. Cái ô
+  // che cao **hai ô** — mái ở trên, chân và quầy ở dưới; lấy mỗi ô mái thì
+  // được một cái nấm bay lơ lửng.
   yacht: {
     w: 3,
     h: 2,
-    layers: [...fill(WATER, 3, 2), { ...DECK, at: [0, 1] }, c(34, 14, 1, 1, [1, 0])],
+    layers: [...fill(WATER, 3, 2), { ...DECK, at: [0, 1] }, c(34, 14, 1, 2, [1, 0])],
   },
   // Không có máy bay, nên là **nhà chứa máy bay**: gờ mái trên dãy cửa cuốn.
   jet: { w: 2, h: 3, layers: [c(4, 8, 2, 1, [0, 0]), c(20, 26, 2, 2, [0, 1])] },
@@ -233,15 +248,29 @@ export const BUSINESS_ART: Record<string, Scene> = {
   /* Heights — tới đây thì đúng là toàn toà nhà, và đó là sự thật. */
   tower: building(TOP.sand, BODY.glass, BASE.doors),
   media: building(TOP.band, BODY.timber, BASE.glass),
-  // Không có vệ tinh, nên là **trạm mặt đất**: ba cột ăng-ten dựng thành hàng.
-  space: {
-    w: 3,
-    h: 2,
-    layers: [u(0, 6, 1, 2, [0, 0]), u(3, 6, 1, 2, [1, 0]), u(0, 6, 1, 2, [2, 0])],
+  /*
+   * Không có vệ tinh, và cũng **không có ăng-ten**.
+   *
+   * Chỗ này từng là ba cái cột dựng thành hàng, định làm trạm mặt đất. Nhưng
+   * cái gọi là cột ấy là một cột chắn đường, một cột đèn chữ T và một **khúc
+   * ống nước** — đọc ra ba dụng cụ chứ không ra ăng-ten. Lấy một thứ khác gán
+   * cho thứ mình cần là đúng cái lỗi cả file này viết ra để tránh. Nên nó là
+   * **nhà điều hành**, và nói thật như thế.
+   */
+  space: building(TOP.band, BODY.glass, BASE.stone),
+  /*
+   * Nhà xưởng mái vòm.
+   *
+   * Chỗ này từng lấy `c(16, 4, 3, 1)` làm hai cái tháp giải nhiệt. Cái mái vòm
+   * ấy rộng đúng **hai ô**; lấy ba thì ô thứ ba là mảnh của một mái khác, và
+   * mép phải hoá ra rách như giấy xé. Nay lấy đúng hai ô, và nó là cái nhà chứ
+   * không giả vờ là tháp giải nhiệt.
+   */
+  fusion: {
+    w: 2,
+    h: 3,
+    layers: [c(16, 4, 2, 1, [0, 0]), c(8, 6, 2, 1, [0, 1]), c(4, 5, 2, 1, [0, 2])],
   },
-  // Hai tháp giải nhiệt trên bệ gạch — đây là chỗ duy nhất mấy ô mái vòm kem
-  // giúp được việc, vì cái cần vẽ vốn *là* hai cái vòm.
-  fusion: { w: 3, h: 2, layers: [c(16, 4, 3, 1, [0, 0]), c(4, 5, 3, 1, [0, 1])] },
   bank2: building(TOP.red, BODY.brick, BASE.doors),
   empire: building(TOP.orange, BODY.glass, BASE.glass),
 };
@@ -257,9 +286,10 @@ export const JOB_ART: Record<string, Scene> = {
   // Tủ mát và mấy thùng hàng: cái bếp sau quán.
   dishes: one(c(12, 15, 2, 2)),
   // Xe bán tải chở đồ.
-  moving: one(c(32, 20, 2, 2)),
+  moving: one(c(31, 20, 3, 2)),
   // Cột đèn đường và cái bốt: ca trực đêm.
   night: { w: 2, h: 2, layers: [u(3, 6, 1, 2, [0, 0]), u(7, 6, 1, 2, [1, 0])] },
-  // Cụm ống và van, tức là công nghiệp.
-  rig: one(c(8, 14, 2, 2)),
+  // Cụm ống và van chạy suốt bề ngang, tức là công nghiệp. Ba ô chứ không hai:
+  // ống vốn vẽ để nối tiếp nhau, cắt hai ô thì hai đầu ống lơ lửng giữa không.
+  rig: one(c(8, 14, 3, 2)),
 };

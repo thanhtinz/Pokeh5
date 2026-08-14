@@ -79,7 +79,7 @@ export const YARD_SCENES: readonly Yard[] = [
   {
     ground: { sheet: 'city', x: 2, y: 24, w: 1, h: 1 },
     props: [
-      c(32, 24, 2, 2, SLOT.top),
+      c(31, 24, 3, 2, SLOT.top),
       c(26, 26, 2, 2, SLOT.left),
       c(20, 26, 2, 2, SLOT.right),
       c(15, 13, 3, 1, SLOT.lowLeft),
@@ -108,7 +108,7 @@ export const YARD_SCENES: readonly Yard[] = [
       u(16, 8, 2, 2, SLOT.top),
       u(8, 11, 2, 1, [0, 2]),
       u(8, 11, 2, 1, [0, 3]),
-      c(32, 20, 2, 2, SLOT.right),
+      c(33, 22, 2, 2, SLOT.right),
       u(10, 12, 1, 1, [0, 4]),
       u(10, 12, 1, 1, [1, 4]),
       u(4, 6, 2, 2, SLOT.lowMid),
@@ -136,7 +136,7 @@ export const YARD_SCENES: readonly Yard[] = [
       // hai ô thì cụt mất nóc — nhìn ra một cái tán bị bạt phẳng.)
       u(16, 11, 2, 2, SLOT.top),
       u(16, 8, 2, 2, SLOT.left),
-      c(31, 18, 2, 2, SLOT.right),
+      c(33, 18, 2, 2, SLOT.right),
       u(16, 10, 2, 1, SLOT.lowLeft),
       c(34, 14, 2, 2, SLOT.lowMid),
       u(16, 8, 2, 2, SLOT.lowRight),
@@ -155,7 +155,9 @@ export const YARD_SCENES: readonly Yard[] = [
       c(31, 10, 1, 2, [3, 0]),
       c(31, 10, 1, 2, [4, 0]),
       u(16, 8, 2, 2, SLOT.left),
-      c(31, 22, 2, 2, SLOT.right),
+      // Xe nhìn ngang rộng ba ô, nên lùi sang cột 5 chứ không đặt ở cột 6 —
+      // đặt ở cột 6 thì ô thứ ba rơi ra ngoài sân và cái xe cụt đuôi.
+      c(34, 20, 3, 2, [5, 2]),
       c(12, 15, 2, 2, SLOT.lowLeft),
       c(34, 14, 2, 2, SLOT.lowMid),
       u(16, 10, 2, 1, [6, 5]),
