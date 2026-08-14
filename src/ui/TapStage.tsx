@@ -46,8 +46,8 @@ const PROPS: readonly (readonly [number, number, number])[] = [
   // Hàng sau: cây và mái che, để mép trên của sân không phải một đường thẳng.
   // Hai góc trên để trống: chữ "8k mỗi chạm" và "×1,8" nằm đè lên đó, và một
   // cái cây dưới chữ thì cả hai đều không đọc được.
-  [259, 24, 2],
-  [286, 92, 2],
+  [259, 76, 0],
+  [286, 104, 62],
   [222, 56, 0],
   [162, 42, 4],
   // Bên trái: thùng rác và đống phế liệu — thứ nhân vật sống bằng nó.

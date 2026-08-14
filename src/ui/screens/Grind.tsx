@@ -2,7 +2,8 @@ import { JOBS, unlockedJobs } from '../../game/jobs';
 import { clock, count, money, rate } from '../../game/money';
 import { t } from '../../i18n';
 import type { PlayerState } from '../../game/state';
-import { Art } from '../Art';
+import { Pix } from '../Pix';
+import { JOB_TILE } from '../tiles';
 import { Icon } from '../Icon';
 import { TapStage } from '../TapStage';
 import {
@@ -113,7 +114,7 @@ export function Grind({ game, state, derived, now }: Props) {
           return (
             <div key={job.id} class={`row${active ? ' row--lit' : ''}`}>
               <span class="row__icon">
-                <Art name={job.icon} />
+                <Pix i={JOB_TILE[job.id] ?? 277} size={32} />
               </span>
               <span class="row__body">
                 <span class="row__name">{t(`job.${job.id}`)}</span>
