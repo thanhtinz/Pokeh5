@@ -201,7 +201,7 @@
 .stage {
   position: relative;
   width: 100%;
-  aspect-ratio: 164 / 122;
+  aspect-ratio: 128 / 88;
   border-radius: calc(var(--radius) - 2px);
   overflow: hidden;
   cursor: pointer;
@@ -266,21 +266,32 @@
   will-change: transform;
 }
 
-.yard {
-  width: 100%;
-  height: 100%;
-  display: block;
+/*
+ * Ảnh pixel phải phóng to bằng nearest-neighbour.
+ *
+ * Mặc định trình duyệt nội suy trơn, và một sprite 34 pixel kéo lên gấp mười
+ * lần với phép nội suy trơn thì thành một vệt nhoè — đúng thứ mà cả lối vẽ này
+ * sinh ra để tránh.
+ */
+.yard__bg,
+.yard__hero {
+  position: absolute;
+  image-rendering: pixelated;
+  pointer-events: none;
 }
 
-/* Cánh tay xoay quanh khớp vai, tính theo toạ độ của chính khung nhìn SVG.
-   Thiếu `transform-box` thì gốc xoay rơi vào hộp bao của riêng cánh tay và cả
-   cánh tay trượt đi chỗ khác thay vì vung. */
-.yard__arm {
-  /* Gốc xoay khai theo toạ độ khung nhìn SVG, và điểm cụ thể do chính cảnh
-     tính ra từ vị trí khớp vai. Thiếu `transform-box` thì gốc rơi vào hộp bao
-     của riêng cánh tay và cánh tay trượt đi thay vì vung. */
-  transform-box: view-box;
-  will-change: transform;
+.yard__bg {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* Nhân vật đặt theo phần trăm của cảnh, đúng chỗ đã căn lúc ghép sprite:
+   34 pixel rộng trên nền 128, đặt ở (28, 34). */
+.yard__hero {
+  left: 21.875%;
+  top: 38.6%;
+  width: 26.5625%;
 }
 
 /* Giá mỗi lần chạm: một cái nhãn nhỏ ở góc, không phải một dòng chữ giữa cảnh. */

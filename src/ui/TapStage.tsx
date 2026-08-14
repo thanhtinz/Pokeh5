@@ -6,7 +6,9 @@ import { Particles, fade } from '../engine/particles';
 import { onFrame } from '../engine/loop';
 import type { Derived, Store } from '../game/store';
 import { t } from '../i18n';
-import { Yard } from './art/Yard';
+import yardUrl from '../assets/sprites/yard.png';
+import heroUpUrl from '../assets/sprites/hero-up.png';
+import heroDownUrl from '../assets/sprites/hero-down.png';
 
 interface Props {
   game: Store;
@@ -61,7 +63,8 @@ export function TapStage({ game, derived }: Props) {
   const canvas = useRef<HTMLCanvasElement>(null);
   const rock = useRef<HTMLDivElement>(null);
   const ring = useRef<SVGRectElement>(null);
-  const arm = useRef<SVGGElement | null>(null);
+  const heroUp = useRef<HTMLImageElement>(null);
+  const heroDown = useRef<HTMLImageElement>(null);
   const label = useRef<HTMLSpanElement>(null);
 
   // Mọi thứ đổi theo từng khung hình sống ở đây, không sống trong state của
@@ -165,7 +168,8 @@ export function TapStage({ game, derived }: Props) {
       if (!busy) {
         if (w.dirty) {
           ctx.clearRect(0, 0, width, height);
-          if (arm.current) arm.current.style.transform = '';
+          if (heroUp.current) heroUp.current.style.opacity = '1';
+          if (heroDown.current) heroDown.current.style.opacity = '0';
           if (rock.current) {
             rock.current.style.transform = '';
             rock.current.style.filter = '';
@@ -247,10 +251,13 @@ export function TapStage({ game, derived }: Props) {
 
       // ------------------------------------------------------- phần DOM -----
 
-      // Xoay quanh khớp vai, không quanh giữa hình: quay quanh giữa hình thì
-      // cả cánh tay trượt đi chỗ khác thay vì vung.
-      if (arm.current) {
-        arm.current.style.transform = `rotate(${(w.swing * -62).toFixed(2)}deg)`;
+      // Đổi khung hình theo pha vung: đang giơ lên thì khung giơ, đang bổ
+      // xuống thì khung bổ. Ngưỡng đặt ở giữa nên nó lật đúng một lần mỗi nhịp
+      // chứ không rung qua rung lại quanh vạch.
+      if (heroUp.current && heroDown.current) {
+        const down = w.swing < 0.35;
+        heroUp.current.style.opacity = down ? '0' : '1';
+        heroDown.current.style.opacity = down ? '1' : '0';
       }
 
       if (rock.current) {
@@ -372,8 +379,14 @@ export function TapStage({ game, derived }: Props) {
         <rect class="stage__ring-heat" x="0" y="0" width="0" height="4" ref={ring} />
       </svg>
 
+      {/* Cảnh và nhân vật là ảnh pixel thật, phóng to bằng nearest-neighbour.
+          Nhân vật có hai khung hình — giơ búa và bổ búa — và vòng lặp đổi khung
+          theo pha của cú vung. Hai khung là đủ: ở nhịp này mắt đọc ra động tác
+          từ điểm đầu và điểm cuối, thêm khung giữa chỉ làm nó nhoè đi. */}
       <div class="stage__rock" ref={rock}>
-        <Yard armRef={(el) => (arm.current = el)} />
+        <img class="yard__bg" src={yardUrl} alt="" />
+        <img class="yard__hero" src={heroUpUrl} ref={heroUp} alt="" />
+        <img class="yard__hero" src={heroDownUrl} ref={heroDown} alt="" />
       </div>
 
       <span class="stage__value num">{money(derived.tapValue)}</span>
