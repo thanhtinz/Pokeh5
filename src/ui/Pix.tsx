@@ -67,3 +67,75 @@ export function Pix({ i, size, sheet = 'urban', class: cls, style }: Props) {
     />
   );
 }
+
+/**
+ * Một mảng ô liền nhau, và đây là chỗ vòng trước làm sai.
+ *
+ * Mấy bộ tile này vẽ đồ vật **trải qua nhiều ô**: cái ô tô chiếm hai nhân hai,
+ * cái sạp hàng hai nhân hai, cái cây một nhân hai, dãy cửa cuốn kho ba nhân
+ * hai. Lấy mỗi lần một ô thì thứ nhận được không phải đồ vật mà là *mảnh* của
+ * nó — một khúc ống, một tấm nệm ghế, một mẩu mái tôn. Ở cỡ ba mươi hai pixel
+ * thì mảnh nào cũng chỉ còn là vệt màu, và cả danh sách trông như icon giao
+ * diện chứ không như đồ đạc.
+ *
+ * Nên đơn vị của lớp hình này là **khối**, không phải ô.
+ */
+export interface Block {
+  sheet: SheetName;
+  /** Ô trái-trên của khối, tính theo cột/hàng trong tấm sheet. */
+  x: number;
+  y: number;
+  /** Khối rộng mấy ô, cao mấy ô. */
+  w: number;
+  h: number;
+  /** Đặt vào đâu trong cảnh, tính bằng ô. Không khai thì là góc trái-trên. */
+  at?: readonly [number, number];
+}
+
+/** Một cảnh: khung rộng `w`×`h` ô, xếp chồng vài khối lên nhau. */
+export interface Scene {
+  w: number;
+  h: number;
+  layers: readonly Block[];
+}
+
+/**
+ * Vẽ một cảnh ở **một cỡ ô cố định**.
+ *
+ * Cỡ ô cố định chứ không phải "phóng cảnh cho vừa khung": phóng cho vừa thì
+ * cái cảnh hai ô và cái cảnh ba ô ra hai mật độ pixel khác nhau, và hai mật độ
+ * pixel đứng cạnh nhau trong cùng một danh sách cuộn thì mắt thấy ngay là hai
+ * bộ hình khác nhau — đúng cái lỗi đã phải sửa một lần rồi. Cảnh nhỏ thì nằm
+ * giữa khung và để trống xung quanh; trống thì được, vênh thì không.
+ */
+export function PixScene({ scene, unit = 16 }: { scene: Scene; unit?: number }) {
+  const tiles = [];
+
+  for (const layer of scene.layers) {
+    const [ax, ay] = layer.at ?? [0, 0];
+    for (let dy = 0; dy < layer.h; dy += 1) {
+      for (let dx = 0; dx < layer.w; dx += 1) {
+        const cols = SHEETS[layer.sheet].cols;
+        tiles.push(
+          <Pix
+            key={`${layer.sheet}-${layer.x}-${layer.y}-${dx}-${dy}-${ax}-${ay}`}
+            sheet={layer.sheet}
+            i={(layer.y + dy) * cols + layer.x + dx}
+            size={unit}
+            style={{
+              position: 'absolute',
+              left: `${(ax + dx) * unit}px`,
+              top: `${(ay + dy) * unit}px`,
+            }}
+          />,
+        );
+      }
+    }
+  }
+
+  return (
+    <span class="pix-scene" style={{ width: `${scene.w * unit}px`, height: `${scene.h * unit}px` }}>
+      {tiles}
+    </span>
+  );
+}

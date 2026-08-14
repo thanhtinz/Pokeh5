@@ -13,8 +13,12 @@
 import { render } from 'preact';
 
 import { ART_NAMES, Art } from './ui/Art';
-import { DISTRICTS } from './game/businesses';
+import { BUSINESSES, DISTRICTS } from './game/businesses';
+import { JOBS } from './game/jobs';
+import { BUSINESS_ART, JOB_ART } from './ui/tiles';
+import { PixScene } from './ui/Pix';
 import { DistrictStrip } from './ui/DistrictStrip';
+import { t } from './i18n';
 import { applyTheme } from './ui/theme';
 
 import './styles/base.css';
@@ -29,6 +33,42 @@ function Sheet() {
     <div class="sheet-page">
       {/* Sáu dải phố bày cạnh nhau: chúng phải khác nhau đủ để nhìn phát biết
           đang ở khu nào, và đó là thứ chỉ thấy được khi xếp chồng lên nhau. */}
+      {/* Icon đúng cỡ nó sống trong danh sách, kèm tên: cái nào không ra hình
+          thì đọc tên xong nhìn hình là biết ngay. */}
+      <h1>Hình cơ sở và việc làm</h1>
+      <div
+        class="iconsheet"
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(6, 150px)',
+          gap: '8px',
+          marginBottom: '20px',
+        }}
+      >
+        {BUSINESSES.map((def) => (
+          <span
+            key={def.id}
+            style={{ display: 'flex', gap: '8px', alignItems: 'center', fontSize: '11px' }}
+          >
+            <span style={{ width: '48px', height: '48px', display: 'grid', placeItems: 'center' }}>
+              {BUSINESS_ART[def.id] && <PixScene scene={BUSINESS_ART[def.id]!} />}
+            </span>
+            <b>{t(`biz.${def.id}`)}</b>
+          </span>
+        ))}
+        {JOBS.map((job) => (
+          <span
+            key={job.id}
+            style={{ display: 'flex', gap: '8px', alignItems: 'center', fontSize: '11px' }}
+          >
+            <span style={{ width: '48px', height: '48px', display: 'grid', placeItems: 'center' }}>
+              {JOB_ART[job.id] && <PixScene scene={JOB_ART[job.id]!} />}
+            </span>
+            <b style={{ color: '#8fd' }}>{t(`job.${job.id}`)}</b>
+          </span>
+        ))}
+      </div>
+
       <h1>Dải phố sáu khu</h1>
       <div style={{ display: 'grid', gap: '10px', width: '360px' }}>
         {DISTRICTS.map((district) => (

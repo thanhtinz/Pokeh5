@@ -3,7 +3,6 @@ import { useState } from 'preact/hooks';
 import {
   BUSINESSES,
   DISTRICTS,
-  type District,
   affordableUnits,
   bulkCost,
   cyclePayout,
@@ -17,9 +16,9 @@ import { hasManager, ownedOf, upgradeOf, type PlayerState } from '../../game/sta
 import { TIERS, isMaxed, nextUpgrade, upgradeMultiplier } from '../../game/upgrades';
 import type { Derived, Store } from '../../game/store';
 import { t } from '../../i18n';
-import { DistrictStrip, MiniFacade } from '../DistrictStrip';
+import { DistrictStrip } from '../DistrictStrip';
 import { BUSINESS_ART } from '../tiles';
-import { Pix } from '../Pix';
+import { PixScene } from '../Pix';
 
 interface Props {
   game: Store;
@@ -143,7 +142,7 @@ export function Empire({ game, state, derived }: Props) {
                     onClick={() => game.runBusiness(def.id)}
                     aria-label={t('empire.run', { name: t(`biz.${def.id}`) })}
                   >
-                    <BusinessArt id={def.id} district={def.district} />
+                    <BusinessArt id={def.id} />
                   </button>
 
                   <span class="row__body">
@@ -234,12 +233,16 @@ export function Empire({ game, state, derived }: Props) {
 }
 
 /**
- * Hình của một cơ sở: một món đồ, hoặc một căn nhà của khu.
+ * Hình của một cơ sở.
  *
- * Bảng phân loại nằm ở `tiles.ts`; chỗ này chỉ là cái công tắc giữa hai lối.
+ * Cỡ ô để đúng mười sáu pixel, tức tỷ lệ gốc, và đó không phải chuyện thẩm mỹ.
+ * Bộ City có **một pixel viền giữa các ô**, nên bước nhảy là `size × 17/16`;
+ * chọn mười bốn thì bước thành 14,875 pixel và trình duyệt lấy mẫu lệch — mọi
+ * ô của bộ đó nhoè đi và dính một vệt của ô bên cạnh, trong khi bộ Urban
+ * (viền 0) vẫn nét. Nhìn thì tưởng chọn nhầm ô, thật ra là chọn nhầm cỡ.
  */
-function BusinessArt({ id, district }: { id: string; district: District }) {
+function BusinessArt({ id }: { id: string }) {
   const art = BUSINESS_ART[id];
   if (!art) return null;
-  return 'tile' in art ? <Pix i={art.tile} size={32} /> : <MiniFacade district={district} />;
+  return <PixScene scene={art} />;
 }

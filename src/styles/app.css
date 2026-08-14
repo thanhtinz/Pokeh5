@@ -283,8 +283,13 @@
   transform: scale(var(--yard-scale, 1));
 }
 
-/* Căn nhà nhỏ làm hình cho một dòng cơ sở. */
-.mini {
+/* Khung của một cảnh ghép từ nhiều ô: các ô nằm tuyệt đối bên trong nó.
+ *
+ * Tên phải có tiền tố `pix-`: `.scene` trần đã là cảnh thành phố ở màn mở đầu,
+ * và cái đó khai `position: absolute`. Trùng tên thì mọi cảnh tile bị hút ra
+ * góc trang và biến mất khỏi chỗ nó phải nằm — mất nửa tiếng mới ra vì DOM
+ * nhìn hoàn toàn đúng, chỉ có `getComputedStyle` mới nói thật. */
+.pix-scene {
   position: relative;
   display: block;
 }
@@ -491,8 +496,11 @@
 .row__icon {
   display: grid;
   place-items: center;
-  width: 46px;
-  height: 46px;
+  /* Bốn mươi tám, không phải bốn mươi sáu: cảnh cao nhất là ba ô mười sáu
+     pixel, và cỡ ô phải là mười sáu để bộ City (viền một pixel) rơi đúng vào
+     lưới pixel. Thu khung lại thì phải thu cỡ ô, mà thu cỡ ô thì nhoè. */
+  width: 48px;
+  height: 48px;
   border-radius: 13px;
   font-size: 20px;
   color: var(--accent-bright);

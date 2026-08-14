@@ -1,18 +1,13 @@
 /**
  * Dải phố của mỗi khu, ghép từ tile.
  *
- * ## Vì sao là dải phố chứ không phải icon cho từng cơ sở
+ * ## Dải phố làm việc mà cái icon không làm nổi
  *
- * Ba mươi sáu cơ sở chạy từ nhặt ve chai tới vệ tinh viễn thông, và không bộ
- * asset miễn phí nào phủ nổi dải đó — chuyện này ghi ở `tiles.ts`. Nhưng thứ
- * mấy bộ này *rất* giàu là **cảnh phố**: tường gạch, cửa kính, mái hiên sọc,
- * thùng rác, cây. Nên dùng chúng cho đúng chỗ mạnh: mỗi khu một dải phố ở đầu
- * mục, còn từng dòng cơ sở giữ nguyên hình cũ.
- *
- * Cách chia này còn tránh được một lỗi khác: trộn hai lối vẽ trong **cùng một
- * danh sách cuộn** thì mắt so sánh ngay hàng trên với hàng dưới và thấy vênh.
- * Dải phố là một thành phần khác hẳn, nằm ở một chỗ khác, nên nó đứng cạnh
- * danh sách mà không tranh chấp.
+ * Hình từng cơ sở (ở `tiles.ts`) nói *cái này là gì*: một sạp rau, một cái két,
+ * một hòn đảo. Dải phố nói *đang ở tầng nào của thang* — và nó nói bằng vật
+ * liệu chứ không bằng chữ. Gạch mộc ở Xóm Liều, cửa cuốn kho ở Cảng, mái hiên
+ * sọc ở Phố Thị, kính suốt từ Tài Chính trở lên. Cuộn qua sáu khu là thấy cả
+ * quãng đường, không cần một dòng chú thích nào.
  *
  * ## Mặt tiền là dữ liệu, không phải hình vẽ tay
  *
@@ -48,108 +43,122 @@ interface Facade {
 }
 
 /**
+ * Ô nào là gì, viết theo cột/hàng của tấm sheet.
+ *
+ * Số thứ tự ô đọc trần trụi (`615`, `793`) thì không kiểm được: vòng trước có
+ * một mái nhà hoá ra là **vạch kẻ đường** và một cái cửa hoá ra là **thùng
+ * gỗ**, cả hai đều vì đọc số từ một bảng soi dựng sai hình học rồi chép thẳng
+ * vào đây. Viết theo cột/hàng thì đối chiếu được với `scripts/contact.mjs`,
+ * và bảng soi ấy dùng đúng công thức mà `Pix` dùng để vẽ.
+ */
+const COLS = 37;
+const at = (x: number, y: number) => y * COLS + x;
+
+/*
+ * Ô mái phải là ô **lặp liền được theo chiều ngang**.
+ *
+ * Vòng trước lấy mấy ô mái vòm màu kem, và mỗi cái vòm ấy là một *mẩu* của một
+ * mái lớn ba ô — lặp nó suốt bề ngang thì cả dải hoá ra một hàng bướu kem
+ * giống hệt nhau, nhìn như bọt biển chứ không như mái nhà. Dải mái hiên sọc
+ * thì ngược lại: nó vốn được vẽ để lặp, nên lặp bao nhiêu cũng liền.
+ */
+const T = {
+  /** Gạch đỏ có chỉ trắng: gờ mái nhà cũ. */
+  redCornice: at(0, 8),
+  /** Gạch xám có chỉ trắng. */
+  greyCornice: at(4, 8),
+  /** Gờ chắn mái bê tông. */
+  parapet: at(20, 5),
+  /** Dải mái hiên xanh ngọc. */
+  band: at(12, 5),
+  /** Mái hiên sọc xanh lá. */
+  awnGreen: at(23, 11),
+  /** Mái hiên sọc cam. */
+  awnOrange: at(27, 11),
+};
+
+const W = {
+  redBrick: at(0, 6),
+  greyBrick: at(4, 6),
+  sandBrick: at(8, 6),
+  brightGlass: at(12, 6),
+  blueGlass: at(16, 6),
+};
+
+const N = {
+  /** Cửa sổ khung gỗ. */
+  timber: at(25, 16),
+  /** Ô kính. */
+  glass: at(16, 7),
+};
+
+const D = {
+  /** Cửa khung gỗ. */
+  timber: at(25, 15),
+  /** Cửa cuốn kho. */
+  shutter: at(20, 26),
+  /** Cửa kính tầng trệt. */
+  glass: at(16, 8),
+};
+
+/**
  * Sáu khu, mỗi khu một dãy nhà.
  *
- * Chất liệu đi lên theo đúng thứ tự người chơi leo: gạch mộc và mái tôn ở Xóm
- * Liều, tường thép ở Cảng, mái hiên sọc ở Phố Thị, rồi kính suốt từ Tài Chính
+ * Chất liệu đi lên theo đúng thứ tự người chơi leo: gạch mộc ở Xóm Liều, bê
+ * tông và cửa cuốn ở Cảng, mái hiên sọc ở Phố Thị, rồi kính suốt từ Tài Chính
  * trở lên. Không cần chú thích nào cho người chơi — đổi vật liệu là đủ.
  */
 const STREETS: Record<District, readonly Facade[]> = {
-  // Gạch mộc, ván gỗ, mái tôn: nhà tự cất.
+  // Gạch mộc, cửa sổ khung gỗ: nhà tự cất.
   skidrow: [
-    { wall: 185, window: 201, top: 615, door: 571, w: 3 },
-    { wall: 0, window: 201, top: 541, door: 608, w: 2 },
-    { wall: 185, window: 201, top: 615, door: 571, w: 3 },
-    { wall: 0, window: 201, top: 541, door: 608, w: 2 },
-    { wall: 185, window: 201, top: 615, door: 571, w: 3 },
-    { wall: 0, window: 201, top: 541, door: 608, w: 2 },
-    { wall: 185, window: 201, top: 615, door: 571, w: 3 },
-    { wall: 0, window: 201, top: 541, door: 608, w: 2 },
+    { wall: W.redBrick, window: N.timber, top: T.redCornice, door: D.timber, w: 3 },
+    { wall: W.greyBrick, window: N.timber, top: T.greyCornice, door: D.timber, w: 2 },
+    { wall: W.redBrick, window: N.timber, top: T.redCornice, door: D.timber, w: 4 },
+    { wall: W.sandBrick, window: N.timber, top: T.greyCornice, door: D.timber, w: 2 },
+    { wall: W.greyBrick, window: N.timber, top: T.greyCornice, door: D.timber, w: 3 },
+    { wall: W.redBrick, window: N.timber, top: T.redCornice, door: D.timber, w: 3 },
   ],
-  // Bê tông và sọc cảnh báo: khu công nghiệp.
+  // Bê tông và cửa cuốn: khu kho bãi.
   docks: [
-    { wall: 9, window: 312, top: 645, door: 201, w: 4 },
-    { wall: 204, window: 312, top: 682, door: 571, w: 3 },
-    { wall: 9, window: 312, top: 645, door: 201, w: 4 },
-    { wall: 204, window: 312, top: 682, door: 571, w: 3 },
-    { wall: 9, window: 312, top: 645, door: 201, w: 4 },
-    { wall: 204, window: 312, top: 682, door: 571, w: 3 },
+    { wall: W.greyBrick, window: N.timber, top: T.parapet, door: D.shutter, w: 4 },
+    { wall: W.sandBrick, window: N.timber, top: T.band, door: D.shutter, w: 3 },
+    { wall: W.greyBrick, window: N.timber, top: T.parapet, door: D.shutter, w: 5 },
+    { wall: W.sandBrick, window: N.timber, top: T.band, door: D.shutter, w: 3 },
   ],
   // Mái hiên sọc: mặt phố buôn bán.
   midtown: [
-    { wall: 28, window: 312, top: 393, door: 571, w: 3 },
-    { wall: 185, window: 349, top: 430, door: 204, w: 3 },
-    { wall: 28, window: 312, top: 467, door: 571, w: 4 },
-    { wall: 185, window: 349, top: 393, door: 204, w: 3 },
-    { wall: 28, window: 312, top: 430, door: 571, w: 3 },
-    { wall: 185, window: 349, top: 467, door: 204, w: 3 },
+    { wall: W.sandBrick, window: N.timber, top: T.awnGreen, door: D.timber, w: 3 },
+    { wall: W.redBrick, window: N.glass, top: T.awnOrange, door: D.glass, w: 3 },
+    { wall: W.sandBrick, window: N.timber, top: T.awnGreen, door: D.timber, w: 4 },
+    { wall: W.greyBrick, window: N.glass, top: T.band, door: D.glass, w: 3 },
+    { wall: W.redBrick, window: N.timber, top: T.awnOrange, door: D.timber, w: 3 },
   ],
   // Kính suốt, không mái hiên: nhà làm việc.
   financial: [
-    { wall: 19, window: 349, top: 19, door: 201, w: 4 },
-    { wall: 9, window: 386, top: 9, door: 201, w: 3 },
-    { wall: 19, window: 349, top: 19, door: 201, w: 4 },
-    { wall: 9, window: 386, top: 9, door: 201, w: 3 },
-    { wall: 19, window: 349, top: 19, door: 201, w: 4 },
+    { wall: W.blueGlass, window: N.glass, top: T.parapet, door: D.glass, w: 4 },
+    { wall: W.brightGlass, window: N.glass, top: T.band, door: D.glass, w: 3 },
+    { wall: W.blueGlass, window: N.glass, top: T.parapet, door: D.glass, w: 5 },
+    { wall: W.brightGlass, window: N.glass, top: T.band, door: D.glass, w: 3 },
   ],
+  // Gạch kem xen kính trắng: khu nhà giàu, thấp và rộng.
   uptown: [
-    { wall: 28, window: 349, top: 467, door: 201, w: 4 },
-    { wall: 19, window: 386, top: 19, door: 201, w: 3 },
-    { wall: 28, window: 349, top: 504, door: 201, w: 4 },
-    { wall: 19, window: 386, top: 19, door: 201, w: 3 },
-    { wall: 28, window: 349, top: 467, door: 201, w: 4 },
+    { wall: W.brightGlass, window: N.glass, top: T.greyCornice, door: D.glass, w: 4 },
+    { wall: W.sandBrick, window: N.timber, top: T.awnGreen, door: D.timber, w: 3 },
+    { wall: W.brightGlass, window: N.glass, top: T.greyCornice, door: D.glass, w: 4 },
+    { wall: W.sandBrick, window: N.timber, top: T.awnOrange, door: D.timber, w: 3 },
   ],
-  // Mái sẫm, kính cao: cao ốc.
+  // Kính cao suốt cả dải: cao ốc.
   heights: [
-    { wall: 9, window: 386, top: 793, door: 201, w: 5 },
-    { wall: 19, window: 423, top: 830, door: 201, w: 4 },
-    { wall: 9, window: 386, top: 793, door: 201, w: 5 },
-    { wall: 19, window: 423, top: 830, door: 201, w: 4 },
+    { wall: W.blueGlass, window: N.glass, top: T.greyCornice, door: D.glass, w: 5 },
+    { wall: W.brightGlass, window: N.glass, top: T.parapet, door: D.glass, w: 4 },
+    { wall: W.blueGlass, window: N.glass, top: T.greyCornice, door: D.glass, w: 6 },
+    { wall: W.brightGlass, window: N.glass, top: T.parapet, door: D.glass, w: 4 },
   ],
 };
 
 /** Ô của dải, tính bằng pixel gốc. Hai tầng: mái và mặt tiền. */
 const TILE = 16;
 const ROWS = 2;
-
-/**
- * Vật liệu tiêu biểu của mỗi khu — căn nhà đầu dãy.
- *
- * Dùng cho những cơ sở không có món đồ nào tả được: một quỹ đầu tư, một hãng
- * xếp hạng tín nhiệm. Ở cỡ bốn mươi pixel thì thứ tả đúng chúng nhất là **cái
- * nhà chúng ngồi trong đó**, và cái nhà ấy phải cùng vật liệu với dải phố của
- * khu — nên nó lấy thẳng từ đây, không khai lại lần nữa.
- */
-export function materialOf(district: District): Facade {
-  return STREETS[district][0]!;
-}
-
-/** Một căn nhà nhỏ, dùng làm hình cho một dòng cơ sở. */
-export function MiniFacade({ district, size = 20 }: { district: District; size?: number }) {
-  const house = materialOf(district);
-  const cells: JSX.Element[] = [];
-
-  for (let col = 0; col < 2; col += 1) {
-    for (let row = 0; row < ROWS; row += 1) {
-      const tile = row === 0 ? house.top : col === 0 ? house.wall : house.door;
-      cells.push(
-        <Pix
-          key={`${col}-${row}`}
-          sheet="city"
-          i={tile}
-          size={size}
-          style={{ position: 'absolute', left: `${col * size}px`, top: `${row * size}px` }}
-        />,
-      );
-    }
-  }
-
-  return (
-    <span class="mini" style={{ width: `${size * 2}px`, height: `${size * ROWS}px` }}>
-      {cells}
-    </span>
-  );
-}
 
 export function DistrictStrip({ district }: { district: District }) {
   const street = STREETS[district];

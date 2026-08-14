@@ -6,7 +6,7 @@ import { Particles, fade } from '../engine/particles';
 import { onFrame } from '../engine/loop';
 import type { Derived, Store } from '../game/store';
 import { t } from '../i18n';
-import { Pix } from './Pix';
+import { Pix, PixScene, type Scene } from './Pix';
 
 interface Props {
   game: Store;
@@ -41,27 +41,34 @@ const GROUND: readonly (readonly number[])[] = [
   [439, 439, 439, 439, 439, 439, 439, 439],
 ];
 
-/** Đồ đạc trong sân: [ô, x, y] tính bằng pixel của cảnh. */
-const PROPS: readonly (readonly [number, number, number])[] = [
-  // Hàng sau: cây và mái che, để mép trên của sân không phải một đường thẳng.
-  // Hai góc trên để trống: chữ "8k mỗi chạm" và "×1,8" nằm đè lên đó, và một
-  // cái cây dưới chữ thì cả hai đều không đọc được.
-  [259, 76, 0],
-  [286, 104, 62],
-  [222, 56, 0],
-  [162, 42, 4],
-  // Bên trái: thùng rác và đống phế liệu — thứ nhân vật sống bằng nó.
-  [253, 6, 26],
-  [251, 20, 28],
-  [254, 12, 58],
-  [426, 2, 74],
-  // Bên phải: sạp hàng, tức là chỗ tiền sẽ tới sau này.
-  [304, 88, 24],
-  [303, 106, 24],
-  [277, 88, 44],
-  [301, 106, 44],
-  [223, 92, 66],
-];
+/**
+ * Đồ đạc trong sân, khai theo **khối** chứ không theo ô.
+ *
+ * Vòng trước khai từng ô một, và cái sân trả giá đúng như danh sách cơ sở đã
+ * trả: cái cây mất gốc vì gốc nằm ở ô bên dưới mà ô ấy bị đặt sang chỗ khác,
+ * còn cái xe chỉ hiện ra **nửa trước** vì nửa sau là một ô riêng không ai lấy.
+ * Xe hơi trong bộ này chiếm hai nhân hai; lấy một ô thì được nửa cái xe, và
+ * nửa cái xe nằm giữa sân thì nhìn như một vệt màu đỏ.
+ *
+ * Hai góc trên để trống: chữ "8k mỗi chạm" và "×1,8" nằm đè lên đó.
+ */
+const PROPS: Scene = {
+  w: 8,
+  h: 6,
+  layers: [
+    // Hàng sau: cột đèn và cái cây — để mép trên không phải một đường thẳng.
+    // Cái cây rộng **hai** ô: lấy một ô thì được đúng nửa tán lá, và nửa tán
+    // lá đứng giữa sân nhìn như một vệt xanh dựng đứng.
+    { sheet: 'urban', x: 3, y: 6, w: 1, h: 2, at: [2, 0] },
+    { sheet: 'urban', x: 16, y: 9, w: 2, h: 2, at: [4, 0] },
+    // Bên trái: thùng rác và cái xe cũ — thứ nhân vật sống bằng nó.
+    { sheet: 'urban', x: 8, y: 9, w: 1, h: 2, at: [0, 2] },
+    { sheet: 'urban', x: 15, y: 16, w: 2, h: 2, at: [0, 4] },
+    // Bên phải: sạp rau và đống đồ cũ, tức là chỗ tiền sẽ tới sau này.
+    { sheet: 'urban', x: 6, y: 10, w: 2, h: 2, at: [6, 2] },
+    { sheet: 'urban', x: 3, y: 10, w: 2, h: 2, at: [6, 4] },
+  ],
+};
 
 /** Nhân vật: công nhân đội mũ bảo hộ, hai tư thế. */
 const HERO_UP = 266;
@@ -437,9 +444,9 @@ export function TapStage({ game, derived }: Props) {
             )),
           )}
 
-          {PROPS.map(([tile, x, y], n) => (
-            <Pix key={`p${n}`} i={tile} size={TILE} style={spot(x, y)} />
-          ))}
+          <span class="yard__frame">
+            <PixScene scene={PROPS} unit={TILE} />
+          </span>
 
           {/* Hai khung hình của nhân vật: đứng thẳng và cúi xuống làm. Chồng
               lên nhau, vòng lặp chỉ bật tắt độ mờ — đổi `i` mỗi khung hình thì
