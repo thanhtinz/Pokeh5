@@ -136,14 +136,24 @@ export function IntroSheet({ onClose }: { onClose: () => void }) {
 export function OfflineSheet({ report, onClose }: { report: OfflineReport; onClose: () => void }) {
   return (
     <div class="scrim scrim--centre" onClick={onClose}>
-      <div class="sheet" onClick={(event) => event.stopPropagation()}>
+      {/* `sheet--offline` không đổi gì về hình. Nó tồn tại để chỉ đúng cái bảng
+          này: `.sheet` trần cũng khớp thẻ cơ hội và bảng mốc cuộc đời, nên ảnh
+          chụp nhắm vào `.sheet` có hôm bắt trúng cái khác — và một bức ảnh sai
+          đối tượng thì tệ hơn không có ảnh, vì nó vẫn xanh. */}
+      <div class="sheet sheet--offline" onClick={(event) => event.stopPropagation()}>
         <div class="sheet__head">
           <span class="sheet__icon">
             <Art name="moon" />
           </span>
           <span class="sheet__head-text">
             <span class="sheet__title">{t('offline.title')}</span>
-            <span class="sheet__sub">{t('offline.away', { duration: duration(report.seconds) })}</span>
+            {/* Thời gian **thật**, không phải thời gian được tính tiền. Trước
+                đây hai cái là một, nên vắng hai mươi tiếng với trần tám tiếng
+                thì dòng này ghi "Vắng 8 tiếng" — sai mặt thời gian, mà lại còn
+                giấu luôn cái trần đi. */}
+            <span class="sheet__sub">
+              {t('offline.away', { duration: duration(report.awaySeconds) })}
+            </span>
           </span>
         </div>
 
@@ -151,6 +161,18 @@ export function OfflineSheet({ report, onClose }: { report: OfflineReport; onClo
         <p class="sheet__body">
           {t(report.jobsFinished > 0 ? 'offline.bodyJob' : 'offline.body')}
         </p>
+
+        {/* Chỉ nói khi thật sự bị cắt. Nói cả lúc chưa chạm trần thì nó thành
+            một dòng chữ luôn luôn ở đó, và một dòng chữ luôn luôn ở đó thì
+            không ai đọc — đúng lúc cần nó nói cũng không ai đọc. */}
+        {report.awaySeconds > report.seconds + 60 && (
+          <p class="sheet__note">
+            {t('offline.capped', {
+              paid: duration(report.seconds),
+              hours: report.capHours,
+            })}
+          </p>
+        )}
 
         <div class="sheet__actions">
           <button class="btn btn--primary" onClick={onClose}>

@@ -303,7 +303,21 @@ export type Notice =
 export type CueId = 'tap' | 'buy' | 'deny' | 'cash' | 'info' | 'card' | 'milestone';
 
 export interface OfflineReport {
+  /** Số giây **được tính tiền** — đã kẹp theo trần offline. */
   seconds: number;
+  /**
+   * Số giây **thật sự** đã vắng mặt.
+   *
+   * Tách khỏi `seconds` vì trước đây chỉ có một con số, và con số ấy là con số
+   * đã kẹp: vắng hai mươi tiếng với trần tám tiếng thì bảng báo ghi "Vắng 8
+   * tiếng". Người chơi bị nói sai mặt thời gian, và **cả cái trần biến mất** —
+   * không ai biết có trần, không ai biết mình vừa mất gì, không ai biết có một
+   * đặc quyền nới nó ra. Cảm giác "về muộn thì thiệt" là thứ giữ người chơi
+   * quay lại, mà nó chỉ tồn tại nếu có ai nói cho họ biết.
+   */
+  awaySeconds: number;
+  /** Trần offline lúc này, tính bằng giờ. */
+  capHours: number;
   earned: number;
   jobsFinished: number;
 }
@@ -1215,7 +1229,8 @@ export class Store {
     }
 
     const d = derive(this.state, now);
-    const capped = Math.min(elapsed, (d.bonuses.offlineHours + d.perks.offlineHours) * 3600);
+    const capHours = d.bonuses.offlineHours + d.perks.offlineHours;
+    const capped = Math.min(elapsed, capHours * 3600);
     const before = this.state.cash;
 
     this.earn(d.income * capped * OFFLINE_EFFICIENCY);
@@ -1240,7 +1255,13 @@ export class Store {
     this.state.nextCardAt = now + 15_000;
     this.state.boost = null;
 
-    return { seconds: capped, earned: this.state.cash - before, jobsFinished };
+    return {
+      seconds: capped,
+      awaySeconds: elapsed,
+      capHours,
+      earned: this.state.cash - before,
+      jobsFinished,
+    };
   }
 }
 

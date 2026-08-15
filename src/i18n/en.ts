@@ -85,6 +85,7 @@ export const en: Record<string, string> = {
   'offline.body': 'The businesses kept running at a reduced rate.',
   'offline.bodyJob': 'The businesses kept running at a reduced rate, and your shift finished.',
   'offline.back': 'Back to work',
+  'offline.capped': 'Only the first {paid} counted — your offline cap is {hours}h. Level up "Earns while you sleep" to earn for longer.',
 
   'notice.automated': '{name} runs itself now',
   'notice.sold': 'Manager sold {ticker}',

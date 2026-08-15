@@ -298,7 +298,9 @@ for (const stage of ['broke', 'rich']) {
   await page.goto(base, { waitUntil: 'networkidle' });
   await page.waitForSelector('.shell', { timeout: 15_000 });
 
-  // Dismiss the offline report if the seeded save triggered one.
+  // Dismiss the offline report if the seeded save triggered one. Ảnh của bảng
+  // ấy có phiên riêng ở cuối file, vì muốn nó chạm trần thì phải cho ván vắng
+  // lâu — mà vắng lâu thì hỏng mọi cảnh chụp khác.
   const sheet = page.locator('.sheet .btn--primary');
   if (await sheet.count()) await sheet.first().click();
 
@@ -469,6 +471,48 @@ for (const stage of ['broke', 'rich']) {
   await page.waitForSelector('.sheet', { timeout: 15_000 });
   await page.waitForTimeout(500);
   await page.screenshot({ path: `${OUT}/card.png` });
+  await context.close();
+}
+
+/*
+ * Bảng báo offline lúc **chạm trần**.
+ *
+ * Phiên riêng, không ghép vào vòng chụp theo tab: bảng này chỉ hiện đúng một
+ * lần ngay lúc nạp ván, và muốn nó chạm trần thì phải cho ván vắng lâu hơn
+ * trần — mà một ván vắng hai tư tiếng thì `catchUp` xoá mất thẻ cơ hội và dọn
+ * sạch buff, tức là làm hỏng mọi cảnh chụp khác dẫn xuất từ cùng cái ván ấy.
+ *
+ * Đây là chỗ duy nhất người chơi được biết mình vừa mất phần còn lại, nên nó
+ * phải có ảnh — không có ảnh thì lần sau ai đó sửa hỏng cũng không ai thấy.
+ */
+{
+  // Tài khoản riêng, đăng ký ngay tại đây.
+  //
+  // Dùng lại `players.rich` thì không được: mấy phiên trước đã đẩy bản lưu của
+  // nó lên máy chủ với `lastSeenAt` mới tinh, và lúc nạp thì bản trên máy chủ
+  // thắng bản nhét vào localStorage — khoảng vắng hai tư tiếng bốc hơi, bảng
+  // báo không hiện, và cái chờ `.sheet--offline` treo cho tới lúc hết giờ.
+  const sleeper = await fetch(`${API}/register`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ name: 'ngu_quen', password: PASSWORD }),
+  }).then((response) => response.json());
+
+  const now = Date.now();
+  const save = richSave(now, sleeper.user.id);
+  save.lastSeenAt = now - 24 * 3600 * 1000;
+  save.card = null;
+
+  const context = await browser.newContext({ viewport: VIEWPORT, deviceScaleFactor: 2 });
+  const page = await context.newPage();
+  await signedIn(page, save, sleeper);
+
+  await page.goto(base, { waitUntil: 'networkidle' });
+  // Nhắm đúng `.sheet--offline`: `.sheet` trần cũng khớp thẻ cơ hội, và thẻ
+  // hiện ra ngay cạnh nên có lần ảnh chụp bắt trúng cái thẻ thay vì bảng báo.
+  await page.waitForSelector('.sheet--offline', { timeout: 15_000 });
+  await page.waitForTimeout(400);
+  await page.screenshot({ path: `${OUT}/offline.png` });
   await context.close();
 }
 

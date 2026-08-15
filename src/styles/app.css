@@ -931,6 +931,19 @@ button.row__icon:not(:disabled):active {
   margin-bottom: 16px;
 }
 
+/* Dòng "chỉ tính được bấy nhiêu": một lời nhắc mất mát, nên nó phải đọc được
+ * mà không được to bằng con số tiền vừa nhận — cái chính vẫn là phần thưởng. */
+.sheet__note {
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--ink-dim);
+  margin: -6px 0 16px;
+  padding: 9px 11px;
+  border-radius: 10px;
+  background: hsl(var(--hue) 22% 100% / 0.05);
+  box-shadow: inset 0 0 0 1px hsl(var(--hue) 22% 100% / 0.06);
+}
+
 .sheet__prize {
   display: block;
   margin: 2px 0 14px;

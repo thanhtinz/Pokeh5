@@ -122,6 +122,7 @@ export const vi: Record<string, string> = {
   'offline.body': 'Cửa hàng vẫn chạy, có điều ì ạch hơn.',
   'offline.bodyJob': 'Cửa hàng vẫn chạy, ì ạch hơn tí. Ca làm cũng xong rồi.',
   'offline.back': 'Làm tiếp',
+  'offline.capped': 'Chỉ tính được {paid} đầu — trần offline của bạn là {hours} tiếng. Nâng "Ngủ vẫn ăn" để ăn dài hơn.',
 
   // -------------------------------------------------------------- thông báo --
   'notice.automated': 'Đã thuê quản lý cho {name}',
