@@ -98,6 +98,8 @@ export const en: Record<string, string> = {
   'advice.grindDone': 'Keep grinding — the money will not come on its own',
   'advice.label': 'Do this',
 
+  'solo.noBoard': 'The solo build has no leaderboard — that needs the account server. Your run lives on this device.',
+
   'notice.automated': '{name} runs itself now',
   'notice.sold': 'Manager sold {ticker}',
   'notice.gambleWin': 'It paid off',

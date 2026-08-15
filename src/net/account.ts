@@ -22,6 +22,7 @@ import { api, type AccountUser, type Board, type BoardMode, type Score } from '.
 import { saveNow } from '../game/save';
 import type { PlayerState } from '../game/state';
 import { store } from '../game/store';
+import { SOLO, SOLO_USER } from './solo';
 
 const TOKEN_KEY = 'broketoboss.token';
 const USER_KEY = 'broketoboss.user';
@@ -53,6 +54,9 @@ export class Account {
   private lastPush = 0;
 
   get signedIn(): boolean {
+    // Bản một mình không có phiên nào để kiểm — vào thẳng. Xem `solo.ts` về
+    // chuyện vì sao đây là cờ lúc dựng chứ không phải một cái nút trong game.
+    if (SOLO) return true;
     return this.token !== null && this.user !== null;
   }
 
@@ -72,6 +76,13 @@ export class Account {
    * **vẫn tính là đã đăng nhập** với bản đã nhớ trong máy — chỉ 401 mới đá ra.
    */
   async boot(): Promise<void> {
+    if (SOLO) {
+      this.user = SOLO_USER;
+      this.checked = true;
+      this.emit();
+      return;
+    }
+
     if (this.token === null) {
       this.checked = true;
       this.emit();
@@ -272,6 +283,16 @@ export class Account {
   }
 
   async refreshBoard(mode: BoardMode = this.boardMode): Promise<void> {
+    // Bản một mình không có máy chủ nào để hỏi. Không chặn ở đây thì mỗi lần
+    // mở tab Bảng là một cú `fetch` vào hư không, và người chơi nhận được
+    // "mất mạng" — sai nguyên nhân, mà lại còn gợi ý là thử lại thì được.
+    if (SOLO) {
+      this.board = null;
+      this.error = 'solo.noBoard';
+      this.emit();
+      return;
+    }
+
     // Đổi bảng thì xoá bảng cũ đi trước khi hỏi: để nguyên thì trong lúc chờ
     // mạng, tiêu đề nói "tuần này" mà mấy dòng bên dưới vẫn là bảng mọi thời.
     if (mode !== this.boardMode) {

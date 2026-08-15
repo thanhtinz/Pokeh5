@@ -7,6 +7,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build && node scripts/sw.mjs",
+    "build:solo": "VITE_SOLO=1 npm run build",
+    "pages:check": "node scripts/pages.mjs",
     "preview": "vite preview --port 4173",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",

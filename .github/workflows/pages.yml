@@ -1,0 +1,83 @@
+# Dựng bản chơi một mình rồi đẩy lên GitHub Pages.
+#
+# ## Vì sao là bản một mình
+#
+# Game bình thường cần một máy chủ Node kèm kho SQLite cho tài khoản, bản lưu
+# trên mây và bảng xếp hạng. Pages chỉ trả file tĩnh — không chạy được cái nào
+# trong số đó. Nên bản đẩy lên đây dựng với `VITE_SOLO=1`: vào thẳng không cần
+# đăng nhập, ván nằm trong máy người chơi, phần mạng tắt hẳn. Chi tiết ở
+# `src/net/solo.ts`.
+#
+# ## Vì sao không cần đặt `base`
+#
+# `vite.config.ts` đã để `base: './'` từ đầu, vì game còn chạy trong WebView
+# của Capacitor. Đường dẫn tương đối thì chạy được ở cả gốc tên miền lẫn dưới
+# `/<tên-repo>/`, nên bản Pages không cần một cấu hình riêng nào.
+#
+# ## Kiểm trước rồi mới đẩy
+#
+# Một bản hỏng đẩy lên Pages là một bản hỏng người lạ nhìn thấy. Nên job này
+# chạy typecheck và toàn bộ test trước; hỏng chỗ nào thì không có gì được đẩy.
+name: Pages
+
+on:
+  push:
+    branches: [main]
+  # Đẩy lại bằng tay được, để lúc bật Pages lần đầu không phải chờ commit mới.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Đẩy chồng lên nhau thì bản cũ thắng bản mới; huỷ bản đang chạy dở là đúng.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - run: npm ci
+
+      - name: Kiểm kiểu
+        run: npm run typecheck
+
+      - name: Chạy test
+        run: npm test
+
+      # Máy runner không có sẵn trình duyệt nào, mà bước kiểm dưới đây mở thật.
+      # Chỉ Chromium, không `--with-deps`: ảnh `ubuntu-latest` đã đủ thư viện,
+      # còn `--with-deps` gọi apt và thêm chừng một phút cho mỗi lần dựng.
+      - name: Cài Chromium cho Playwright
+        run: npx playwright install chromium
+
+      # Dựng bản một mình, bày dưới thư mục con rồi mở bằng trình duyệt thật.
+      # Typecheck với test kiểm mã nguồn; cái này kiểm **bản sẽ đẩy đi** — hai
+      # kiểu hỏng riêng của nó (còn cổng đăng nhập, 404 vì nằm dưới thư mục
+      # con) đều không làm mã nguồn đỏ. Nó dựng luôn `dist/` cho bước sau.
+      - name: Dựng và thử bản Pages
+        run: npm run pages:check
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@v4

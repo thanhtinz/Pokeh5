@@ -135,6 +135,8 @@ export const vi: Record<string, string> = {
   'advice.grindDone': 'Cày thêm đi, tiền tự nó không tới',
   'advice.label': 'Nên làm',
 
+  'solo.noBoard': 'Bản chơi một mình không có bảng xếp hạng — nó cần máy chủ tài khoản. Ván của bạn nằm trong máy này.',
+
   // -------------------------------------------------------------- thông báo --
   'notice.automated': 'Đã thuê quản lý cho {name}',
   'notice.sold': 'Quản lý vừa bán {ticker}',

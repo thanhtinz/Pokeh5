@@ -4,6 +4,7 @@ import { fixed, money } from '../../game/money';
 import type { Account } from '../../net/account';
 import type { BoardMode, BoardRow } from '../../net/api';
 import { t } from '../../i18n';
+import { SOLO } from '../../net/solo';
 import { Icon } from '../Icon';
 
 interface Props {
@@ -200,7 +201,10 @@ function Table({ account }: { account: Account }) {
 
       {board === null ? (
         <span class="row__meta" style={{ whiteSpace: 'normal' }}>
-          {t('board.empty')}
+          {/* Bản một mình không có bảng, và lý do phải nói thẳng: "chưa có ai
+              trên bảng" là câu sai — không có bảng nào cả, và thử lại bao nhiêu
+              lần cũng thế. */}
+          {SOLO ? t('solo.noBoard') : t('board.empty')}
         </span>
       ) : (
         <>

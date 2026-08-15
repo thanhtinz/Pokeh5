@@ -19,8 +19,11 @@ npm install
 npm run dev        # http://localhost:5173
 npm run server     # the account API on :8787 (required — the game is behind a sign-in)
 npm run dev:all    # both at once
-npm test           # 110 tests over the rule layer, the dictionaries and the server
+npm test           # 181 tests over the rule layer, the dictionaries and the server
+npm run audit      # click through every screen in a real browser and report anything that shouts
 npm run build      # typecheck, then a production bundle in dist/
+npm run build:solo # the same bundle with no account layer — see "Two builds" below
+npm run pages:check # build the solo bundle, serve it under a subpath, and play it
 npm run shot       # screenshots every screen at both ends of the palette
 npm run art        # every drawn asset and sprite on one sheet, large enough to judge
 npm run sprite     # re-bake the business/job sprite sheet from scripts/icon-map.json
@@ -35,9 +38,37 @@ npx cap add android
 npm run cap:android
 ```
 
-`npm run shot` needs a Chromium and starts its own throwaway API on :8788, since
-every screen now sits behind a session. If the environment pins a browser, point
-at it: `CHROMIUM_PATH=/opt/pw-browsers/chromium npm run shot`.
+`npm run shot`, `npm run audit` and `npm run pages:check` all need a Chromium.
+The first two start their own throwaway API, since every screen sits behind a
+session. If the environment pins a browser, point at it:
+`CHROMIUM_PATH=/opt/pw-browsers/chromium npm run shot`.
+
+## Two builds from one source
+
+The game normally sits behind a sign-in, and that buys two things: a save that
+belongs to a person rather than to a handset, and a leaderboard where each name
+is somebody. Both need a Node server and a SQLite file.
+
+A static host has neither. So `VITE_SOLO=1` produces a second build that walks
+straight in, keeps the run in `localStorage`, and turns the network layer off —
+the Board tab says so rather than pretending the server is merely down. That is
+the build [GitHub Pages](https://thanhtinz.github.io/Pokeh5/) serves, pushed by
+`.github/workflows/pages.yml` on every green push to `main`.
+
+The flag is set at build time, not offered as a button in the game. A "play
+offline" link next to the password box would quietly rewrite the rules of the
+hosted build — anyone could then skip the sign-in, and the gate would have no
+reason to exist. Deciding it per build keeps each one honest about what it is.
+
+Two failure modes belong to the Pages build alone, and neither turns the source
+red: the sign-in gate surviving into it, and 404s from being served under
+`/<repo>/` instead of at the root. `npm run pages:check` builds it, serves it
+under a subdirectory, opens it in a real browser and fails on either — which is
+why CI runs that instead of a plain `npm run build`.
+
+**Turning it on:** Pages must be enabled once by hand, in the repository's
+Settings → Pages, with the source set to *GitHub Actions*. The workflow cannot
+do that for you.
 
 ## The one idea
 
