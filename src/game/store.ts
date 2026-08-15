@@ -31,12 +31,11 @@ import {
   businessById,
   cyclePayout,
   incomePerSecond,
-  unitCost,
 } from './businesses';
 import { t as tr } from '../i18n';
 import { dailyReward, dailyState, dayIndex, type DailyState } from './daily';
 import { cooled, heatMultiplier, heated } from './combo';
-import { CARD_LIFETIME, drawCard, jobById } from './jobs';
+import { CARD_INTERVAL, CARD_LIFETIME, drawCard, jobById } from './jobs';
 import { bonusesFrom, newlyReached, type LifeBonuses, type LifeMilestone } from './life';
 import { effectsFrom, perkById, perkCost, type PerkEffects } from './perks';
 import { pendingReputation, reputationMultiplier } from './prestige';
@@ -563,7 +562,10 @@ export class Store {
   }
 
   private scheduleCard(now: number, d: Derived): void {
-    const interval = (90 / (d.bonuses.cardRate * d.perks.cardRate)) * 1000;
+    // `CARD_INTERVAL`, không phải một con số 90 viết cứng ở đây: hằng số ấy
+    // nằm cạnh `CARD_LIFETIME` trong `jobs.ts` và trông như thứ chỉnh được,
+    // nhưng chỉnh nó thì chẳng có gì nhúc nhích — nhịp thật nằm ở dòng này.
+    const interval = (CARD_INTERVAL / (d.bonuses.cardRate * d.perks.cardRate)) * 1000;
     this.state.nextCardAt = now + interval;
   }
 
@@ -1243,9 +1245,3 @@ export class Store {
 }
 
 export const store = new Store();
-
-/** Cost of the next unit, exported for the UI so it does not reach into rules. */
-export function nextUnitCost(id: string, owned: number): number {
-  const def = businessById(id);
-  return def ? unitCost(def, owned) : 0;
-}

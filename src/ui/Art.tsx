@@ -921,34 +921,3 @@ export function Art({ name, class: className }: { name: string; class?: string }
     </svg>
   );
 }
-
-/**
- * The refinery's ore, drawn large for the tap target.
- *
- * The one place in the game that earns a real illustration rather than an icon:
- * it is the first thing a player touches and the only thing on the opening
- * screen. Facets are flat fills at different opacities of the accent, so the
- * crystal recolours with the palette like everything else, and the glint
- * sweeps on a slow loop so an untouched screen is never completely still.
- */
-export function OreArt() {
-  return (
-    <svg class="ore" viewBox="0 0 64 64" aria-hidden="true">
-      {/* Crown: three facets across the top, the middle one catching the light. */}
-      <path class="ore__facet ore__facet--dim" d="M12 20 20 8h6v12z" />
-      <path class="ore__facet ore__facet--lit" d="M20 8h24l-6 12H26z" />
-      <path class="ore__facet ore__facet--mid" d="M44 8l8 12h-14z" />
-
-      {/* Pavilion: three facets falling to a point. */}
-      <path class="ore__facet ore__facet--dark" d="M12 20h14L32 56z" />
-      <path class="ore__facet ore__facet--mid" d="M26 20h12L32 56z" />
-      <path class="ore__facet ore__facet--dim" d="M38 20h14L32 56z" />
-
-      <path
-        class="ore__edge"
-        d="M20 8h24l8 12L32 56 12 20zM12 20h40M26 20 20 8M38 20 44 8M26 20 32 56M38 20 32 56"
-      />
-      <path class="ore__glint" d="M24.5 10.5h5.5l-3 7h-5.5z" />
-    </svg>
-  );
-}

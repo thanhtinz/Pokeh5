@@ -371,60 +371,6 @@
   pointer-events: none;
 }
 
-/* The ore crystal. Flat facets in one colour at three opacities — enough to
- * read as lit from above without needing a gradient per face. */
-.ore {
-  width: 54%;
-  height: auto;
-  color: var(--accent-bright);
-  filter: drop-shadow(0 4px 14px hsl(var(--hue) 60% 4% / 0.75));
-}
-
-.ore__facet {
-  fill: currentColor;
-  stroke: none;
-}
-
-.ore__facet--lit {
-  opacity: 0.95;
-}
-
-.ore__facet--mid {
-  opacity: 0.62;
-}
-
-.ore__facet--dim {
-  opacity: 0.44;
-}
-
-.ore__facet--dark {
-  opacity: 0.28;
-}
-
-.ore__edge {
-  fill: none;
-  stroke: hsl(var(--hue) 60% 8% / 0.55);
-  stroke-width: 1.4;
-  stroke-linejoin: round;
-}
-
-.ore__glint {
-  fill: hsl(var(--hue) 30% 99%);
-  opacity: 0.7;
-  animation: glint 3.6s ease-in-out infinite;
-}
-
-@keyframes glint {
-  0%,
-  70%,
-  100% {
-    opacity: 0.25;
-  }
-  35% {
-    opacity: 0.95;
-  }
-}
-
 .refinery__ore {
   width: 100%;
   display: grid;

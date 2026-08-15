@@ -29,7 +29,6 @@ function read(): Locale {
 }
 
 let current: Locale = read();
-const listeners = new Set<() => void>();
 
 export function locale(): Locale {
   return current;
@@ -44,12 +43,6 @@ export function setLocale(next: Locale): void {
   } catch {
     // Không lưu được thì vẫn đổi cho phiên này.
   }
-  for (const listener of listeners) listener();
-}
-
-export function onLocaleChange(listener: () => void): () => void {
-  listeners.add(listener);
-  return () => listeners.delete(listener);
 }
 
 /**

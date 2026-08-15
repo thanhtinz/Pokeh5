@@ -18,7 +18,8 @@
     "art": "node scripts/art-sheet.mjs",
     "sprite": "node scripts/sprite.mjs",
     "icons": "node scripts/icons.mjs",
-    "backup": "node scripts/backup.mjs"
+    "backup": "node scripts/backup.mjs",
+    "audit": "node scripts/audit.mjs"
   },
   "dependencies": {
     "@capacitor/core": "^7.4.3",
