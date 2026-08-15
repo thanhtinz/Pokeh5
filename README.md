@@ -532,6 +532,29 @@ into the fair the moment it opens, clearing all four steps before the player
 touches anything. Like the daily-job snapshot, it survives prestige, because the
 counters it measures do.
 
+### And one that just tells you where you are
+
+`src/game/ledger.ts` adds no mechanic at all. It draws a line.
+
+This game has two kinds of number and until now they were mixed together
+everywhere. `peakNetWorth` resets on prestige; `bestNetWorth` never does. Units
+held vanish when you sell the empire; units *ever bought* accumulate forever and
+are what the achievement ladders actually measure. A player four runs in, looking
+at 144ngt, has nothing on screen telling them whether that figure belongs to this
+climb or to the whole journey — and those are two different stories.
+
+So the More screen ends with **Sổ sách**: two columns, "this run" on the left and
+"all time" on the right, side by side on every width because the point is the
+line between them. What belongs in which column is a rule, not markup, which is
+why it lives in the rule layer — put `bestNetWorth` in the left column and it
+simply never falls after a prestige, with nothing red to say so.
+`tests/ledger.test.ts` plays a run, prestiges, and asserts that every left-column
+figure dropped and no right-column figure did.
+
+There is deliberately no "net worth right now" row. Buying moves value sideways,
+so current worth is almost always *equal* to the run's peak, and a table with two
+rows that copy each other is a table people stop reading closely.
+
 ### And one that gives the number a shape
 
 `src/game/rivals.ts`. Everything above is a number going up, and a number going

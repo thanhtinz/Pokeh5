@@ -367,6 +367,14 @@ for (const stage of ['broke', 'rich']) {
   if (stage === 'rich') {
     await page.locator('.tab').nth(TABS.indexOf('more')).click();
     await page.waitForTimeout(400);
+
+    // Sổ sách nằm giữa: dưới đáy ảnh chụp theo tab, trên đầu ảnh chụp cuộn hết
+    // cỡ. Cuộn cho nó nằm gọn trong khung rồi chụp riêng — hai cột số mà chỉ
+    // thấy được một nửa thì không kiểm được cái ranh giới giữa chúng.
+    await page.locator('.books').scrollIntoViewIfNeeded();
+    await page.waitForTimeout(400);
+    await page.screenshot({ path: `${OUT}/books.png` });
+
     await page.locator('.screen').evaluate((el) => el.scrollTo(0, el.scrollHeight));
     await page.waitForTimeout(500);
     await page.screenshot({ path: `${OUT}/settings.png` });

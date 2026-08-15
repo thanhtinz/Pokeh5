@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
 import { BUSINESSES, DISTRICTS } from '../src/game/businesses';
+import { FAIRS } from '../src/game/fair';
+import { ledgerOf } from '../src/game/ledger';
+import { createNewSave } from '../src/game/state';
 import { JOBS } from '../src/game/jobs';
 import { MILESTONES } from '../src/game/life';
 import { STOCKS } from '../src/game/stocks';
@@ -41,12 +44,30 @@ describe('every id the game can show', () => {
       ...MILESTONES.flatMap((m) => [`life.${m.id}`, `life.${m.id}.line`]),
       ...STOCKS.map((stock) => `stock.${stock.id}`),
       ...new Set(STOCKS.map((stock) => `sector.${stock.sector}`)),
+      ...FAIRS.flatMap((fair) => [`fair.${fair.id}`, `fair.buff.${fair.id}`, `fair.goal.${fair.id}`]),
+      ...ledgerLines(),
     ];
 
     expect(keys.filter((key) => !(key in vi))).toEqual([]);
     expect(keys.filter((key) => !(key in en))).toEqual([]);
   });
 });
+
+/**
+ * Dòng sổ sách lấy từ chính hàm dựng sổ, không chép tay lại.
+ *
+ * Thêm một dòng vào `ledger.ts` mà quên chữ cho nó thì màn hình hiện ra đúng
+ * cái id — `ledger.trades` nằm giữa hai con số. Chép tay danh sách ở đây thì
+ * bài kiểm chỉ canh được những dòng đã có hôm nay.
+ */
+function ledgerLines(): string[] {
+  const books = ledgerOf(createNewSave(1), {
+    income: 0,
+    pendingReputation: 0,
+    now: Date.now(),
+  });
+  return [...books.run, ...books.life].map((line) => `ledger.${line.id}`);
+}
 
 describe('lookup', () => {
   it('fills placeholders and leaves unknown ones alone', () => {

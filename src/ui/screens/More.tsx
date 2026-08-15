@@ -3,7 +3,8 @@ import { useState } from 'preact/hooks';
 import { sound } from '../../audio/sound';
 import { ACHIEVEMENTS, nextInLadder } from '../../game/achievements';
 import { CYCLE, REWARD_SECONDS } from '../../game/daily';
-import { clock, count, money } from '../../game/money';
+import { ledgerOf, type LedgerLine } from '../../game/ledger';
+import { clock, count, money, rate } from '../../game/money';
 import { PERKS, describePerk, perkCost } from '../../game/perks';
 import { QUEST_BONUS_REPUTATION } from '../../game/quests';
 import { perkLevel, type PlayerState } from '../../game/state';
@@ -233,6 +234,8 @@ export function More({ game, state, derived }: Props) {
         )}
       </section>
 
+      <Books state={state} derived={derived} />
+
       {/* Ngay trên công tắc tiếng: cả hai đều là "chuyện của cái máy này" chứ
           không phải chuyện trong game, nên chúng đứng cùng nhau ở cuối màn. */}
       <Transfer game={game} ownerId={state.ownerId} />
@@ -317,6 +320,73 @@ function Fair({ game, derived }: { game: Store; derived: Derived }) {
       </span>
     </section>
   );
+}
+
+/**
+ * Sổ sách: hai cột, và cái ranh giới giữa chúng là nội dung.
+ *
+ * Cột trái về mốc đầu mỗi lần làm lại, cột phải thì không bao giờ tụt. Người
+ * chơi ở lượt thứ tư nhìn một con số mà không biết nó thuộc loại nào thì con số
+ * ấy không nói được gì; đặt cạnh nhau thì mỗi bên tự giải thích bên kia.
+ *
+ * Việc chia dòng nào về cột nào nằm ở `game/ledger.ts` — đó là một luật, và là
+ * luật sai lặng lẽ nếu xếp nhầm. Chỗ này chỉ dịch id ra chữ và số ra định dạng.
+ */
+function Books({ state, derived }: { state: PlayerState; derived: Derived }) {
+  const books = ledgerOf(state, {
+    income: derived.income,
+    pendingReputation: derived.pendingReputation,
+    // Không lấy `now` từ trên xuống: thứ duy nhất cần nó là số ngày đã mở sổ,
+    // và một con số đo bằng ngày thì không quan tâm màn hình vẽ lại lúc nào.
+    now: Date.now(),
+  });
+
+  return (
+    <section class="panel panel--inset">
+      <div class="prestige__head">
+        <span class="section__title" style={{ margin: 0 }}>
+          {t('ledger.title')}
+        </span>
+      </div>
+
+      <div class="books">
+        <Column title={t('ledger.run')} lines={books.run} />
+        <Column title={t('ledger.life')} lines={books.life} />
+      </div>
+
+      <span class="row__meta" style={{ whiteSpace: 'normal' }}>
+        {t('ledger.note')}
+      </span>
+    </section>
+  );
+}
+
+function Column({ title, lines }: { title: string; lines: LedgerLine[] }) {
+  return (
+    <div class="books__col">
+      <span class="books__head">{title}</span>
+      {lines.map((line) => (
+        <span key={line.id} class="stat">
+          <span class="stat__label">{t(`ledger.${line.id}`)}</span>
+          <span class="stat__value num">{figure(line)}</span>
+        </span>
+      ))}
+    </div>
+  );
+}
+
+/** Một dòng sổ đọc ra chữ. Kiểu nằm trong dữ liệu, nên chỗ này không phải đoán. */
+function figure(line: LedgerLine): string {
+  switch (line.kind) {
+    case 'money':
+      return money(line.value);
+    case 'rate':
+      return rate(line.value);
+    case 'days':
+      return t('ledger.dayCount', { days: count(Math.floor(line.value)) });
+    default:
+      return count(line.value);
+  }
 }
 
 /**
