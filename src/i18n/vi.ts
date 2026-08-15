@@ -124,6 +124,17 @@ export const vi: Record<string, string> = {
   'offline.back': 'Làm tiếp',
   'offline.capped': 'Chỉ tính được {paid} đầu — trần offline của bạn là {hours} tiếng. Nâng "Ngủ vẫn ăn" để ăn dài hơn.',
 
+  'advice.milestone': 'Có mốc cuộc đời chuộc được rồi',
+  'advice.daily': 'Điểm danh hôm nay đang chờ',
+  'advice.quest': 'Nhiệm vụ xong rồi, vào lấy thưởng',
+  'advice.prestige': 'Làm lại được rồi — uy tín đang chờ',
+  'advice.manager': 'Thuê quản lý cho {name}',
+  'advice.business': 'Mở {name}',
+  'advice.upgrade': 'Nâng cấp {name}',
+  'advice.grind': 'Cày thêm {amount} nữa là mở được {name}',
+  'advice.grindDone': 'Cày thêm đi, tiền tự nó không tới',
+  'advice.label': 'Nên làm',
+
   // -------------------------------------------------------------- thông báo --
   'notice.automated': 'Đã thuê quản lý cho {name}',
   'notice.sold': 'Quản lý vừa bán {ticker}',

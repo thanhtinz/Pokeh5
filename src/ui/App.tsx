@@ -10,6 +10,8 @@ import { Icon } from './Icon';
 import { CityScene } from './Scene';
 import { derive } from '../game/store';
 import { Hud } from './Hud';
+import { NextStep } from './NextStep';
+import { adviceShortfall, nextStep } from '../game/advice';
 import { CardSheet, IntroSheet, MilestoneSheet, OfflineSheet } from './Overlays';
 import { Board } from './screens/Board';
 import { Gate } from './screens/Gate';
@@ -114,12 +116,30 @@ export function App() {
     more: derived.daily.available || derived.quests.claimable,
   };
 
+  const advice = nextStep(state, {
+    netWorth: derived.netWorth,
+    spendable: derived.spendable,
+    pendingReputation: derived.pendingReputation,
+    reputationTotal: state.reputationTotal,
+    dailyAvailable: derived.daily.available,
+    questClaimable: derived.quests.claimable,
+  });
+
   return (
     <div class="shell">
       {/* Behind everything, and drawn by the same value the palette runs on. */}
       <CityScene />
 
       <Hud state={state} derived={derived} now={now} />
+
+      {/* Nằm giữa phần đầu và phần thân, tức là trên mọi màn. Đây là chỗ duy
+          nhất trả lời được câu "giờ bấm cái gì" cho một người vừa mở app sau
+          một ngày vắng — sáu tab kia màn nào cũng chỉ nói về phần của mình. */}
+      <NextStep
+        advice={advice}
+        shortfall={adviceShortfall(advice, state, derived.spendable)}
+        onGo={() => setTab(advice.tab)}
+      />
 
       <main class="screen scroll">
         {tab === 'grind' && <Grind game={game} state={state} derived={derived} now={now} />}

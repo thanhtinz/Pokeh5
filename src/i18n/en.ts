@@ -87,6 +87,17 @@ export const en: Record<string, string> = {
   'offline.back': 'Back to work',
   'offline.capped': 'Only the first {paid} counted — your offline cap is {hours}h. Level up "Earns while you sleep" to earn for longer.',
 
+  'advice.milestone': 'A life milestone is ready to buy back',
+  'advice.daily': 'Your daily check-in is waiting',
+  'advice.quest': 'A quest is done — go collect',
+  'advice.prestige': 'Time to start over — standing is waiting',
+  'advice.manager': 'Hire a manager for {name}',
+  'advice.business': 'Open {name}',
+  'advice.upgrade': 'Upgrade {name}',
+  'advice.grind': '{amount} more and {name} is yours',
+  'advice.grindDone': 'Keep grinding — the money will not come on its own',
+  'advice.label': 'Do this',
+
   'notice.automated': '{name} runs itself now',
   'notice.sold': 'Manager sold {ticker}',
   'notice.gambleWin': 'It paid off',

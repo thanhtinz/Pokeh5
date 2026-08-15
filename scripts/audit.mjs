@@ -209,6 +209,17 @@ if (!(await atGate())) {
 await page.waitForTimeout(600);
 
 const found = [...new Set(problems)];
+/*
+ * Một tấm ảnh ở cuối lượt.
+ *
+ * Lượt soi chỉ nói "có kêu hay không". Nhưng thứ hay hỏng nhất ở lớp giao diện
+ * lại là thứ *không kêu*: một cái hình cao bằng không, một dòng chữ tràn ra
+ * ngoài khung, một khoảng trống ở chỗ đáng ra phải có gì đó. Ảnh này là chỗ
+ * duy nhất bắt được chúng — và nó chụp *sau* khi đã bấm qua tất cả, nên trạng
+ * thái trong ảnh không phải trạng thái vừa mở app.
+ */
+await page.screenshot({ path: 'shots/audit.png' });
+
 console.log(found.length ? found.join('\n') : 'Đi hết một vòng, không có gì kêu.');
 
 await browser.close();
