@@ -4,7 +4,7 @@
  * ## Vì sao cần cái này
  *
  * Màn Cày là màn hình người chơi nhìn lâu nhất, và cho tới đây nó **không hề
- * đổi**: một người có mười một nghìn tỷ vẫn đứng cuốc trong đúng cái bãi rác
+ * đổi**: một người có mười một nghìn tỷ vẫn ngồi nhìn đúng cái bãi rác
  * có mấy thùng rác và một chiếc xe hỏng như lúc còn nợ một tỷ. Cả trò chơi tên
  * là "từ trắng tay thành ông chủ", mà chỗ duy nhất người chơi *ở* thì không
  * chứng minh câu đó lấy một lần.

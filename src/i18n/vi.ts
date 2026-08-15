@@ -34,18 +34,34 @@ export const vi: Record<string, string> = {
   'tab.market': 'Sàn',
   'tab.life': 'Cuộc đời',
 
-  // -------------------------------------------------------------- màn Cày --
+  /*
+   * ---------------------------------------------------------------- màn Cày --
+   *
+   * Vòng chạm ở đây từng mượn hình ảnh **đào mỏ**: quặng, cuốc, xưởng luyện.
+   * Không có cái mỏ nào trong trò này. Người chơi đang phát tờ rơi, rửa bát,
+   * bốc vác, trực đêm — bấm "Làm" xong mà màn hình vẫn bảo đi nâng cấp cuốc
+   * thì hai nửa của cùng một màn hình nói hai câu chuyện khác nhau.
+   *
+   * Nay là **công**: đơn vị việc đã làm mà chưa lấy được tiền. Tay nghề quyết
+   * mỗi lần chạm ra bao nhiêu công; giá công quyết mỗi công đổi ra bao nhiêu
+   * tiền. Cả hai đúng với cả năm cái việc, và đúng cả lúc không làm việc nào.
+   *
+   * Không đổi nhãn theo từng nghề — nghe thì hợp lý, nhưng số công là **của
+   * chung cả ván**, còn cái nghề thì chỉ kéo vài chục giây. Đang rửa bát mà
+   * đồng hồ ghi "1,4k bát" trong khi chỗ ấy phần lớn kiếm từ hôm đi phát tờ
+   * rơi thì đó là một con số nói dối.
+   */
   'grind.heatMax': 'NÓNG MÁY!',
   'grind.perTap': 'mỗi chạm',
-  'grind.mine': 'Đào quặng',
-  'grind.ore': 'Quặng',
-  'grind.refining': 'Luyện {rate} quặng/s',
-  'grind.each': '{value}/quặng',
-  'grind.pickaxe': 'Nâng cấp cuốc',
-  'grind.pickaxeDetail': 'Cấp {level} · {ore} quặng/chạm',
-  'grind.refinery': 'Nâng cấp xưởng',
-  'grind.refineryDetail': 'Cấp {level} · {value}/quặng',
-  'grind.oreSpark': '+{amount} quặng',
+  'grind.mine': 'Làm việc',
+  'grind.ore': 'Công',
+  'grind.refining': 'Chốt {rate} công/s',
+  'grind.each': '{value}/công',
+  'grind.pickaxe': 'Nâng tay nghề',
+  'grind.pickaxeDetail': 'Cấp {level} · {ore} công/chạm',
+  'grind.refinery': 'Nâng giá công',
+  'grind.refineryDetail': 'Cấp {level} · {value}/công',
+  'grind.oreSpark': '+{amount} công',
   'grind.work': 'Đi làm',
   'grind.onShift': 'Đang làm',
   'grind.pickShift': 'Chọn việc',
@@ -96,7 +112,7 @@ export const vi: Record<string, string> = {
   'card.pass': 'Bỏ qua',
   'card.take': 'Lấy',
   'card.boost': '×{multiplier} trong {seconds}s',
-  'card.oreGift': 'Thêm {amount} lượt quặng',
+  'card.oreGift': 'Thêm {amount} lượt công',
   'card.gamble': 'Ăn {amount} hoặc mất trắng',
 
   'milestone.keepGoing': 'Đi tiếp',
@@ -113,7 +129,7 @@ export const vi: Record<string, string> = {
   'notice.gambleWin': 'Ăn rồi',
   'notice.gambleLose': 'Trượt rồi',
   'notice.boost': '{title}: ×{multiplier} trong {seconds}s',
-  'notice.ore': '{title}: quặng đầy ắp xưởng',
+  'notice.ore': '{title}: công dồn đầy, chốt không kịp',
 
   // ----------------------------------------------------------- phần thưởng --
   'bonus.tap': 'Mỗi chạm ×{multiplier}',
@@ -154,7 +170,7 @@ export const vi: Record<string, string> = {
   'perk.offline': 'Ngủ vẫn ăn',
   'perk.offline.desc': 'Ăn tiền offline lâu hơn',
   'perk.tap': 'Tay khoẻ',
-  'perk.tap.desc': 'Mỗi lần chạm ra nhiều quặng hơn',
+  'perk.tap.desc': 'Mỗi lần chạm ra nhiều công hơn',
   'perk.speed': 'Chạy nhanh',
   'perk.speed.desc': 'Mọi cơ sở quay vòng nhanh hơn',
   'perk.card': 'Quan hệ rộng',
@@ -442,8 +458,8 @@ export const vi: Record<string, string> = {
   'card.streak.flavour': 'Sờ vào đâu cũng ra tiền gấp đôi.',
   'card.investor': 'Có người để mắt',
   'card.investor.flavour': 'Cuối cùng cũng có người gọi lại.',
-  'card.seam': 'Trúng vỉa quặng',
-  'card.seam.flavour': 'Xưởng luyện sắp bận rồi.',
+  'card.seam': 'Vớ được mối sộp',
+  'card.seam.flavour': 'Làm không hết việc mấy hôm tới.',
   'card.sure': 'Kèo thơm',
   'card.sure.flavour': 'Ăn gấp đôi hoặc mất trắng. Tuỳ.',
 

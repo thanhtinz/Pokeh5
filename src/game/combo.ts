@@ -2,7 +2,7 @@
  * Nhiệt — thứ biến việc bấm từ một thao tác thành một quyết định.
  *
  * Trước khi có file này, bấm tay là một phép cộng: mỗi lần chạm ra đúng chừng
- * ấy quặng, bấm nhanh hay chậm không khác gì nhau ngoài số lần trên giây. Nghĩa
+ * ấy công, bấm nhanh hay chậm không khác gì nhau ngoài số lần trên giây. Nghĩa
  * là người chơi không có gì để *chơi* — chỉ có một cái nút trả tiền theo tần
  * số. Đó là chỗ mà một game bấm khác một cái nút.
  *
@@ -11,7 +11,7 @@
  *  - Mỗi lần chạm cộng một điểm nhiệt, trần là `HEAT_CAP`.
  *  - Ngừng tay thì nhiệt **nguội theo thời gian thật**, `COOL_PER_SECOND` điểm
  *    mỗi giây, và nguội ngay chứ không có thời gian ân hạn.
- *  - Quặng mỗi lần chạm nhân với `1 + nhiệt × HEAT_STEP`, tối đa gấp ba.
+ *  - Công mỗi lần chạm nhân với `1 + nhiệt × HEAT_STEP`, tối đa gấp ba.
  *
  * Ba lựa chọn ở trên, mỗi cái đóng một lỗ:
  *

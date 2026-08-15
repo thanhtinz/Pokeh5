@@ -1,5 +1,5 @@
 /**
- * Hạt: mảnh quặng văng ra, đồng xu bay lên, con số nảy khỏi chỗ vừa chạm.
+ * Hạt: mảnh vụn văng ra, đồng xu bay lên, con số nảy khỏi chỗ vừa chạm.
  *
  * ## Vì sao là một cái hồ, không phải một mảng cứ thế đẩy vào
  *
@@ -133,7 +133,7 @@ export class Particles {
       item.y += item.vy * dt;
       item.angle += item.spin * dt;
 
-      // Nảy một cái rồi nằm im dần. Mảnh quặng rơi xuống mà biến mất giữa
+      // Nảy một cái rồi nằm im dần. Mảnh vụn rơi xuống mà biến mất giữa
       // không trung thì trông như lỗi vẽ, còn nảy một cái thì trông như đá.
       if (floor !== undefined && item.y > floor && item.vy > 0) {
         item.y = floor;

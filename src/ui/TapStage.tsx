@@ -306,7 +306,7 @@ export function TapStage({ game, derived }: Props) {
       });
     }
 
-    // Chỉ con số, không kèm chữ "quặng": nhãn dài thì ba lần chạm liên tiếp là
+    // Chỉ con số, không kèm chữ "công": nhãn dài thì ba lần chạm liên tiếp là
     // ba dòng chữ chồng lên nhau thành một vệt không đọc được — mà bấm liên
     // tiếp mới là trạng thái bình thường của màn này. Tản ngang một chút nữa để
     // hai con số cùng lúc không nằm đúng chồng nhau.

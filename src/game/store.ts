@@ -738,7 +738,7 @@ export class Store {
 
   /** One tap on the refinery. Returns the ore mined, for the floating number. */
   /**
-   * Một lần chạm. Trả về số quặng ra được, đã tính nhiệt.
+   * Một lần chạm. Trả về số công ra được, đã tính nhiệt.
    *
    * Nhiệt nằm ở đây chứ không nằm trong bản lưu: nó đo nhịp tay của mấy giây
    * vừa rồi, và một thứ đo nhịp tay thì không có nghĩa gì sau khi tắt game.
@@ -1128,7 +1128,7 @@ export class Store {
   /**
    * Bán sạch cơ ngơi để đổi lấy uy tín.
    *
-   * Cái gì mua được thì mất: cơ sở, quản lý, cổ phiếu, cấp cuốc, cấp xưởng.
+   * Cái gì mua được thì mất: cơ sở, quản lý, cổ phiếu, cấp tay nghề, cấp giá công.
    * Cái gì đã chuộc lại thì ở lại — mốc cuộc đời không phải hàng hoá. Sàn cũng
    * được gieo hạt mới, vì lượt sau là một thị trường khác.
    */
