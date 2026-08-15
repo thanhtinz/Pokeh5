@@ -137,6 +137,17 @@ export const vi: Record<string, string> = {
 
   'solo.noBoard': 'Bản chơi một mình không có bảng xếp hạng — nó cần máy chủ tài khoản. Ván của bạn nằm trong máy này.',
 
+  'transfer.title': 'Mang ván đi',
+  'transfer.note': 'Chép ván ra một chuỗi để lưu chỗ khác, hoặc dán chuỗi cũ vào để chơi tiếp trên máy này.',
+  'transfer.copy': 'Chép ván ra',
+  'transfer.copied': 'Đã chép vào bộ nhớ tạm',
+  'transfer.paste': 'Dán chuỗi ván vào đây…',
+  'transfer.load': 'Nạp ván đã dán',
+  'transfer.sure': 'Chắc chưa? Ván đang chơi sẽ bị thay',
+  'transfer.empty': 'Chưa dán gì cả.',
+  'transfer.foreign': 'Chuỗi này không phải ván Broke to Boss — ván nào cũng bắt đầu bằng BTB1.',
+  'transfer.broken': 'Chuỗi đúng dạng nhưng ruột hỏng, chắc bị cắt mất một khúc lúc chép.',
+
   // -------------------------------------------------------------- thông báo --
   'notice.automated': 'Đã thuê quản lý cho {name}',
   'notice.sold': 'Quản lý vừa bán {ticker}',

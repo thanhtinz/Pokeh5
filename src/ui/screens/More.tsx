@@ -11,6 +11,7 @@ import type { Derived, Store } from '../../game/store';
 import { t } from '../../i18n';
 import { Art } from '../Art';
 import { Icon } from '../Icon';
+import { Transfer } from '../Transfer';
 
 interface Props {
   game: Store;
@@ -227,6 +228,10 @@ export function More({ game, state, derived }: Props) {
           </>
         )}
       </section>
+
+      {/* Ngay trên công tắc tiếng: cả hai đều là "chuyện của cái máy này" chứ
+          không phải chuyện trong game, nên chúng đứng cùng nhau ở cuối màn. */}
+      <Transfer game={game} ownerId={state.ownerId} />
 
       <Settings />
     </>

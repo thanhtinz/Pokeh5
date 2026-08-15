@@ -194,6 +194,36 @@
   color: var(--ink-dim);
 }
 
+/* Mang ván đi. Hai ô chữ dài nên xếp dọc, cách nhau vừa đủ để không dính vào
+ * nhau mà cũng không biến một mục phụ thành cả một màn hình. */
+.transfer {
+  display: grid;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.transfer__code {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 9px 11px;
+  border: 1px solid var(--panel-edge);
+  border-radius: 10px;
+  /* Chuỗi ván không có khoảng trắng nào, nên phải cho nó tự xuống dòng — không
+     thì cả khối tràn ngang và người chơi chỉ thấy được chừng hai chục ký tự. */
+  overflow-wrap: anywhere;
+  resize: vertical;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--ink-dim);
+  background: hsl(var(--hue) 22% 6% / 0.55);
+}
+
+.transfer__code:focus {
+  outline: 1px solid var(--accent);
+  color: var(--ink);
+}
+
 .screen {
   padding: 16px 16px 24px;
   display: flex;

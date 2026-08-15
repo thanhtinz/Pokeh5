@@ -54,6 +54,7 @@ import { Rng, randomSeed } from './rng';
 import { newlyPassed, rivalReward, rivalState, RIVALS, type RivalState } from './rivals';
 import { rootMultiplier, rootsOf, totalRootTiers, type RootState } from './roots';
 import { loadSave, sanitise, saveNow, wipeSave } from './save';
+import { decodeSave, encodeSave, isTransferError, type TransferError } from './transfer';
 import {
   STARTING_BALANCE,
   createNewSave,
@@ -1125,6 +1126,28 @@ export class Store {
    * là tin một cái client nào đó — và đó đúng là thứ mà `sanitise` sinh ra để
    * không phải tin.
    */
+  /** Ván hiện tại, đóng thành một chuỗi mang đi được. */
+  exportSave(): string {
+    saveNow(this.state);
+    return encodeSave(this.state);
+  }
+
+  /**
+   * Nhận một ván từ chuỗi dán vào. Trả về `null` nếu xong, hoặc lý do hỏng.
+   *
+   * Đóng dấu lại `ownerId` theo người đang đăng nhập trước khi nhận: ván chép
+   * từ máy khác mang theo chủ cũ, mà `loadSave` bỏ qua ván không đúng chủ —
+   * không đóng dấu lại thì dán vào xong, mở lại app là ván biến mất, và biến
+   * mất mà không có một dòng nào báo.
+   */
+  importSave(text: string, ownerId: number | null): TransferError | null {
+    const incoming = decodeSave(text);
+    if (isTransferError(incoming)) return incoming;
+
+    this.adopt({ ...incoming, ownerId });
+    return null;
+  }
+
   adopt(incoming: unknown): boolean {
     const clean = sanitise(incoming);
     if (!clean) return false;

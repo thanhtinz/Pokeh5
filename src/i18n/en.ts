@@ -100,6 +100,17 @@ export const en: Record<string, string> = {
 
   'solo.noBoard': 'The solo build has no leaderboard — that needs the account server. Your run lives on this device.',
 
+  'transfer.title': 'Move your run',
+  'transfer.note': 'Copy the run out as a code to keep somewhere safe, or paste an old code in to carry on here.',
+  'transfer.copy': 'Copy the run out',
+  'transfer.copied': 'Copied to the clipboard',
+  'transfer.paste': 'Paste a run code here…',
+  'transfer.load': 'Load the pasted run',
+  'transfer.sure': 'Sure? This replaces the run you are playing',
+  'transfer.empty': 'Nothing pasted yet.',
+  'transfer.foreign': 'That is not a Broke to Boss run — every code starts with BTB1.',
+  'transfer.broken': 'Right shape, broken inside — most likely a piece went missing on the way.',
+
   'notice.automated': '{name} runs itself now',
   'notice.sold': 'Manager sold {ticker}',
   'notice.gambleWin': 'It paid off',
