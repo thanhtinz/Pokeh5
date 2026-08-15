@@ -3,7 +3,7 @@ import { useState } from 'preact/hooks';
 import { sound } from '../../audio/sound';
 import { ACHIEVEMENTS, nextInLadder } from '../../game/achievements';
 import { CYCLE, REWARD_SECONDS } from '../../game/daily';
-import { count, money } from '../../game/money';
+import { clock, count, money } from '../../game/money';
 import { PERKS, describePerk, perkCost } from '../../game/perks';
 import { QUEST_BONUS_REPUTATION } from '../../game/quests';
 import { perkLevel, type PlayerState } from '../../game/state';
@@ -35,6 +35,10 @@ export function More({ game, state, derived }: Props) {
 
   return (
     <>
+      {/* Trên cùng vì nó là thứ duy nhất ở màn này có giờ đóng cửa. Mọi mục
+          khác mở lúc nào cũng còn đó; phiên chợ thì không. */}
+      <Fair game={game} derived={derived} />
+
       {/* ---------------------------------------------------- việc hôm nay -- */}
       <section class="panel panel--inset">
         <div class="prestige__head">
@@ -239,6 +243,83 @@ export function More({ game, state, derived }: Props) {
 }
 
 /**
+ * Phiên chợ.
+ *
+ * Hai hình dạng, không phải một hình dạng có nút mờ đi: **đang mở** thì đây là
+ * một cái thang bốn nấc kèm đồng hồ đếm ngược, **đang nghỉ** thì nó chỉ còn một
+ * dòng nói phiên sau là món gì và còn bao lâu. Vẽ cái thang xám xịt trong lúc
+ * chợ nghỉ thì người chơi phải đọc cả khối mới hiểu là chưa làm gì được — mà
+ * câu trả lời cho lúc đó chỉ dài một dòng.
+ */
+function Fair({ game, derived }: { game: Store; derived: Derived }) {
+  const { window: phien, points, reached, claimed, claimable, next } = derived.fair;
+  const def = phien.def;
+  const tiers = def.tiers;
+
+  if (!phien.open) {
+    return (
+      <section class="panel panel--inset">
+        <div class="prestige__head">
+          <span class="section__title" style={{ margin: 0 }}>
+            {t('fair.title')}
+          </span>
+          <span class="prestige__bonus num">{t('fair.closed', { time: clock(phien.seconds) })}</span>
+        </div>
+        <span class="row__meta" style={{ whiteSpace: 'normal' }}>
+          {t('fair.shut')} · {t('fair.next', { name: t(`fair.${phien.nextDef.id}`) })}
+        </span>
+      </section>
+    );
+  }
+
+  // Hết thang thì thanh đầy và mốc là nấc cuối — chia cho `next.points` khi
+  // `next` là null là một `NaN` chảy thẳng vào thuộc tính `width`.
+  const target = next?.points ?? tiers[tiers.length - 1]!.points;
+
+  return (
+    <section class="panel panel--inset">
+      <div class="prestige__head">
+        <span class="section__title" style={{ margin: 0 }}>
+          {t('fair.title')}
+        </span>
+        <span class="prestige__bonus num">{t('fair.open', { time: clock(phien.seconds) })}</span>
+      </div>
+
+      <div class={`row${claimable ? ' row--lit' : ''}`}>
+        <span class="row__icon">
+          <Art name={FAIR_ART[def.id] ?? 'coin'} />
+        </span>
+        <span class="row__body">
+          <span class="row__name">{t(`fair.${def.id}`)}</span>
+          <span class="row__meta">{t(`fair.buff.${def.id}`)}</span>
+        </span>
+        <span class="row__side">
+          <button
+            class={`btn btn--sm${claimable ? ' btn--primary' : ''}`}
+            disabled={!claimable}
+            onClick={() => game.claimFair()}
+          >
+            {claimed >= tiers.length ? t('fair.maxed') : t('fair.claim')}
+          </button>
+        </span>
+        <span class="row__bar bar">
+          <span class="bar__fill" style={{ width: `${Math.min(100, (points / target) * 100)}%` }} />
+        </span>
+      </div>
+
+      <span class="row__meta">
+        {t(`fair.goal.${def.id}`)} {t('ach.progress', { current: count(points), target: count(target) })}{' '}
+        · {t('fair.tier', { index: Math.min(reached + 1, tiers.length), total: tiers.length })}
+      </span>
+
+      <span class="row__meta" style={{ whiteSpace: 'normal' }}>
+        {t('fair.note')}
+      </span>
+    </section>
+  );
+}
+
+/**
  * Cái công tắc duy nhất của game.
  *
  * Nằm cuối màn Thêm chứ không nằm trên đầu: người chơi đi tìm nút tắt tiếng
@@ -279,6 +360,17 @@ function Settings() {
     </section>
   );
 }
+
+/** Phiên chợ mượn asset của thứ nó bắt làm, y như việc trong ngày. */
+const FAIR_ART: Record<string, string> = {
+  // Cố ý **không** trùng hình với hàng việc hôm nay ngay bên dưới, dù hai bên
+  // cùng đếm một số đếm: hai hàng giống hệt nhau xếp chồng lên nhau thì mắt đọc
+  // ra một danh sách, không đọc ra hai mục khác nhau.
+  dawn: 'cart',
+  hiring: 'briefcase',
+  lucky: 'dice',
+  opening: 'flower',
+};
 
 /** Việc trong ngày cũng mượn asset của thứ nó bắt người chơi đi làm. */
 const QUEST_ART: Record<string, string> = {

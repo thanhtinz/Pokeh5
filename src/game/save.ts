@@ -2,6 +2,7 @@ import { Capacitor } from '@capacitor/core';
 
 import { achievementById } from './achievements';
 import { businessById } from './businesses';
+import { FAIRS } from './fair';
 import { cardTemplate, jobById } from './jobs';
 import { milestoneById } from './life';
 import { perkById } from './perks';
@@ -13,6 +14,9 @@ import { stockById } from './stocks';
 import { SAVE_VERSION, createNewSave, type PlayerState } from './state';
 
 const KEY = 'broketoboss.save.v1';
+
+/** Nấc phiên chợ nhiều nhất một món có — trần cho số nấc đã nhận trong ván. */
+const FAIR_MAX_TIERS = Math.max(...FAIRS.map((fair) => fair.tiers.length));
 
 /** Số đếm mà việc trong ngày có thể bám vào; khoá ngoài danh sách này bị bỏ. */
 const QUEST_METRICS = new Set<string>(QUEST_POOL.map((quest) => quest.metric));
@@ -235,6 +239,13 @@ export function sanitise(raw: unknown): PlayerState | null {
     questIds,
     questBase,
     questDone,
+
+    // Ván ghi trước khi có phiên chợ không có ba trường này, và `-1` là câu trả
+    // lời đúng cho nó: chưa mở sổ cho phiên nào, nên lần tick đầu tiên trong
+    // một phiên đang mở sẽ chụp mốc tử tế thay vì tính điểm từ đầu ván.
+    fairIndex: clampInt(data.fairIndex, -1, Number.MAX_SAFE_INTEGER, -1),
+    fairBase: clampInt(data.fairBase, 0, Number.MAX_SAFE_INTEGER, 0),
+    fairClaimed: clampInt(data.fairClaimed, 0, FAIR_MAX_TIERS, 0),
 
     stats: {
       taps: clampInt(stats['taps'], 0, Number.MAX_SAFE_INTEGER, 0),

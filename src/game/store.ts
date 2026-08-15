@@ -35,6 +35,7 @@ import {
 import { t as tr } from '../i18n';
 import { dailyReward, dailyState, dayIndex, type DailyState } from './daily';
 import { cooled, heatMultiplier, heated } from './combo';
+import { FINAL_BOOST, fairAt, fairReward, fairState, type FairState } from './fair';
 import { CARD_INTERVAL, CARD_LIFETIME, drawCard, jobById } from './jobs';
 import { bonusesFrom, newlyReached, type LifeBonuses, type LifeMilestone } from './life';
 import { effectsFrom, perkById, perkCost, type PerkEffects } from './perks';
@@ -160,6 +161,8 @@ export interface Derived {
   rivals: RivalState;
   /** Ba việc của hôm nay. */
   quests: QuestState;
+  /** Phiên chợ: đang mở món gì, được mấy điểm, còn bao lâu. */
+  fair: FairState;
   /** Nhân tổng: mốc cuộc đời × uy tín × buff đang chạy. */
   globalMultiplier: number;
   boostMultiplier: number;
@@ -204,10 +207,15 @@ export function derive(state: PlayerState, now = Date.now()): Derived {
   const achieveMultiplier = achievementMultiplier(state.achievements);
   const perks = effectsFrom(state.perks);
   const roots = rootMultiplier(state.businesses);
-  const globalMultiplier =
+  const baseMultiplier =
     bonuses.income * repMultiplier * achieveMultiplier * roots * boostMultiplier;
 
   const metrics = metricsOf(state);
+  const fair = fairState(now, state.fairIndex, state.fairBase, state.fairClaimed, metrics);
+  // Buff của phiên nhân vào đúng những đường đã có, không đẻ đường mới: `global`
+  // đi cùng chỗ với buff thẻ cơ hội, `tap` đi cùng chỗ với thưởng mốc cuộc đời.
+  // Có vậy thì con số hiện trên màn hình mới là con số thật sự trả tiền.
+  const globalMultiplier = baseMultiplier * fair.effects.global;
 
   const assets = businessAssets(state) + portfolioValue(state);
   const netWorth = state.cash + assets;
@@ -215,7 +223,7 @@ export function derive(state: PlayerState, now = Date.now()): Derived {
   const oreValue =
     ORE_BASE_VALUE * Math.pow(REFINERY_GROWTH, state.refineryLevel - 1) * globalMultiplier;
   const oreRate = REFINERY_BASE_RATE * state.refineryLevel;
-  const tapOre = state.tapLevel * bonuses.tap * perks.tap;
+  const tapOre = state.tapLevel * bonuses.tap * perks.tap * fair.effects.tap;
 
   let income = 0;
   for (const def of BUSINESSES) {
@@ -250,6 +258,7 @@ export function derive(state: PlayerState, now = Date.now()): Derived {
     daily: dailyState(state.dailyClaimedAt, state.dailyStreak, now),
     rivals: rivalState(state.peakNetWorth),
     quests: questState(state.questIds, state.questBase, state.questDone, metrics),
+    fair,
     globalMultiplier,
     boostMultiplier,
     pendingReputation: pendingReputation(state.peakNetWorth, state.reputationTotal),
@@ -364,6 +373,7 @@ export class Store {
     this.ready = true;
     // Trước khi người chơi kịp chạm cái gì, để mốc số đếm của hôm nay là thật.
     this.rollQuests(Date.now());
+    this.rollFair(Date.now());
     this.emit();
     return isNew;
   }
@@ -494,6 +504,7 @@ export class Store {
     this.checkRivals(d);
     this.checkYard(d);
     this.rollQuests(now);
+    this.rollFair(now);
 
     if (this.state.boost && this.state.boost.endsAt <= now) this.state.boost = null;
 
@@ -553,7 +564,7 @@ export class Store {
     this.state.job = null;
     if (!def) return;
 
-    const payout = def.payout * d.globalMultiplier;
+    const payout = def.payout * d.globalMultiplier * d.fair.effects.jobPay;
     this.earn(payout);
     this.state.stats.jobs += 1;
     this.notice({ kind: 'cash', amount: payout, label: tr(`job.${def.id}`) });
@@ -580,7 +591,8 @@ export class Store {
     // `CARD_INTERVAL`, không phải một con số 90 viết cứng ở đây: hằng số ấy
     // nằm cạnh `CARD_LIFETIME` trong `jobs.ts` và trông như thứ chỉnh được,
     // nhưng chỉnh nó thì chẳng có gì nhúc nhích — nhịp thật nằm ở dòng này.
-    const interval = (CARD_INTERVAL / (d.bonuses.cardRate * d.perks.cardRate)) * 1000;
+    const interval =
+      (CARD_INTERVAL / (d.bonuses.cardRate * d.perks.cardRate * d.fair.effects.cardRate)) * 1000;
     this.state.nextCardAt = now + interval;
   }
 
@@ -726,6 +738,28 @@ export class Store {
     this.state.questIds = questsFor(today, this.availableQuestMetrics()).map((quest) => quest.id);
     this.state.questBase = snapshot(metricsOf(this.state));
     this.state.questDone = [];
+    this.persist();
+  }
+
+  /**
+   * Mở sổ cho một phiên chợ vừa mở.
+   *
+   * Chỉ mở sổ khi phiên **đang mở**. Chụp mốc trong quãng đóng cửa thì mọi thứ
+   * người chơi làm từ lúc đó tới lúc phiên mở đều được tính vào phiên — hai
+   * ngày cày rồi vào đúng lúc mở cửa là bốn nấc xong sẵn, và cái thang không
+   * còn là thang nữa.
+   *
+   * Chạy trong tick, ngay cạnh `rollQuests`, và vì cùng một lý do: mốc phải
+   * được chụp trước khi hành động đầu tiên của phiên kịp cộng vào số đếm.
+   */
+  private rollFair(now: number): void {
+    const window = fairAt(now);
+    if (!window.open || this.state.fairIndex === window.index) return;
+
+    this.state.fairIndex = window.index;
+    this.state.fairBase = metricsOf(this.state)[window.def.metric];
+    this.state.fairClaimed = 0;
+    this.notice({ kind: 'info', label: tr('fair.opened', { name: tr(`fair.${window.def.id}`) }) });
     this.persist();
   }
 
@@ -909,6 +943,47 @@ export class Store {
       this.notice({
         kind: 'info',
         label: tr('quest.bonusEarned', { amount: QUEST_BONUS_REPUTATION }),
+      });
+    }
+
+    this.persist();
+    this.emit();
+    return reward;
+  }
+
+  /**
+   * Nhận một nấc phiên chợ. Trả về số tiền, hoặc 0 nếu không có nấc nào để nhận.
+   *
+   * Nhận **từng nấc một, theo thứ tự**. Đủ điểm nấc ba thì bấm ba lần chứ không
+   * gộp — vì ba lần bấm là ba lần thấy tiền vào, và cái thang chỉ có nghĩa nếu
+   * người chơi nhìn thấy mình leo qua từng bậc của nó.
+   */
+  claimFair(now = Date.now()): number {
+    const d = derive(this.state, now);
+    if (!d.fair.claimable) return 0;
+
+    const tier = d.fair.window.def.tiers[d.fair.claimed];
+    if (!tier) return 0;
+
+    const reward = fairReward(tier, d.income + d.refineryIncome * 0.25, d.tapValue);
+    this.earn(reward);
+    this.state.fairClaimed = d.fair.claimed + 1;
+    this.notice({ kind: 'cash', amount: reward, label: tr(`fair.${d.fair.window.def.id}`) });
+
+    // Hết thang thì thêm một cữ buff. Ghi đè buff đang chạy là chấp nhận được:
+    // người vừa leo hết bốn nấc không muốn nghe rằng phần thưởng của họ bị hoãn
+    // lại vì đang có một cái buff nhỏ hơn chưa hết giờ.
+    if (this.state.fairClaimed >= d.fair.window.def.tiers.length) {
+      this.state.boost = {
+        multiplier: FINAL_BOOST.multiplier,
+        endsAt: now + FINAL_BOOST.seconds * 1000,
+      };
+      this.notice({
+        kind: 'info',
+        label: tr('fair.finished', {
+          multiplier: FINAL_BOOST.multiplier,
+          seconds: FINAL_BOOST.seconds,
+        }),
       });
     }
 
@@ -1159,6 +1234,7 @@ export class Store {
     this.marketCarry = 0;
     this.offline = this.catchUp();
     this.rollQuests(Date.now());
+    this.rollFair(Date.now());
     this.persist();
     this.emit();
     return true;
@@ -1191,6 +1267,11 @@ export class Store {
       questDay: this.state.questDay,
       questBase: this.state.questBase,
       questDone: this.state.questDone,
+      // Phiên chợ đếm bằng chính mấy số đếm ấy, nên nó theo cùng một luật: bán
+      // sạch đế chế giữa phiên không phải là một cách mở lại thang từ nấc một.
+      fairIndex: this.state.fairIndex,
+      fairBase: this.state.fairBase,
+      fairClaimed: this.state.fairClaimed,
       bestNetWorth: Math.max(this.state.bestNetWorth, this.state.peakNetWorth),
       reputation: this.state.reputation + gain,
       reputationTotal: this.state.reputationTotal + gain,
@@ -1266,7 +1347,7 @@ export class Store {
     if (this.state.job && this.state.job.endsAt <= now) {
       const def = jobById(this.state.job.jobId);
       if (def) {
-        this.earn(def.payout * d.globalMultiplier);
+        this.earn(def.payout * d.globalMultiplier * d.fair.effects.jobPay);
         jobsFinished = 1;
       }
       this.state.job = null;

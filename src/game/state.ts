@@ -116,6 +116,18 @@ export interface PlayerState {
   questBase: Record<string, number>;
   questDone: string[];
 
+  /**
+   * Phiên chợ: chu kỳ đang tính điểm, mốc số đếm lúc phiên mở, và đã nhận tới
+   * nấc mấy.
+   *
+   * Ba con số, không hơn — lịch phiên suy ra từ đồng hồ (`fair.ts`), nên ván
+   * không cần giữ món gì đang chạy hay bao giờ đóng. `-1` là "chưa mở sổ cho
+   * phiên nào", và nó phải là số âm: chu kỳ số 0 là một chu kỳ có thật.
+   */
+  fairIndex: number;
+  fairBase: number;
+  fairClaimed: number;
+
   /** Số đếm cộng dồn cho thành tựu — không reset khi làm lại. */
   stats: {
     taps: number;
@@ -182,6 +194,10 @@ export function createNewSave(seed: number): PlayerState {
     questIds: [],
     questBase: {},
     questDone: [],
+
+    fairIndex: -1,
+    fairBase: 0,
+    fairClaimed: 0,
 
     stats: { taps: 0, cards: 0, jobs: 0, trades: 0, units: 0, upgrades: 0 },
 

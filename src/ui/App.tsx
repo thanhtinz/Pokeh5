@@ -113,7 +113,7 @@ export function App() {
     life: game.pendingMilestones().length > 0 || derived.pendingReputation > 0,
     // Điểm danh và việc trong ngày là hai thứ đáng chấm nhất trên thanh tab:
     // cả hai đều chỉ có hôm nay.
-    more: derived.daily.available || derived.quests.claimable,
+    more: derived.daily.available || derived.quests.claimable || derived.fair.claimable,
   };
 
   const advice = nextStep(state, {
@@ -123,6 +123,7 @@ export function App() {
     reputationTotal: state.reputationTotal,
     dailyAvailable: derived.daily.available,
     questClaimable: derived.quests.claimable,
+    fairClaimable: derived.fair.claimable,
   });
 
   return (

@@ -32,6 +32,7 @@ const idle = {
   reputationTotal: 0,
   dailyAvailable: false,
   questClaimable: false,
+  fairClaimable: false,
 };
 
 describe('thứ tự ưu tiên', () => {

@@ -47,7 +47,16 @@ export type AdviceTab = 'grind' | 'empire' | 'market' | 'life' | 'board' | 'more
 
 export interface Advice {
   /** Loại việc — cũng là hậu tố khoá i18n `advice.<kind>`. */
-  kind: 'milestone' | 'daily' | 'quest' | 'prestige' | 'manager' | 'business' | 'upgrade' | 'grind';
+  kind:
+    | 'milestone'
+    | 'daily'
+    | 'quest'
+    | 'fair'
+    | 'prestige'
+    | 'manager'
+    | 'business'
+    | 'upgrade'
+    | 'grind';
   /** Bấm vào lời khuyên thì mở tab nào. */
   tab: AdviceTab;
   /** Cơ sở liên quan, nếu có. Lớp vẽ dùng để lấy tên và hình. */
@@ -72,6 +81,8 @@ export interface AdviceInput {
   reputationTotal: number;
   dailyAvailable: boolean;
   questClaimable: boolean;
+  /** Phiên chợ có nấc đã đủ điểm mà chưa bấm nhận. */
+  fairClaimable: boolean;
 }
 
 export function nextStep(state: PlayerState, input: AdviceInput): Advice {
@@ -81,6 +92,11 @@ export function nextStep(state: PlayerState, input: AdviceInput): Advice {
   }
   if (input.dailyAvailable) return { kind: 'daily', tab: 'more' };
   if (input.questClaimable) return { kind: 'quest', tab: 'more' };
+  // Nấc phiên chợ đứng cạnh hai cái trên vì cùng một lý do — đã kiếm được rồi,
+  // chỉ còn thiếu một cú bấm — nhưng đứng *sau* chúng vì nó là thứ duy nhất có
+  // giờ đóng cửa: nếu chỉ kịp làm một việc thì người chơi nên biết ba việc này
+  // đều đang chờ, và cái thứ ba là cái sẽ mất nếu để qua đêm.
+  if (input.fairClaimable) return { kind: 'fair', tab: 'more' };
 
   // 2. Làm lại, nhưng chỉ khi là bước nhảy thật.
   const worthReset =

@@ -497,6 +497,41 @@ thirds of a screen the player learns to ignore. The rolled ids are stored rather
 than recomputed from the day, so unlocking the market at noon doesn't swap the
 goals out from under whoever is working on them.
 
+### And one that closes at the end of the day
+
+Everything above is always there. Open the app at any hour and the businesses,
+the upgrades, the perks and the ladders are all exactly where you left them,
+which is the genre's comfort and also the reason no particular moment is *the*
+moment to play. Check-in and daily jobs push back on that, but they repeat
+identically every day, and anything that repeats identically becomes an errand
+by week two.
+
+**Phiên chợ** (`src/game/fair.ts`) is the part that shuts. The timeline is cut
+into 48-hour periods; the first 24 hours of each are open, the rest is closed.
+Which of the four fairs runs is drawn from the period number, so there is no
+server handing out an event calendar — every device computes the same schedule
+from its own clock, which is what lets the GitHub Pages build have live events
+at all. The save carries three integers: the period it is scoring, the counter
+reading when that period opened, and how many steps have been claimed.
+
+Two things make it a different mechanic from daily jobs rather than a renamed
+one. It is **one four-step ladder** instead of three separate goals, so it is
+something you are partway up rather than a list you tick. And while it is open,
+one thing in the game is genuinely better — taps mine double, shifts pay double,
+offers arrive twice as often, or everything earns ×1.5 — so twenty minutes
+played inside the window are worth more than twenty minutes outside it. That
+multiplier goes into the multiplier paths that already exist (`tapOre`, the card
+interval, the job payout, `globalMultiplier`) rather than into a new one of its
+own, because a second parallel path is how the number on the screen and the
+number that pays quietly drift apart.
+
+The trap here is the counter snapshot, and `tests/fair.test.ts` stands over it.
+Points are a delta against a reading taken **when the window opened and only if
+it is open** — snapshot during the closed half and two days of grinding pour
+into the fair the moment it opens, clearing all four steps before the player
+touches anything. Like the daily-job snapshot, it survives prestige, because the
+counters it measures do.
+
 ### And one that gives the number a shape
 
 `src/game/rivals.ts`. Everything above is a number going up, and a number going
