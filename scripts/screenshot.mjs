@@ -334,6 +334,32 @@ for (const stage of ['broke', 'rich']) {
     await page.screenshot({ path: `${OUT}/${stage}-tap.png` });
   }
 
+  /*
+   * Khung giữa lúc **đang làm việc**.
+   *
+   * Nó phải hiện cái việc chứ không phải cái khu, và đó là thứ một ảnh chụp
+   * màn Cày bình thường không bao giờ bắt được — lúc rảnh thì hai đường của
+   * `yardIcon` nhìn y hệt nhau. Nên bấm thật một cái "Làm" rồi chụp.
+   */
+  {
+    await page.locator('.tab').nth(TABS.indexOf('grind')).click();
+    await page.waitForTimeout(400);
+    await page.locator('.screen').evaluate((el) => el.scrollTo(0, el.scrollHeight));
+    await page.waitForTimeout(300);
+
+    // Bấm cái nút "Làm" nào còn bấm được. Có thể chẳng còn cái nào — ván nạp
+    // vào đã sẵn một việc đang chạy thì mọi nút khác đều xám, và lúc ấy khung
+    // giữa vốn đã hiện cái việc rồi, cứ chụp.
+    const start = page.locator('.row .btn--primary:not([disabled])').last();
+    if (await start.count()) {
+      await start.click();
+      await page.waitForTimeout(400);
+    }
+    await page.locator('.screen').evaluate((el) => el.scrollTo(0, 0));
+    await page.waitForTimeout(400);
+    await page.screenshot({ path: `${OUT}/${stage}-working.png` });
+  }
+
   // Công tắc tiếng nằm cuối màn Thêm, tức là dưới màn hình ở mọi ảnh chụp theo
   // tab. Cuộn xuống tận đáy rồi chụp riêng một tấm.
   if (stage === 'rich') {

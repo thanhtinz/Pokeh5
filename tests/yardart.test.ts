@@ -10,7 +10,7 @@ import { describe, expect, it } from 'vitest';
 import { BUSINESSES, DISTRICTS } from '../src/game/businesses';
 import { JOBS } from '../src/game/jobs';
 import { ICONS, ICON_COLS, ICON_ROWS } from '../src/ui/icons';
-import { YARD_ITEMS, YARD_SCENES, yardScene } from '../src/ui/yards';
+import { YARD_ICONS, yardIcon } from '../src/ui/yards';
 
 describe('bảng ghép hình', () => {
   it('cơ sở nào cũng có hình', () => {
@@ -43,34 +43,50 @@ describe('bảng ghép hình', () => {
   });
 });
 
-describe('tấm hình màn Cày', () => {
-  it('mỗi khu một tấm', () => {
-    expect(YARD_SCENES).toHaveLength(DISTRICTS.length);
+describe('khung giữa màn Cày', () => {
+  it('mỗi khu một hình', () => {
+    expect(YARD_ICONS).toHaveLength(DISTRICTS.length);
   });
 
-  it('tấm nào cũng đúng một hình', () => {
-    YARD_SCENES.forEach((ids, tier) => {
-      expect({ tier, count: ids.length }).toEqual({ tier, count: YARD_ITEMS });
+  it('hình của một khu đúng là cơ sở thuộc khu đó', () => {
+    YARD_ICONS.forEach((id, tier) => {
+      const def = BUSINESSES.find((entry) => entry.id === id);
+      expect({ tier, district: def?.district }).toEqual({ tier, district: DISTRICTS[tier] });
     });
   });
 
-  it('hình trong một tấm đều thuộc đúng khu của tấm đó', () => {
-    YARD_SCENES.forEach((ids, tier) => {
-      const wrong = ids.filter((id) => {
-        const def = BUSINESSES.find((entry) => entry.id === id);
-        return !def || def.district !== DISTRICTS[tier];
-      });
-      expect({ tier, wrong }).toEqual({ tier, wrong: [] });
-    });
-  });
-
-  it('sáu tấm khác hẳn nhau, không hình nào lặp lại giữa hai tấm', () => {
-    const all = YARD_SCENES.flat();
-    expect(new Set(all).size).toBe(all.length);
+  it('sáu khu sáu hình khác nhau', () => {
+    expect(new Set(YARD_ICONS).size).toBe(YARD_ICONS.length);
   });
 
   it('bậc ngoài khoảng thì kẹp về hai đầu chứ không vỡ', () => {
-    expect(yardScene(-5)).toBe(YARD_SCENES[0]);
-    expect(yardScene(999)).toBe(YARD_SCENES[YARD_SCENES.length - 1]);
+    expect(yardIcon(-5)).toBe(YARD_ICONS[0]);
+    expect(yardIcon(999)).toBe(YARD_ICONS[YARD_ICONS.length - 1]);
+  });
+
+  /*
+   * Luật của khung này: *đang làm gì* gấp hơn *đang giàu tới đâu*. Bấm "Làm"
+   * xong mà khung vẫn hiện cái khu thì người chơi không có cách nào biết cú
+   * bấm đã ăn — danh sách việc ở dưới thường đã cuộn khuất.
+   */
+  it('đang làm việc thì việc thắng, ở bất kỳ khu nào', () => {
+    for (const job of JOBS) {
+      for (let tier = 0; tier < YARD_ICONS.length; tier += 1) {
+        expect(yardIcon(tier, job.id)).toBe(job.id);
+      }
+    }
+  });
+
+  it('làm xong thì hình quay về cơ sở của khu', () => {
+    expect(yardIcon(3, null)).toBe(YARD_ICONS[3]);
+  });
+
+  /*
+   * `working` đi ra từ bản lưu, và một bản lưu cũ có thể còn giữ tên một việc
+   * đã bị xoá khỏi game. Rơi về hình của khu thì màn hình vẫn đủ nghĩa; để nó
+   * trỏ vào một ô không tồn tại thì khung giữa trống trơn.
+   */
+  it('id việc lạ thì rơi về cơ sở của khu chứ không để trống', () => {
+    expect(yardIcon(2, 'khong-co-viec-nay')).toBe(YARD_ICONS[2]);
   });
 });

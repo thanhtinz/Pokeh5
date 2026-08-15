@@ -141,6 +141,15 @@ export interface Derived {
    * chạy được test mà không cần trình duyệt.
    */
   yard: number;
+  /**
+   * Việc đang làm thuê, hoặc `null` nếu đang rảnh.
+   *
+   * Có sẵn trong `state.job`, nhưng lôi ra đây vì lớp vẽ cần đúng **một chuỗi
+   * id** chứ không cần biết việc ấy còn mấy giây: giờ hết hạn đổi từng khung
+   * hình, mà cái id thì đứng yên suốt cả ca — đọc `state.job` thẳng ở lớp vẽ
+   * là mời một lần dựng lại DOM mỗi khung hình cho một thứ không đổi.
+   */
+  working: string | null;
   /** Tổng bậc cắm rễ đã có. */
   rootTiers: number;
   /** Số đo cộng dồn cho thành tựu. */
@@ -236,6 +245,7 @@ export function derive(state: PlayerState, now = Date.now()): Derived {
     roots: rootsOf(state.businesses),
     rootTiers: totalRootTiers(state.businesses),
     yard: yardOf(state.peakNetWorth),
+    working: state.job && state.job.endsAt > now ? state.job.jobId : null,
     metrics,
     daily: dailyState(state.dailyClaimedAt, state.dailyStreak, now),
     rivals: rivalState(state.peakNetWorth),

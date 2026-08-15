@@ -16,7 +16,7 @@ import { ART_NAMES, Art } from './ui/Art';
 import { BUSINESSES } from './game/businesses';
 import { JOBS } from './game/jobs';
 import { Sprite } from './ui/Sprite';
-import { YARD_SCENES, yardScene } from './ui/yards';
+import { YARD_ICONS, yardIcon } from './ui/yards';
 import { YARDS } from './game/yard';
 import { t } from './i18n';
 import { applyTheme } from './ui/theme';
@@ -69,17 +69,21 @@ function Sheet() {
         ))}
       </div>
 
-      {/* Sáu tấm hình của màn Cày, bày cạnh nhau. Bày cạnh nhau mới kiểm được
-          thứ duy nhất chúng phải làm: khác nhau đủ để nhìn phát biết vừa đổi
-          khu, mà không tấm nào lặp lại hình của tấm bên cạnh. */}
-      <h1>Sáu tấm hình màn Cày</h1>
+      {/* Khung giữa màn Cày, cả hai đường nó có thể đi: sáu khu khi rảnh, và
+          năm việc khi đang làm. Bày cạnh nhau mới kiểm được thứ duy nhất chúng
+          phải làm — khác nhau đủ để nhìn phát biết vừa đổi. */}
+      <h1>Khung giữa màn Cày</h1>
       <div style={{ display: 'grid', gap: '10px', marginBottom: '20px' }}>
-        {YARD_SCENES.map((_, tier) => (
+        {YARD_ICONS.map((_, tier) => (
           <span key={tier} style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-            {yardScene(tier).map((id) => (
-              <Sprite key={id} id={id} class="sheet-sprite" />
-            ))}
+            <Sprite id={yardIcon(tier)} class="sheet-sprite" />
             <b style={{ fontSize: '12px' }}>{t(`district.${YARDS[tier]!}`)}</b>
+          </span>
+        ))}
+        {JOBS.map((job) => (
+          <span key={job.id} style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+            <Sprite id={yardIcon(0, job.id)} class="sheet-sprite" />
+            <b style={{ fontSize: '12px', color: '#8fd' }}>{t(`job.${job.id}`)}</b>
           </span>
         ))}
       </div>

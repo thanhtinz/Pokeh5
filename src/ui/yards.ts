@@ -1,5 +1,5 @@
 /**
- * Tấm hình của màn Cày: một cơ sở của khu đang đứng.
+ * Tấm hình giữa màn Cày: đang làm gì thì hiện cái đó.
  *
  * ## Vì sao không còn là cái sân lát tile
  *
@@ -13,44 +13,51 @@
  * thêm được gì, vừa hứa một thứ trò chơi mà phần còn lại của game không có —
  * và một lời hứa hụt thì tệ hơn là không hứa.
  *
- * ## Vì sao file này giờ chỉ còn một bảng tên
+ * ## Hai câu hỏi, và câu nào gấp hơn thì thắng
  *
- * Bản trước của nó dài trăm rưỡi dòng: khai chỗ đặt, tính khoảng cách, canh
- * đáy, kẹp cho khỏi tràn khung. Toàn bộ chỗ ấy tồn tại vì hình cũ **to nhỏ
- * khác nhau** — cái hai ô, cái ba ô, cái cao ba ô. Hình mới thì cái nào cũng
- * là một ô vuông, nên đặt nó vào giữa khung là việc của hai dòng CSS, và cái
- * file này chỉ còn phải trả lời đúng một câu: khu này thì lấy cơ sở nào.
+ * Khung này chỉ đủ chỗ cho một hình, mà có hai thứ muốn nói:
  *
- * Cơ sở *đầu* của khu, chứ không phải cái đắt nhất: đó là thứ người chơi mua
- * trước, nên tấm hình khớp với cái họ vừa bấm mua chứ không phải cái còn cách
- * vài giờ nữa.
+ *  - *đang giàu tới đâu* — trả lời bằng cơ sở đầu của khu đang đứng, đổi vài
+ *    giờ một lần;
+ *  - *đang làm gì ngay lúc này* — trả lời bằng cái việc đang chạy, đổi vài
+ *    chục giây một lần.
+ *
+ * Cái thứ hai gấp hơn, nên nó thắng khi cả hai cùng có. Người chơi vừa bấm
+ * "Làm" xong thì thứ họ chờ thấy là **việc vừa bấm**, không phải cái khu họ đã
+ * đứng từ nãy — và khi việc xong, hình tự quay về cái khu, đúng lúc chỗ đó lại
+ * là thứ duy nhất còn đáng nói.
+ *
+ * Nhờ vậy khung này còn kiêm luôn một việc thứ hai: nó là chỗ **báo việc còn
+ * đang chạy**. Trước đó, dấu hiệu duy nhất là chữ "ĐANG LÀM" bé tí ở đầu danh
+ * sách phía dưới, mà danh sách ấy thường đã cuộn khuất.
  */
 import { BUSINESSES, DISTRICTS } from '../game/businesses';
 import { ICONS } from './icons';
 
 /**
- * Mỗi tấm bày bấy nhiêu hình — **một**.
+ * Cơ sở đại diện cho mỗi khu — cơ sở **đầu**, không phải cái đắt nhất.
  *
- * Vòng trước là ba, và ba thì sai theo hai hướng cùng lúc. Ba hình xếp ngang
- * trong một khung 2:1 thì mỗi hình chỉ còn rộng chưa tới một phần tư khung,
- * tức là bé hơn cái hình cùng nó nằm trong hàng danh sách ngay bên dưới — cái
- * khung to nhất màn hình mà đựng hình nhỏ hơn chỗ khác. Và ba hình đứng ngang
- * hàng nhau thì không hình nào là chủ: mắt phải quét cả ba rồi tự ghép lại
- * thành "à, khu này", trong khi thứ cần nói chỉ là *đang ở khu nào*.
- *
- * Một hình thì to gấp ba, và nó là chủ. Muốn xem cả khu thì đã có danh sách
- * bên màn Cơ ngơi, đúng chỗ của nó.
+ * Đó là thứ người chơi mua trước, nên tấm hình khớp với cái họ vừa bấm mua chứ
+ * không phải cái còn cách vài giờ nữa.
  */
-export const YARD_ITEMS = 1;
-
-/** Sáu tấm, mỗi tấm là mấy id cơ sở. Dựng đúng một lần lúc nạp module. */
-export const YARD_SCENES: readonly (readonly string[])[] = DISTRICTS.map((district) =>
-  BUSINESSES.filter((def) => def.district === district && ICONS[def.id] !== undefined)
-    .slice(0, YARD_ITEMS)
-    .map((def) => def.id),
+export const YARD_ICONS: readonly string[] = DISTRICTS.map(
+  (district) =>
+    BUSINESSES.find((def) => def.district === district && ICONS[def.id] !== undefined)!.id,
 );
 
-/** Tấm hình của một bậc. Bậc ngoài khoảng thì kẹp về hai đầu. */
-export function yardScene(tier: number): readonly string[] {
-  return YARD_SCENES[Math.min(Math.max(tier, 0), YARD_SCENES.length - 1)]!;
+/** Kẹp bậc về trong khoảng. Bậc ngoài khoảng thì lấy hai đầu chứ không vỡ. */
+function clamp(tier: number): number {
+  return Math.min(Math.max(tier, 0), YARD_ICONS.length - 1);
+}
+
+/**
+ * Id hình cho khung giữa: việc đang làm nếu có, không thì cơ sở của khu.
+ *
+ * `working` nhận cả id lạ mà vẫn không vỡ — id nào không có hình thì rơi về
+ * cái khu. Cần thế vì `working` đi ra từ bản lưu, và một bản lưu cũ có thể còn
+ * giữ tên một việc đã bị xoá khỏi game.
+ */
+export function yardIcon(tier: number, working: string | null = null): string {
+  if (working !== null && ICONS[working] !== undefined) return working;
+  return YARD_ICONS[clamp(tier)]!;
 }

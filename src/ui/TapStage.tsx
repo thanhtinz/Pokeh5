@@ -7,7 +7,7 @@ import { onFrame } from '../engine/loop';
 import type { Derived, Store } from '../game/store';
 import { t } from '../i18n';
 import { Sprite } from './Sprite';
-import { yardScene } from './yards';
+import { yardIcon } from './yards';
 
 interface Props {
   game: Store;
@@ -355,17 +355,15 @@ export function TapStage({ game, derived }: Props) {
       </svg>
 
       {/*
-        Tấm hình: cơ sở đầu của khu đang đứng. Dựng lại đúng khi đổi khu và
-        không lúc nào khác — `yardScene` là hàm thuần, còn `derived.yard` là
-        một số nguyên chạy từ 0 tới 5. Giữa hai lần đổi khu thì đây là một khối
-        DOM đứng im; cái duy nhất chạm vào nó mỗi khung hình là `transform` của
-        cú nén, ghi ở lớp ngoài.
+        Tấm hình: việc đang làm nếu có, không thì cơ sở đầu của khu đang đứng.
+        Dựng lại đúng khi một trong hai thứ ấy đổi và không lúc nào khác —
+        `yardIcon` là hàm thuần của hai giá trị đều đứng yên hàng chục giây.
+        Giữa hai lần đổi thì đây là một khối DOM bất động; cái duy nhất chạm
+        vào nó mỗi khung hình là `transform` của cú nén, ghi ở lớp ngoài.
       */}
       <div class="stage__rock" ref={rock}>
         <span class="yard">
-          {yardScene(derived.yard).map((id) => (
-            <Sprite key={id} id={id} class="yard__item" />
-          ))}
+          <Sprite id={yardIcon(derived.yard, derived.working)} class="yard__item" />
         </span>
       </div>
 
